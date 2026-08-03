@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchasing Hub - نظام المشتريات والعهد</title>
+    <title>Price Quotations Hub - نظام عروض الأسعار والعهد</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- مكتبات الـ PDF -->
@@ -30,7 +30,7 @@
 
         /* Sidebar Navigation */
         .sidebar { width: 270px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 20px 12px; flex-shrink: 0; }
-        .sidebar-brand { font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 25px; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .sidebar-brand { font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 25px; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .sidebar-menu { list-style: none; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.88rem; transition: 0.2s; }
         .sidebar-menu li a:hover, .sidebar-menu li a.active { background: var(--primary); color: #fff; font-weight: bold; }
@@ -89,17 +89,17 @@
     <!-- القائمة الجانبية -->
     <div class="sidebar">
         <div class="sidebar-brand">
-            <i class="fa-solid fa-cart-shopping"></i> Purchasing Hub
+            <i class="fa-solid fa-tags"></i> Quotations Hub
         </div>
         <ul class="sidebar-menu">
             <li><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم</a></li>
             
-            <li><a href="#" class="nav-link" onclick="switchTab('cat_hospitality', event)"><i class="fa-solid fa-mug-hot"></i> مشتريات الضيافة والبوفيه</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('cat_cleaning', event)"><i class="fa-solid fa-broom"></i> مشتريات النظافة</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('cat_stationery', event)"><i class="fa-solid fa-print"></i> القرطاسية والإلكترونيات</a></li>
+            <li><a href="#" class="nav-link" onclick="switchTab('cat_hospitality', event)"><i class="fa-solid fa-mug-hot"></i> عروض الضيافة والبوفيه</a></li>
+            <li><a href="#" class="nav-link" onclick="switchTab('cat_cleaning', event)"><i class="fa-solid fa-broom"></i> عروض النظافة</a></li>
+            <li><a href="#" class="nav-link" onclick="switchTab('cat_stationery', event)"><i class="fa-solid fa-print"></i> عروض القرطاسية والإلكترونيات</a></li>
             
-            <li><a href="#" class="nav-link" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;" onclick="switchTab('purchase_orders', event)"><i class="fa-solid fa-file-invoice-dollar"></i> أمر المشتريات الشامل</a></li>
-            <li><a href="#" class="nav-link" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24;" onclick="switchTab('monthly_archive', event)"><i class="fa-solid fa-box-archive"></i> أرشيف المشتريات الشهرية</a></li>
+            <li><a href="#" class="nav-link" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;" onclick="switchTab('quotation_summary', event)"><i class="fa-solid fa-file-signature"></i> عروض الأسعار والعهدة الشاملة</a></li>
+            <li><a href="#" class="nav-link" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24;" onclick="switchTab('monthly_archive', event)"><i class="fa-solid fa-box-archive"></i> أرشيف العروض والعهد الشهرية</a></li>
             
             <li><a href="#" class="nav-link" onclick="switchTab('suppliers', event)"><i class="fa-solid fa-truck"></i> إدارة الموردين</a></li>
             <li><a href="#" class="nav-link" onclick="switchTab('employees', event)"><i class="fa-solid fa-user-group"></i> إدارة الموظفين</a></li>
@@ -119,26 +119,26 @@
             <div id="dashboard" class="page-section active-page">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <h4>الطلبات في أمر الشراء الحالي</h4>
+                        <h4>عدد الأصناف في قائمة العروض</h4>
                         <div class="val" id="dashTotalOrders">0</div>
                     </div>
                     <div class="stat-card">
-                        <h4>المصروف الحالي لهذا الشهر</h4>
+                        <h4>إجمالي القيمة التقديرية (عروض الأسعار)</h4>
                         <div class="val" id="dashTotalAmount">0.00 ر.س</div>
                     </div>
                     <div class="stat-card">
-                        <h4>مبلغ العهدة المخصص</h4>
+                        <h4>مبلغ العهدة المستلمة من سيستم الشركة</h4>
                         <div class="val" id="dashPettyCash">0.00 ر.س</div>
                     </div>
                     <div class="stat-card">
-                        <h4>المتبقي من العهدة</h4>
+                        <h4>المتبقي من العهدة الفعليه</h4>
                         <div class="val" id="dashRemainingCash" style="color: var(--success);">0.00 ر.س</div>
                     </div>
                 </div>
                 <div class="box">
-                    <h3>أهلاً بك في نظام Purchasing Hub 🛒</h3>
+                    <h3>أهلاً بك في نظام Price Quotations Hub 🏷️</h3>
                     <p style="color: var(--text-muted); margin-top: 10px; line-height: 1.6;">
-                        تستطيع إضافة المشتريات وتعديلها مباشرة من داخل كل قسم، تتبع العهدة الشهرية، وأرشفة السجلات شهرياً بضغطة زر.
+                        هذا النظام مخصص لإدارة وتسجيل عروض أسعار الأصناف المقترحة قبل رفع أمر الشراء في سيستم الشركة، ومتابعة توازن العهدة وأرشفتها شهرياً.
                     </p>
                 </div>
             </div>
@@ -146,7 +146,7 @@
             <!-- 2. صفحة الضيافة والبوفيه -->
             <div id="cat_hospitality" class="page-section">
                 <div class="box">
-                    <h3>☕ إضافة مشتريات قسم الضيافة والبوفيه</h3>
+                    <h3>☕ تسجيل عرض سعر - قسم الضيافة والبوفيه</h3>
                     <form onsubmit="handleCategoryFormSubmit(event, 'الضيافة والبوفيه')" class="form-grid">
                         <div class="form-group">
                             <label>
@@ -156,27 +156,27 @@
                             <select id="item_hosp" onchange="autoFillPrice('hosp')"></select>
                         </div>
                         <div class="form-group">
-                            <label>الكمية</label>
+                            <label>الكمية المطلوبة</label>
                             <input type="number" id="qty_hosp" value="1" min="1" oninput="calcFormTotal('hosp')" required>
                         </div>
                         <div class="form-group">
-                            <label>سعر الوحدة (ر.س)</label>
+                            <label>سعر الوحدة من المورد (ر.س)</label>
                             <input type="number" id="price_hosp" step="0.01" oninput="calcFormTotal('hosp')" required>
                         </div>
                         <div class="form-group">
-                            <label>المورد</label>
+                            <label>المورد صاحب عرض السعر</label>
                             <select id="sup_hosp"></select>
                         </div>
                         <div class="form-group">
-                            <label>الموظف المستفيد</label>
+                            <label>الموظف / الجهة الطالبة</label>
                             <select id="emp_hosp"></select>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" id="tax_hosp" checked onchange="calcFormTotal('hosp')"> إضافة ضريبة 15%</label>
+                            <label><input type="checkbox" id="tax_hosp" checked onchange="calcFormTotal('hosp')"> السعر يشمل ضريبة 15%</label>
                             <input type="number" id="tot_hosp" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إرسال الطلب إلى "أمر المشتريات الشامل"</button>
+                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة إلى قائمة عروض الأسعار</button>
                         </div>
                     </form>
                 </div>
@@ -185,7 +185,7 @@
             <!-- 3. صفحة النظافة -->
             <div id="cat_cleaning" class="page-section">
                 <div class="box">
-                    <h3>🧹 إضافة مشتريات قسم النظافة</h3>
+                    <h3>🧹 تسجيل عرض سعر - قسم النظافة</h3>
                     <form onsubmit="handleCategoryFormSubmit(event, 'أدوات النظافة')" class="form-grid">
                         <div class="form-group">
                             <label>
@@ -195,27 +195,27 @@
                             <select id="item_clean" onchange="autoFillPrice('clean')"></select>
                         </div>
                         <div class="form-group">
-                            <label>الكمية</label>
+                            <label>الكمية المطلوبة</label>
                             <input type="number" id="qty_clean" value="1" min="1" oninput="calcFormTotal('clean')" required>
                         </div>
                         <div class="form-group">
-                            <label>سعر الوحدة (ر.س)</label>
+                            <label>سعر الوحدة من المورد (ر.س)</label>
                             <input type="number" id="price_clean" step="0.01" oninput="calcFormTotal('clean')" required>
                         </div>
                         <div class="form-group">
-                            <label>المورد</label>
+                            <label>المورد صاحب عرض السعر</label>
                             <select id="sup_clean"></select>
                         </div>
                         <div class="form-group">
-                            <label>الموظف المستفيد</label>
+                            <label>الموظف / الجهة الطالبة</label>
                             <select id="emp_clean"></select>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" id="tax_clean" checked onchange="calcFormTotal('clean')"> إضافة ضريبة 15%</label>
+                            <label><input type="checkbox" id="tax_clean" checked onchange="calcFormTotal('clean')"> السعر يشمل ضريبة 15%</label>
                             <input type="number" id="tot_clean" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إرسال الطلب إلى "أمر المشتريات الشامل"</button>
+                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة إلى قائمة عروض الأسعار</button>
                         </div>
                     </form>
                 </div>
@@ -224,7 +224,7 @@
             <!-- 4. صفحة القرطاسية والإلكترونيات -->
             <div id="cat_stationery" class="page-section">
                 <div class="box">
-                    <h3>📄 إضافة مشتريات قسم القرطاسية والإلكترونيات</h3>
+                    <h3>📄 تسجيل عرض سعر - القرطاسية والإلكترونيات</h3>
                     <form onsubmit="handleCategoryFormSubmit(event, 'القرطاسية والإلكترونيات')" class="form-grid">
                         <div class="form-group">
                             <label>
@@ -234,51 +234,51 @@
                             <select id="item_stat" onchange="autoFillPrice('stat')"></select>
                         </div>
                         <div class="form-group">
-                            <label>الكمية</label>
+                            <label>الكمية المطلوبة</label>
                             <input type="number" id="qty_stat" value="1" min="1" oninput="calcFormTotal('stat')" required>
                         </div>
                         <div class="form-group">
-                            <label>سعر الوحدة (ر.س)</label>
+                            <label>سعر الوحدة من المورد (ر.س)</label>
                             <input type="number" id="price_stat" step="0.01" oninput="calcFormTotal('stat')" required>
                         </div>
                         <div class="form-group">
-                            <label>المورد</label>
+                            <label>المورد صاحب عرض السعر</label>
                             <select id="sup_stat"></select>
                         </div>
                         <div class="form-group">
-                            <label>الموظف المستفيد</label>
+                            <label>الموظف / الجهة الطالبة</label>
                             <select id="emp_stat"></select>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" id="tax_stat" checked onchange="calcFormTotal('stat')"> إضافة ضريبة 15%</label>
+                            <label><input type="checkbox" id="tax_stat" checked onchange="calcFormTotal('stat')"> السعر يشمل ضريبة 15%</label>
                             <input type="number" id="tot_stat" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
-                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إرسال الطلب إلى "أمر المشتريات الشامل"</button>
+                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة إلى قائمة عروض الأسعار</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- 5. صفحة أمر المشتريات الشامل (المجمعة) -->
-            <div id="purchase_orders" class="page-section">
+            <!-- 5. صفحة قائمة عروض الأسعار الشاملة والعهدة -->
+            <div id="quotation_summary" class="page-section">
                 <div class="box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div>
-                        <h3>📑 صفحة أمر المشتريات والشهر الحالي</h3>
-                        <p style="color: var(--text-muted); font-size: 0.85rem;">هنا تتجمع كافة طلبات الشهر الحالي المضافة من الأقسام.</p>
+                        <h3>📑 صفحة عروض الأسعار والشهر الحالي</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">هنا تتجمع كافة طلبات عروض الأسعار للشهر الحالي المضافة من الأقسام.</p>
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn btn-warning" onclick="archiveCurrentMonth()"><i class="fa-solid fa-box-archive"></i> إغلاق وأرشفة هذا الشهر</button>
-                        <button class="btn btn-success" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> تصدير أمر مشتريات PDF</button>
+                        <button class="btn btn-success" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> تصدير عرض سعر PDF</button>
                     </div>
                 </div>
 
-                <!-- إعداد وتحديث مبلغ العهدة -->
+                <!-- إعداد وتحديث مبلغ العهدة المستلمة -->
                 <div class="box">
                     <h4>💰 إدارة عهدة الشهر الحالي</h4>
                     <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; align-items: flex-end;">
                         <div class="form-group">
-                            <label>مبلغ العهدة المسلّم (ر.س)</label>
+                            <label>مبلغ العهدة المستلَم (ر.س)</label>
                             <input type="number" id="currentPettyCashInput" placeholder="أدخل مبلغ العهدة">
                         </div>
                         <div class="form-group">
@@ -307,11 +307,11 @@
                 </div>
             </div>
 
-            <!-- 6. أرشيف المشتريات الشهرية (جديد) -->
+            <!-- 6. أرشيف عروض الأسعار والعهد الشهرية -->
             <div id="monthly_archive" class="page-section">
                 <div class="box">
-                    <h3>📦 أرشيف المشتريات والأشهر السابقة</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اختر الشهر لاستعراض بيانات المشتريات، المبلغ المستلم من العهدة، وكم صُرِف والمتبقي.</p>
+                    <h3>📦 أرشيف عروض الأسعار والعهد السابقة</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اختر الشهر لاستعراض بيانات عروض الأسعار، مبلغ العهدة المستلم، وإجمالي المنصرف.</p>
 
                     <div class="form-group" style="max-width: 300px;">
                         <label>اختر الشهر المؤرشف:</label>
@@ -322,11 +322,11 @@
                 <!-- ملخص الحسابات للشهر المختار -->
                 <div class="stats-grid" id="archiveStatsGrid" style="display: none;">
                     <div class="stat-card">
-                        <h4>العهدة المخصصة للشهر</h4>
+                        <h4>العهدة المستلمة للشهر</h4>
                         <div class="val" id="archPettyCash">0.00 ر.س</div>
                     </div>
                     <div class="stat-card">
-                        <h4>إجمالي ما تم صرفه</h4>
+                        <h4>إجمالي عروض الأسعار / المصروفات</h4>
                         <div class="val" id="archSpent" style="color: var(--danger);">0.00 ر.س</div>
                     </div>
                     <div class="stat-card">
@@ -336,7 +336,7 @@
                 </div>
 
                 <div class="box" id="archiveBox" style="display: none;">
-                    <h4 id="archiveTableTitle">تفاصيل المشتريات</h4>
+                    <h4 id="archiveTableTitle">تفاصيل عروض الأسعار</h4>
                     <table>
                         <thead>
                             <tr>
@@ -361,7 +361,7 @@
                     <h3>إضافة مورد جديد</h3>
                     <form onsubmit="handleAddSupplier(event)" class="form-grid">
                         <div class="form-group">
-                            <label>اسم المورد</label>
+                            <label>اسم المورد / الشركة</label>
                             <input type="text" id="newSupplierName" required placeholder="مثال: شركة التوريدات السريعة">
                         </div>
                         <div class="form-group">
@@ -392,7 +392,7 @@
             <!-- 8. إدارة الموظفين -->
             <div id="employees" class="page-section">
                 <div class="box">
-                    <h3>إضافة موظف مستفيد</h3>
+                    <h3>إضافة موظف / جهة طالبة</h3>
                     <form onsubmit="handleAddEmployee(event)" class="form-grid">
                         <div class="form-group">
                             <label>اسم الموظف</label>
@@ -409,7 +409,7 @@
                 </div>
 
                 <div class="box">
-                    <h3>قائمة الموظفين</h3>
+                    <h3>قائمة الموظفين والجهات الطالبة</h3>
                     <table>
                         <thead>
                             <tr>
@@ -450,16 +450,16 @@
         <div class="pdf-page" id="pdfContent">
             <div class="pdf-header">
                 <div>
-                    <h2 style="color: #0369a1; margin-bottom: 5px;">Purchasing Hub System</h2>
-                    <span style="font-size: 0.8rem; color: #555;">نظام إداري موحد لإدارة طلبات المشتريات والعهد</span>
+                    <h2 style="color: #0369a1; margin-bottom: 5px;">Quotations Hub System</h2>
+                    <span style="font-size: 0.8rem; color: #555;">جدول مقارنة عروض الأسعار وطلب العهدة</span>
                 </div>
                 <div style="text-align: left; font-size: 0.8rem; line-height: 1.5;">
                     <b>التاريخ والوقت:</b> <span id="pdfDateTime"></span><br>
-                    <b>رقم أمر الشراء:</b> #PO-<span id="pdfPoNum"></span>
+                    <b>رقم البيان:</b> #QUO-<span id="pdfPoNum"></span>
                 </div>
             </div>
 
-            <div class="pdf-title">أمر شراء مشتريات مجمع</div>
+            <div class="pdf-title">بيان عروض الأسعار التقديرية</div>
 
             <table class="pdf-table">
                 <thead>
@@ -468,7 +468,7 @@
                         <th>القسم</th>
                         <th>الصنف / البيان</th>
                         <th>الكمية</th>
-                        <th>المورد</th>
+                        <th>المورد المقترح</th>
                         <th>المستفيد</th>
                         <th>الإجمالي (ر.س)</th>
                     </tr>
@@ -479,19 +479,19 @@
             <div class="pdf-totals">
                 <div><span>المبلغ قبل الضريبة:</span> <b id="pdfSubtotal">0.00 ر.س</b></div>
                 <div><span>ضريبة القيمة المضافة (15%):</span> <b id="pdfTax">0.00 ر.س</b></div>
-                <div style="font-size: 1.05rem; font-weight: bold; color: #0369a1;"><span>الإجمالي النهائي:</span> <b id="pdfGrandTotal">0.00 ر.س</b></div>
+                <div style="font-size: 1.05rem; font-weight: bold; color: #0369a1;"><span>الإجمالي النهائي المطلوبة للعهدة:</span> <b id="pdfGrandTotal">0.00 ر.س</b></div>
             </div>
 
             <div style="clear: both;"></div>
 
             <div class="pdf-footer">
                 <div>
-                    <p>إعداد / مسؤول المشتريات</p>
+                    <p>إعداد الموظف / المسؤول</p>
                     <br><br>
                     <p>التوقيع: ............................</p>
                 </div>
                 <div>
-                    <p>اعتماد الإدارة المالية</p>
+                    <p>اعتماد الإدارة</p>
                     <br><br>
                     <p>التوقيع والختم: ............................</p>
                 </div>
@@ -511,11 +511,11 @@
                 { id: 1, name: 'مؤسسة التوريدات السريعة', phone: '0500000000' }
             ],
             employees: JSON.parse(localStorage.getItem('ph_employees')) || [
-                { id: 1, name: 'أحمد - المشتريات', dept: 'المشتريات' }
+                { id: 1, name: 'أحمد - إدارة المشتريات', dept: 'المشتريات' }
             ],
             currentPettyCash: parseFloat(localStorage.getItem('ph_petty_cash')) || 0,
             orders: JSON.parse(localStorage.getItem('ph_orders')) || [],
-            archives: JSON.parse(localStorage.getItem('ph_archives')) || [] // أرشيف الأشهر
+            archives: JSON.parse(localStorage.getItem('ph_archives')) || []
         };
 
         let currentActiveCat = '';
@@ -591,11 +591,11 @@
 
             const titles = {
                 dashboard: 'لوحة التحكم',
-                cat_hospitality: 'مشتريات الضيافة والبوفيه',
-                cat_cleaning: 'مشتريات النظافة',
-                cat_stationery: 'القرطاسية والإلكترونيات',
-                purchase_orders: 'أمر المشتريات الشامل والعهدة',
-                monthly_archive: 'أرشيف المشتريات الشهرية',
+                cat_hospitality: 'عروض أسعار الضيافة والبوفيه',
+                cat_cleaning: 'عروض أسعار النظافة',
+                cat_stationery: 'عروض القرطاسية والإلكترونيات',
+                quotation_summary: 'عروض الأسعار والعهدة الشاملة',
+                monthly_archive: 'أرشيف العروض والعهد الشهرية',
                 suppliers: 'إدارة الموردين',
                 employees: 'إدارة الموظفين'
             };
@@ -605,7 +605,7 @@
                 const prefixKey = tabId === 'cat_hospitality' ? 'hosp' : tabId === 'cat_cleaning' ? 'clean' : 'stat';
                 populateCategoryForm(prefixKey);
             }
-            if(tabId === 'purchase_orders') {
+            if(tabId === 'quotation_summary') {
                 renderMasterOrdersTable();
                 document.getElementById('currentPettyCashInput').value = db.currentPettyCash || '';
             }
@@ -702,16 +702,16 @@
 
             db.orders.push(newOrder);
             saveDb();
-            alert(`تم إرسال الطلب إلى "أمر المشتريات الشامل" بنجاح!`);
+            alert(`تمت إضافة عرض السعر إلى القائمة الشاملة بنجاح!`);
         }
 
-        // Render Master Orders Table (Centralized Page)
+        // Render Master Orders Table (Quotation Summary Page)
         function renderMasterOrdersTable() {
             const tbody = document.getElementById('masterOrdersTableBody');
             tbody.innerHTML = '';
 
             if(db.orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color: var(--text-muted);">لا توجد طلبات مضافة بعد للشهر الحالي</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color: var(--text-muted);">لا توجد عروض أسعار مضافة للشهر الحالي</td></tr>';
                 return;
             }
 
@@ -741,7 +741,7 @@
         // Archiving Logic
         function archiveCurrentMonth() {
             if(db.orders.length === 0) {
-                alert('لا توجد طلبات لحفظها وأرشفتها لهذا الشهر!');
+                alert('لا توجد بيانات عروض أسعار لحفظها وأرشفة هذا الشهر!');
                 return;
             }
 
@@ -762,11 +762,11 @@
             };
 
             db.archives.push(archiveRecord);
-            db.orders = []; // إعادة تعيين طلبات الشهر الحالي
-            db.currentPettyCash = 0; // إعادة تعيين العهدة للشهر الجديد
+            db.orders = [];
+            db.currentPettyCash = 0;
 
             saveDb();
-            alert(`تمت أرشفة (${monthName}) بنجاح وتم تحضير النظام لشهر جديد!`);
+            alert(`تمت أرشفة عروض وعهد (${monthName}) بنجاح!`);
             renderMasterOrdersTable();
         }
 
@@ -868,7 +868,7 @@
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
                 pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                pdf.save(`امر_مشتريات_شامل_${Date.now()}.pdf`);
+                pdf.save(`بيان_عروض_الاسعار_${Date.now()}.pdf`);
             });
         }
 
