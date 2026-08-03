@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchasing Hub - نظام المشتريات والعهد</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- مكتبات الـ PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --border: #cbd5e1;
+            --sidebar-bg: #0f172a;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navigation */
+        .sidebar { width: 270px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 20px 12px; flex-shrink: 0; }
+        .sidebar-brand { font-size: 1.2rem; font-weight: bold; text-align: center; margin-bottom: 25px; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.88rem; transition: 0.2s; }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { background: var(--primary); color: #fff; font-weight: bold; }
+
+        /* Main Content Area */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header { background: var(--bg-card); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .clock-box { font-size: 0.85rem; font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 6px 14px; border-radius: 20px; border: 1px solid #bae6fd; }
+
+        .content { padding: 25px; }
+        .page-section { display: none; }
+        .page-section.active-page { display: block; }
+
+        /* Buttons & Forms */
+        .btn { padding: 9px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); color: #fff; }
+        .btn-danger { background: var(--danger); padding: 5px 10px; font-size: 0.75rem; }
+        .btn-sm-add { padding: 4px 8px; font-size: 0.75rem; background: #16a34a; border-radius: 4px; border: none; color: white; cursor: pointer; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); }
+        .stat-card h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-card .val { font-size: 1.5rem; font-weight: bold; color: var(--primary-dark); }
+
+        .box { background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 9px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: right; padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        th { color: var(--text-muted); background: rgba(0,0,0,0.02); }
+
+        /* Modal Popup */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 999; }
+        .modal-card { background: #fff; width: 90%; max-width: 400px; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+        /* PDF hidden container */
+        #pdfExportContainer { position: absolute; left: -9999px; top: -9999px; }
+        .pdf-page { width: 800px; padding: 40px; background: #fff; color: #000; font-family: sans-serif; direction: rtl; }
+        .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-dark); padding-bottom: 15px; margin-bottom: 20px; }
+        .pdf-title { text-align: center; margin: 20px 0; color: var(--primary-dark); font-size: 1.4rem; font-weight: bold; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .pdf-table th { background: var(--primary-dark); color: white; padding: 8px; text-align: right; font-size: 0.85rem; }
+        .pdf-table td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 0.85rem; text-align: right; }
+        .pdf-totals { margin-top: 20px; float: left; width: 300px; font-size: 0.9rem; }
+        .pdf-totals div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .pdf-footer { margin-top: 80px; display: flex; justify-content: space-between; text-align: center; font-weight: bold; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <!-- القائمة الجانبية -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fa-solid fa-cart-shopping"></i> Purchasing Hub
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم</a></li>
+            
+            <li><a href="#" class="nav-link" onclick="switchTab('cat_hospitality', event)"><i class="fa-solid fa-mug-hot"></i> مشتريات الضيافة والبوفيه</a></li>
+            <li><a href="#" class="nav-link" onclick="switchTab('cat_cleaning', event)"><i class="fa-solid fa-broom"></i> مشتريات النظافة</a></li>
+            <li><a href="#" class="nav-link" onclick="switchTab('cat_stationery', event)"><i class="fa-solid fa-print"></i> القرطاسية والإلكترونيات</a></li>
+            
+            <li><a href="#" class="nav-link" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;" onclick="switchTab('purchase_orders', event)"><i class="fa-solid fa-file-invoice-dollar"></i> أمر المشتريات الشامل</a></li>
+            <li><a href="#" class="nav-link" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24;" onclick="switchTab('monthly_archive', event)"><i class="fa-solid fa-box-archive"></i> أرشيف المشتريات الشهرية</a></li>
+            
+            <li><a href="#" class="nav-link" onclick="switchTab('suppliers', event)"><i class="fa-solid fa-truck"></i> إدارة الموردين</a></li>
+            <li><a href="#" class="nav-link" onclick="switchTab('employees', event)"><i class="fa-solid fa-user-group"></i> إدارة الموظفين</a></li>
+        </ul>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-wrapper">
+        <header>
+            <h3 id="pageTitle">لوحة التحكم</h3>
+            <div class="clock-box" id="liveClock"><i class="fa-regular fa-clock"></i> جاري التحميل...</div>
+        </header>
+
+        <div class="content">
+
+            <!-- 1. صفحة لوحة التحكم -->
+            <div id="dashboard" class="page-section active-page">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>الطلبات في أمر الشراء الحالي</h4>
+                        <div class="val" id="dashTotalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>المصروف الحالي لهذا الشهر</h4>
+                        <div class="val" id="dashTotalAmount">0.00 ر.س</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>مبلغ العهدة المخصص</h4>
+                        <div class="val" id="dashPettyCash">0.00 ر.س</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>المتبقي من العهدة</h4>
+                        <div class="val" id="dashRemainingCash" style="color: var(--success);">0.00 ر.س</div>
+                    </div>
+                </div>
+                <div class="box">
+                    <h3>أهلاً بك في نظام Purchasing Hub 🛒</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px; line-height: 1.6;">
+                        تستطيع إضافة المشتريات وتعديلها مباشرة من داخل كل قسم، تتبع العهدة الشهرية، وأرشفة السجلات شهرياً بضغطة زر.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. صفحة الضيافة والبوفيه -->
+            <div id="cat_hospitality" class="page-section">
+                <div class="box">
+                    <h3>☕ إضافة مشتريات قسم الضيافة والبوفيه</h3>
+                    <form onsubmit="handleCategoryFormSubmit(event, 'الضيافة والبوفيه')" class="form-grid">
+                        <div class="form-group">
+                            <label>
+                                الصنف 
+                                <button type="button" class="btn-sm-add" onclick="openQuickAddModal('الضيافة والبوفيه', 'hosp')"><i class="fa-solid fa-plus"></i> صنف جديد</button>
+                            </label>
+                            <select id="item_hosp" onchange="autoFillPrice('hosp')"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="qty_hosp" value="1" min="1" oninput="calcFormTotal('hosp')" required>
+                        </div>
+                        <div class="form-group">
+                            <label>سعر الوحدة (ر.س)</label>
+                            <input type="number" id="price_hosp" step="0.01" oninput="calcFormTotal('hosp')" required>
+                        </div>
+                        <div class="form-group">
+                            <label>المورد</label>
+                            <select id="sup_hosp"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الموظف المستفيد</label>
+                            <select id="emp_hosp"></select>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="tax_hosp" checked onchange="calcFormTotal('hosp')"> إضافة ضريبة 15%</label>
+                            <input type="number" id="tot_hosp" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إرسال الطلب إلى "أمر المشتريات الشامل"</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 3. صفحة النظافة -->
+            <div id="cat_cleaning" class="page-section">
+                <div class="box">
+                    <h3>🧹 إضافة مشتريات قسم النظافة</h3>
+                    <form onsubmit="handleCategoryFormSubmit(event, 'أدوات النظافة')" class="form-grid">
+                        <div class="form-group">
+                            <label>
+                                الصنف 
+                                <button type="button" class="btn-sm-add" onclick="openQuickAddModal('أدوات النظافة', 'clean')"><i class="fa-solid fa-plus"></i> صنف جديد</button>
+                            </label>
+                            <select id="item_clean" onchange="autoFillPrice('clean')"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="qty_clean" value="1" min="1" oninput="calcFormTotal('clean')" required>
+                        </div>
+                        <div class="form-group">
+                            <label>سعر الوحدة (ر.س)</label>
+                            <input type="number" id="price_clean" step="0.01" oninput="calcFormTotal('clean')" required>
+                        </div>
+                        <div class="form-group">
+                            <label>المورد</label>
+                            <select id="sup_clean"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الموظف المستفيد</label>
+                            <select id="emp_clean"></select>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="tax_clean" checked onchange="calcFormTotal('clean')"> إضافة ضريبة 15%</label>
+                            <input type="number" id="tot_clean" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إرسال الطلب إلى "أمر المشتريات الشامل"</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 4. صفحة القرطاسية والإلكترونيات -->
+            <div id="cat_stationery" class="page-section">
+                <div class="box">
+                    <h3>📄 إضافة مشتريات قسم القرطاسية والإلكترونيات</h3>
+                    <form onsubmit="handleCategoryFormSubmit(event, 'القرطاسية والإلكترونيات')" class="form-grid">
+                        <div class="form-group">
+                            <label>
+                                الصنف 
+                                <button type="button" class="btn-sm-add" onclick="openQuickAddModal('القرطاسية والإلكترونيات', 'stat')"><i class="fa-solid fa-plus"></i> صنف جديد</button>
+                            </label>
+                            <select id="item_stat" onchange="autoFillPrice('stat')"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="qty_stat" value="1" min="1" oninput="calcFormTotal('stat')" required>
+                        </div>
+                        <div class="form-group">
+                            <label>سعر الوحدة (ر.س)</label>
+                            <input type="number" id="price_stat" step="0.01" oninput="calcFormTotal('stat')" required>
+                        </div>
+                        <div class="form-group">
+                            <label>المورد</label>
+                            <select id="sup_stat"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الموظف المستفيد</label>
+                            <select id="emp_stat"></select>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="tax_stat" checked onchange="calcFormTotal('stat')"> إضافة ضريبة 15%</label>
+                            <input type="number" id="tot_stat" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إرسال الطلب إلى "أمر المشتريات الشامل"</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 5. صفحة أمر المشتريات الشامل (المجمعة) -->
+            <div id="purchase_orders" class="page-section">
+                <div class="box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3>📑 صفحة أمر المشتريات والشهر الحالي</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">هنا تتجمع كافة طلبات الشهر الحالي المضافة من الأقسام.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-warning" onclick="archiveCurrentMonth()"><i class="fa-solid fa-box-archive"></i> إغلاق وأرشفة هذا الشهر</button>
+                        <button class="btn btn-success" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> تصدير أمر مشتريات PDF</button>
+                    </div>
+                </div>
+
+                <!-- إعداد وتحديث مبلغ العهدة -->
+                <div class="box">
+                    <h4>💰 إدارة عهدة الشهر الحالي</h4>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; align-items: flex-end;">
+                        <div class="form-group">
+                            <label>مبلغ العهدة المسلّم (ر.س)</label>
+                            <input type="number" id="currentPettyCashInput" placeholder="أدخل مبلغ العهدة">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn" onclick="savePettyCash()"><i class="fa-solid fa-floppy-disk"></i> حفظ مبلغ العهدة</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>القسم</th>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>السعر الفردي</th>
+                                <th>المورد</th>
+                                <th>المستفيد</th>
+                                <th>الإجمالي</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterOrdersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. أرشيف المشتريات الشهرية (جديد) -->
+            <div id="monthly_archive" class="page-section">
+                <div class="box">
+                    <h3>📦 أرشيف المشتريات والأشهر السابقة</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اختر الشهر لاستعراض بيانات المشتريات، المبلغ المستلم من العهدة، وكم صُرِف والمتبقي.</p>
+
+                    <div class="form-group" style="max-width: 300px;">
+                        <label>اختر الشهر المؤرشف:</label>
+                        <select id="archiveMonthSelect" onchange="renderArchiveData()"></select>
+                    </div>
+                </div>
+
+                <!-- ملخص الحسابات للشهر المختار -->
+                <div class="stats-grid" id="archiveStatsGrid" style="display: none;">
+                    <div class="stat-card">
+                        <h4>العهدة المخصصة للشهر</h4>
+                        <div class="val" id="archPettyCash">0.00 ر.س</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>إجمالي ما تم صرفه</h4>
+                        <div class="val" id="archSpent" style="color: var(--danger);">0.00 ر.س</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>المتبقي من العهدة</h4>
+                        <div class="val" id="archRemaining" style="color: var(--success);">0.00 ر.س</div>
+                    </div>
+                </div>
+
+                <div class="box" id="archiveBox" style="display: none;">
+                    <h4 id="archiveTableTitle">تفاصيل المشتريات</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>القسم</th>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>السعر الفردي</th>
+                                <th>المورد</th>
+                                <th>المستفيد</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archiveOrdersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 7. إدارة الموردين -->
+            <div id="suppliers" class="page-section">
+                <div class="box">
+                    <h3>إضافة مورد جديد</h3>
+                    <form onsubmit="handleAddSupplier(event)" class="form-grid">
+                        <div class="form-group">
+                            <label>اسم المورد</label>
+                            <input type="text" id="newSupplierName" required placeholder="مثال: شركة التوريدات السريعة">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="text" id="newSupplierPhone" placeholder="05xxxxxxxx">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button type="submit" class="btn"><i class="fa-solid fa-user-plus"></i> إضافة المورد</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="box">
+                    <h3>قائمة الموردين</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم المورد</th>
+                                <th>الهاتف</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 8. إدارة الموظفين -->
+            <div id="employees" class="page-section">
+                <div class="box">
+                    <h3>إضافة موظف مستفيد</h3>
+                    <form onsubmit="handleAddEmployee(event)" class="form-grid">
+                        <div class="form-group">
+                            <label>اسم الموظف</label>
+                            <input type="text" id="newEmpName" required placeholder="اسم الموظف">
+                        </div>
+                        <div class="form-group">
+                            <label>القسم</label>
+                            <input type="text" id="newEmpDept" required placeholder="مثال: الإدارة / العمليات">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button type="submit" class="btn"><i class="fa-solid fa-user-check"></i> إضافة الموظف</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="box">
+                    <h3>قائمة الموظفين</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم الموظف</th>
+                                <th>القسم</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- نافذة إضافة صنف سريعة من داخل القسم (Quick Add Modal) -->
+    <div class="modal-overlay" id="quickAddModal">
+        <div class="modal-card">
+            <h4 style="margin-bottom: 15px; color: var(--primary-dark);" id="modalTitle">إضافة صنف جديد</h4>
+            <div class="form-group">
+                <label>اسم الصنف الجديد</label>
+                <input type="text" id="quickItemName" placeholder="مثال: شمعة / مناديل">
+            </div>
+            <div class="form-group">
+                <label>السعر الافتراضي (ر.س)</label>
+                <input type="number" id="quickItemPrice" step="0.01" placeholder="0.00">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn" style="background: var(--text-muted);" onclick="closeQuickAddModal()">إلغاء</button>
+                <button class="btn btn-success" onclick="saveQuickItem()">حفظ وإضافة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- حاوية الـ PDF الخفية المخصصة للتصدير -->
+    <div id="pdfExportContainer">
+        <div class="pdf-page" id="pdfContent">
+            <div class="pdf-header">
+                <div>
+                    <h2 style="color: #0369a1; margin-bottom: 5px;">Purchasing Hub System</h2>
+                    <span style="font-size: 0.8rem; color: #555;">نظام إداري موحد لإدارة طلبات المشتريات والعهد</span>
+                </div>
+                <div style="text-align: left; font-size: 0.8rem; line-height: 1.5;">
+                    <b>التاريخ والوقت:</b> <span id="pdfDateTime"></span><br>
+                    <b>رقم أمر الشراء:</b> #PO-<span id="pdfPoNum"></span>
+                </div>
+            </div>
+
+            <div class="pdf-title">أمر شراء مشتريات مجمع</div>
+
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>القسم</th>
+                        <th>الصنف / البيان</th>
+                        <th>الكمية</th>
+                        <th>المورد</th>
+                        <th>المستفيد</th>
+                        <th>الإجمالي (ر.س)</th>
+                    </tr>
+                </thead>
+                <tbody id="pdfTableBody"></tbody>
+            </table>
+
+            <div class="pdf-totals">
+                <div><span>المبلغ قبل الضريبة:</span> <b id="pdfSubtotal">0.00 ر.س</b></div>
+                <div><span>ضريبة القيمة المضافة (15%):</span> <b id="pdfTax">0.00 ر.س</b></div>
+                <div style="font-size: 1.05rem; font-weight: bold; color: #0369a1;"><span>الإجمالي النهائي:</span> <b id="pdfGrandTotal">0.00 ر.س</b></div>
+            </div>
+
+            <div style="clear: both;"></div>
+
+            <div class="pdf-footer">
+                <div>
+                    <p>إعداد / مسؤول المشتريات</p>
+                    <br><br>
+                    <p>التوقيع: ............................</p>
+                </div>
+                <div>
+                    <p>اعتماد الإدارة المالية</p>
+                    <br><br>
+                    <p>التوقيع والختم: ............................</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data LocalStorage Initialization
+        let db = {
+            items: JSON.parse(localStorage.getItem('ph_items')) || [
+                { id: 1, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 21.00 },
+                { id: 2, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 18.00 },
+                { id: 3, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
+            ],
+            suppliers: JSON.parse(localStorage.getItem('ph_suppliers')) || [
+                { id: 1, name: 'مؤسسة التوريدات السريعة', phone: '0500000000' }
+            ],
+            employees: JSON.parse(localStorage.getItem('ph_employees')) || [
+                { id: 1, name: 'أحمد - المشتريات', dept: 'المشتريات' }
+            ],
+            currentPettyCash: parseFloat(localStorage.getItem('ph_petty_cash')) || 0,
+            orders: JSON.parse(localStorage.getItem('ph_orders')) || [],
+            archives: JSON.parse(localStorage.getItem('ph_archives')) || [] // أرشيف الأشهر
+        };
+
+        let currentActiveCat = '';
+        let currentActivePrefix = '';
+
+        const prefixMap = {
+            'hosp': 'الضيافة والبوفيه',
+            'clean': 'أدوات النظافة',
+            'stat': 'القرطاسية والإلكترونيات'
+        };
+
+        function saveDb() {
+            localStorage.setItem('ph_items', JSON.stringify(db.items));
+            localStorage.setItem('ph_suppliers', JSON.stringify(db.suppliers));
+            localStorage.setItem('ph_employees', JSON.stringify(db.employees));
+            localStorage.setItem('ph_petty_cash', db.currentPettyCash);
+            localStorage.setItem('ph_orders', JSON.stringify(db.orders));
+            localStorage.setItem('ph_archives', JSON.stringify(db.archives));
+            updateDashboardStats();
+        }
+
+        // Live Clock Functionality
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('ar-SA');
+            document.getElementById('liveClock').innerHTML = `<i class="fa-regular fa-clock"></i> ${dateStr} - ${timeStr}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Modal Functionality for Quick Add Item
+        function openQuickAddModal(catName, prefix) {
+            currentActiveCat = catName;
+            currentActivePrefix = prefix;
+            document.getElementById('modalTitle').innerText = `إضافة صنف جديد لـ (${catName})`;
+            document.getElementById('quickItemName').value = '';
+            document.getElementById('quickItemPrice').value = '';
+            document.getElementById('quickAddModal').style.display = 'flex';
+        }
+
+        function closeQuickAddModal() {
+            document.getElementById('quickAddModal').style.display = 'none';
+        }
+
+        function saveQuickItem() {
+            const name = document.getElementById('quickItemName').value.trim();
+            const price = parseFloat(document.getElementById('quickItemPrice').value) || 0;
+
+            if(!name) {
+                alert('يرجى أدخال اسم الصنف!');
+                return;
+            }
+
+            const newItem = { id: Date.now(), name: name, cat: currentActiveCat, price: price };
+            db.items.push(newItem);
+            saveDb();
+            closeQuickAddModal();
+
+            populateCategoryForm(currentActivePrefix);
+            document.getElementById(`item_${currentActivePrefix}`).value = newItem.id;
+            autoFillPrice(currentActivePrefix);
+        }
+
+        // Tab Navigation
+        function switchTab(tabId, event) {
+            if(event) event.preventDefault();
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active-page'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active-page');
+            if(event) event.currentTarget.classList.add('active');
+
+            const titles = {
+                dashboard: 'لوحة التحكم',
+                cat_hospitality: 'مشتريات الضيافة والبوفيه',
+                cat_cleaning: 'مشتريات النظافة',
+                cat_stationery: 'القرطاسية والإلكترونيات',
+                purchase_orders: 'أمر المشتريات الشامل والعهدة',
+                monthly_archive: 'أرشيف المشتريات الشهرية',
+                suppliers: 'إدارة الموردين',
+                employees: 'إدارة الموظفين'
+            };
+            document.getElementById('pageTitle').innerText = titles[tabId];
+
+            if(tabId.startsWith('cat_')) {
+                const prefixKey = tabId === 'cat_hospitality' ? 'hosp' : tabId === 'cat_cleaning' ? 'clean' : 'stat';
+                populateCategoryForm(prefixKey);
+            }
+            if(tabId === 'purchase_orders') {
+                renderMasterOrdersTable();
+                document.getElementById('currentPettyCashInput').value = db.currentPettyCash || '';
+            }
+            if(tabId === 'monthly_archive') setupArchivePage();
+            if(tabId === 'suppliers') renderSuppliersPage();
+            if(tabId === 'employees') renderEmployeesPage();
+        }
+
+        // Save Petty Cash Amount
+        function savePettyCash() {
+            const val = parseFloat(document.getElementById('currentPettyCashInput').value) || 0;
+            db.currentPettyCash = val;
+            saveDb();
+            alert('تم حفظ مبلغ العهدة بنجاح!');
+        }
+
+        // Populate Form Specific Options
+        function populateCategoryForm(prefix) {
+            const catName = prefixMap[prefix];
+            const itemSelect = document.getElementById(`item_${prefix}`);
+            itemSelect.innerHTML = '';
+
+            const items = db.items.filter(i => i.cat === catName);
+            if(items.length === 0) {
+                itemSelect.innerHTML = '<option value="">لا توجد أصناف، اضغط (+ صنف جديد)</option>';
+            } else {
+                items.forEach(i => {
+                    itemSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+                });
+            }
+
+            const supSelect = document.getElementById(`sup_${prefix}`);
+            supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+
+            const empSelect = document.getElementById(`emp_${prefix}`);
+            empSelect.innerHTML = db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+
+            autoFillPrice(prefix);
+        }
+
+        function autoFillPrice(prefix) {
+            const itemId = document.getElementById(`item_${prefix}`).value;
+            const item = db.items.find(i => i.id == itemId);
+            if(item) {
+                document.getElementById(`price_${prefix}`).value = item.price;
+                calcFormTotal(prefix);
+            }
+        }
+
+        function calcFormTotal(prefix) {
+            const qty = parseFloat(document.getElementById(`qty_${prefix}`).value) || 1;
+            const unitPrice = parseFloat(document.getElementById(`price_${prefix}`).value) || 0;
+            const hasTax = document.getElementById(`tax_${prefix}`).checked;
+
+            const sub = qty * unitPrice;
+            const total = hasTax ? sub * 1.15 : sub;
+            document.getElementById(`tot_${prefix}`).value = total.toFixed(2);
+        }
+
+        function handleCategoryFormSubmit(e, catName) {
+            e.preventDefault();
+            const prefix = catName === 'الضيافة والبوفيه' ? 'hosp' : catName === 'أدوات النظافة' ? 'clean' : 'stat';
+            
+            const itemId = document.getElementById(`item_${prefix}`).value;
+            const itemObj = db.items.find(i => i.id == itemId);
+
+            if(!itemObj) {
+                alert('يرجى إضافة أو اختيار صنف أولاً!');
+                return;
+            }
+
+            const qty = parseFloat(document.getElementById(`qty_${prefix}`).value);
+            const unitPrice = parseFloat(document.getElementById(`price_${prefix}`).value);
+            const hasTax = document.getElementById(`tax_${prefix}`).checked;
+            const subtotal = qty * unitPrice;
+            const tax = hasTax ? subtotal * 0.15 : 0;
+            const total = subtotal + tax;
+
+            itemObj.price = unitPrice;
+
+            const newOrder = {
+                id: Date.now(),
+                cat: catName,
+                itemName: itemObj.name,
+                qty: qty,
+                unitPrice: unitPrice,
+                supplier: document.getElementById(`sup_${prefix}`).value,
+                emp: document.getElementById(`emp_${prefix}`).value,
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
+                datetime: new Date().toLocaleString('ar-SA')
+            };
+
+            db.orders.push(newOrder);
+            saveDb();
+            alert(`تم إرسال الطلب إلى "أمر المشتريات الشامل" بنجاح!`);
+        }
+
+        // Render Master Orders Table (Centralized Page)
+        function renderMasterOrdersTable() {
+            const tbody = document.getElementById('masterOrdersTableBody');
+            tbody.innerHTML = '';
+
+            if(db.orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color: var(--text-muted);">لا توجد طلبات مضافة بعد للشهر الحالي</td></tr>';
+                return;
+            }
+
+            db.orders.forEach((o, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${o.cat}</span></td>
+                        <td><b>${o.itemName}</b></td>
+                        <td>${o.qty}</td>
+                        <td>${o.unitPrice.toFixed(2)} ر.س</td>
+                        <td>${o.supplier}</td>
+                        <td>${o.emp}</td>
+                        <td><b>${o.total.toFixed(2)} ر.س</b></td>
+                        <td><button class="btn btn-danger" onclick="deleteMasterOrder(${o.id})"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteMasterOrder(id) {
+            db.orders = db.orders.filter(o => o.id !== id);
+            saveDb();
+            renderMasterOrdersTable();
+        }
+
+        // Archiving Logic
+        function archiveCurrentMonth() {
+            if(db.orders.length === 0) {
+                alert('لا توجد طلبات لحفظها وأرشفتها لهذا الشهر!');
+                return;
+            }
+
+            const now = new Date();
+            const monthName = prompt("أدخل اسم الشهر المراد أرشفته (مثال: شهر 8 - أغسطس 2026):", `شهر ${now.getMonth() + 1} - ${now.getFullYear()}`);
+
+            if(!monthName) return;
+
+            const spentTotal = db.orders.reduce((acc, o) => acc + o.total, 0);
+
+            const archiveRecord = {
+                id: Date.now(),
+                monthTitle: monthName,
+                pettyCash: db.currentPettyCash,
+                spentTotal: spentTotal,
+                remainingCash: db.currentPettyCash - spentTotal,
+                orders: [...db.orders]
+            };
+
+            db.archives.push(archiveRecord);
+            db.orders = []; // إعادة تعيين طلبات الشهر الحالي
+            db.currentPettyCash = 0; // إعادة تعيين العهدة للشهر الجديد
+
+            saveDb();
+            alert(`تمت أرشفة (${monthName}) بنجاح وتم تحضير النظام لشهر جديد!`);
+            renderMasterOrdersTable();
+        }
+
+        // Setup & Render Archive Page
+        function setupArchivePage() {
+            const select = document.getElementById('archiveMonthSelect');
+            select.innerHTML = '<option value="">-- اختر الشهر --</option>';
+
+            if(db.archives.length === 0) {
+                select.innerHTML = '<option value="">لا توجد أشهر محفوظة بالأرشيف بعد</option>';
+                document.getElementById('archiveStatsGrid').style.display = 'none';
+                document.getElementById('archiveBox').style.display = 'none';
+                return;
+            }
+
+            db.archives.forEach(arch => {
+                select.innerHTML += `<option value="${arch.id}">${arch.monthTitle}</option>`;
+            });
+        }
+
+        function renderArchiveData() {
+            const archId = document.getElementById('archiveMonthSelect').value;
+            const arch = db.archives.find(a => a.id == archId);
+
+            if(!arch) {
+                document.getElementById('archiveStatsGrid').style.display = 'none';
+                document.getElementById('archiveBox').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('archiveStatsGrid').style.display = 'grid';
+            document.getElementById('archiveBox').style.display = 'block';
+
+            document.getElementById('archPettyCash').innerText = arch.pettyCash.toFixed(2) + ' ر.س';
+            document.getElementById('archSpent').innerText = arch.spentTotal.toFixed(2) + ' ر.س';
+            document.getElementById('archRemaining').innerText = arch.remainingCash.toFixed(2) + ' ر.س';
+
+            const tbody = document.getElementById('archiveOrdersTableBody');
+            tbody.innerHTML = '';
+
+            arch.orders.forEach((o, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${o.cat}</td>
+                        <td><b>${o.itemName}</b></td>
+                        <td>${o.qty}</td>
+                        <td>${o.unitPrice.toFixed(2)} ر.س</td>
+                        <td>${o.supplier}</td>
+                        <td>${o.emp}</td>
+                        <td><b>${o.total.toFixed(2)} ر.س</b></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Export PDF
+        function exportPDF() {
+            if(db.orders.length === 0) {
+                alert('لا توجد عناصر مضافة لتصديرها إلى PDF!');
+                return;
+            }
+
+            document.getElementById('pdfDateTime').innerText = new Date().toLocaleString('ar-SA');
+            document.getElementById('pdfPoNum').innerText = Math.floor(1000 + Math.random() * 9000);
+
+            const pdfBody = document.getElementById('pdfTableBody');
+            pdfBody.innerHTML = '';
+            let sub = 0, tax = 0, grand = 0;
+
+            db.orders.forEach((o, index) => {
+                sub += o.subtotal;
+                tax += o.tax;
+                grand += o.total;
+                pdfBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${o.cat}</td>
+                        <td><b>${o.itemName}</b></td>
+                        <td>${o.qty}</td>
+                        <td>${o.supplier}</td>
+                        <td>${o.emp}</td>
+                        <td>${o.total.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('pdfSubtotal').innerText = sub.toFixed(2) + ' ر.س';
+            document.getElementById('pdfTax').innerText = tax.toFixed(2) + ' ر.س';
+            document.getElementById('pdfGrandTotal').innerText = grand.toFixed(2) + ' ر.س';
+
+            const element = document.getElementById('pdfContent');
+
+            html2canvas(element, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.save(`امر_مشتريات_شامل_${Date.now()}.pdf`);
+            });
+        }
+
+        // Suppliers Page
+        function renderSuppliersPage() {
+            const tbody = document.getElementById('suppliersTableBody');
+            tbody.innerHTML = '';
+            db.suppliers.forEach(s => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${s.name}</b></td>
+                        <td>${s.phone || '-'}</td>
+                        <td><button class="btn btn-danger" onclick="deleteSupplier(${s.id})"><i class="fa-solid fa-trash"></i> حذف</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function handleAddSupplier(e) {
+            e.preventDefault();
+            db.suppliers.push({
+                id: Date.now(),
+                name: document.getElementById('newSupplierName').value,
+                phone: document.getElementById('newSupplierPhone').value
+            });
+            saveDb();
+            renderSuppliersPage();
+            document.getElementById('newSupplierName').value = '';
+            document.getElementById('newSupplierPhone').value = '';
+        }
+
+        function deleteSupplier(id) {
+            db.suppliers = db.suppliers.filter(s => s.id !== id);
+            saveDb();
+            renderSuppliersPage();
+        }
+
+        // Employees Page
+        function renderEmployeesPage() {
+            const tbody = document.getElementById('employeesTableBody');
+            tbody.innerHTML = '';
+            db.employees.forEach(e => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${e.name}</b></td>
+                        <td>${e.dept}</td>
+                        <td><button class="btn btn-danger" onclick="deleteEmployee(${e.id})"><i class="fa-solid fa-trash"></i> حذف</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function handleAddEmployee(e) {
+            e.preventDefault();
+            db.employees.push({
+                id: Date.now(),
+                name: document.getElementById('newEmpName').value,
+                dept: document.getElementById('newEmpDept').value
+            });
+            saveDb();
+            renderEmployeesPage();
+            document.getElementById('newEmpName').value = '';
+            document.getElementById('newEmpDept').value = '';
+        }
+
+        function deleteEmployee(id) {
+            db.employees = db.employees.filter(e => e.id !== id);
+            saveDb();
+            renderEmployeesPage();
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('dashTotalOrders').innerText = db.orders.length;
+            const spentTotal = db.orders.reduce((acc, o) => acc + o.total, 0);
+            document.getElementById('dashTotalAmount').innerText = spentTotal.toFixed(2) + ' ر.س';
+            document.getElementById('dashPettyCash').innerText = (db.currentPettyCash || 0).toFixed(2) + ' ر.س';
+
+            const remaining = (db.currentPettyCash || 0) - spentTotal;
+            const remainingElem = document.getElementById('dashRemainingCash');
+            remainingElem.innerText = remaining.toFixed(2) + ' ر.س';
+            
+            if(remaining < 0) {
+                remainingElem.style.color = 'var(--danger)';
+            } else {
+                remainingElem.style.color = 'var(--success)';
+            }
+        }
+
+        // Init Dashboard Stats
+        updateDashboardStats();
+    </script>
+</body>
+</html>
