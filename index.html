@@ -45,11 +45,11 @@
         .page-section.active-page { display: block; }
 
         /* Buttons & Forms */
-        .btn { padding: 9px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .btn { padding: 9px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.2s; }
         .btn:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: #fff; }
-        .btn-danger { background: var(--danger); padding: 5px 10px; font-size: 0.75rem; }
+        .btn-danger { background: var(--danger); }
         .btn-sm-add { padding: 4px 8px; font-size: 0.75rem; background: #16a34a; border-radius: 4px; border: none; color: white; cursor: pointer; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
@@ -71,17 +71,34 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 999; }
         .modal-card { background: #fff; width: 90%; max-width: 400px; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-        /* PDF hidden container */
+        /* ===== PDF Modern Template Layout ===== */
         #pdfExportContainer { position: absolute; left: -9999px; top: -9999px; }
-        .pdf-page { width: 800px; padding: 40px; background: #fff; color: #000; font-family: sans-serif; direction: rtl; }
-        .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-dark); padding-bottom: 15px; margin-bottom: 20px; }
-        .pdf-title { text-align: center; margin: 20px 0; color: var(--primary-dark); font-size: 1.4rem; font-weight: bold; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .pdf-document { width: 800px; padding: 35px; background: #ffffff; color: #1e293b; font-family: sans-serif; direction: rtl; box-sizing: border-box; }
+        
+        .pdf-top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
+        .pdf-brand-logo { display: flex; align-items: center; gap: 12px; }
+        .pdf-brand-logo i { font-size: 2.2rem; color: #0284c7; }
+        .pdf-brand-title { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0; }
+        .pdf-brand-sub { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        
+        .pdf-meta-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 15px; text-align: right; font-size: 0.8rem; color: #334155; line-height: 1.6; }
+        
+        .pdf-doc-title-container { text-align: center; margin: 20px 0; background: #f0f9ff; border-radius: 6px; padding: 10px; border: 1px solid #bae6fd; }
+        .pdf-doc-title { font-size: 1.25rem; font-weight: bold; color: #0369a1; margin: 0; }
+
         .pdf-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .pdf-table th { background: var(--primary-dark); color: white; padding: 8px; text-align: right; font-size: 0.85rem; }
-        .pdf-table td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 0.85rem; text-align: right; }
-        .pdf-totals { margin-top: 20px; float: left; width: 300px; font-size: 0.9rem; }
-        .pdf-totals div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
-        .pdf-footer { margin-top: 80px; display: flex; justify-content: space-between; text-align: center; font-weight: bold; font-size: 0.9rem; }
+        .pdf-table th { background: #0f172a; color: #ffffff; padding: 10px 8px; text-align: right; font-size: 0.8rem; font-weight: 600; }
+        .pdf-table td { padding: 9px 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.82rem; color: #334155; text-align: right; }
+        .pdf-table tr:nth-child(even) td { background-color: #f8fafc; }
+
+        .pdf-summary-section { margin-top: 25px; display: flex; justify-content: flex-end; }
+        .pdf-summary-box { width: 320px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+        .pdf-summary-row { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 0.83rem; border-bottom: 1px solid #f1f5f9; color: #475569; }
+        .pdf-summary-row.final { background: #0284c7; color: #ffffff; font-weight: bold; font-size: 0.95rem; border: none; }
+
+        .pdf-signatures { margin-top: 60px; display: flex; justify-content: space-between; text-align: center; font-size: 0.85rem; color: #334155; }
+        .pdf-sig-box { width: 220px; }
+        .pdf-sig-line { margin-top: 45px; border-top: 1px dashed #94a3b8; }
     </style>
 </head>
 <body>
@@ -127,18 +144,18 @@
                         <div class="val" id="dashTotalAmount">0.00 ر.س</div>
                     </div>
                     <div class="stat-card">
-                        <h4>مبلغ العهدة المستلمة من سيستم الشركة</h4>
+                        <h4>مبلغ العهدة المستلمة</h4>
                         <div class="val" id="dashPettyCash">0.00 ر.س</div>
                     </div>
                     <div class="stat-card">
-                        <h4>المتبقي من العهدة الفعليه</h4>
+                        <h4>المتبقي من العهدة</h4>
                         <div class="val" id="dashRemainingCash" style="color: var(--success);">0.00 ر.س</div>
                     </div>
                 </div>
                 <div class="box">
                     <h3>أهلاً بك في نظام Price Quotations Hub 🏷️</h3>
                     <p style="color: var(--text-muted); margin-top: 10px; line-height: 1.6;">
-                        هذا النظام مخصص لإدارة وتسجيل عروض أسعار الأصناف المقترحة قبل رفع أمر الشراء في سيستم الشركة، ومتابعة توازن العهدة وأرشفتها شهرياً.
+                        هذا النظام مخصص لإدارة وتسجيل عروض أسعار الأصناف المقترحة، ومتابعة العهدة وأرشفتها وتصديرها كتقارير رسمية بصيغة PDF.
                     </p>
                 </div>
             </div>
@@ -265,11 +282,11 @@
                 <div class="box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div>
                         <h3>📑 صفحة عروض الأسعار والشهر الحالي</h3>
-                        <p style="color: var(--text-muted); font-size: 0.85rem;">هنا تتجمع كافة طلبات عروض الأسعار للشهر الحالي المضافة من الأقسام.</p>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">تجميع كامل لطلبات عروض الأسعار للشهر الحالي المضافة من الأقسام.</p>
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn btn-warning" onclick="archiveCurrentMonth()"><i class="fa-solid fa-box-archive"></i> إغلاق وأرشفة هذا الشهر</button>
-                        <button class="btn btn-success" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> تصدير عرض سعر PDF</button>
+                        <button class="btn btn-success" onclick="exportCurrentPDF()"><i class="fa-solid fa-file-pdf"></i> تصدير عرض سعر PDF</button>
                     </div>
                 </div>
 
@@ -311,11 +328,15 @@
             <div id="monthly_archive" class="page-section">
                 <div class="box">
                     <h3>📦 أرشيف عروض الأسعار والعهد السابقة</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">اختر الشهر لاستعراض بيانات عروض الأسعار، مبلغ العهدة المستلم، وإجمالي المنصرف.</p>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">استعرض الأرشيف السابق مع خيارات التصدير والحذف.</p>
 
-                    <div class="form-group" style="max-width: 300px;">
-                        <label>اختر الشهر المؤرشف:</label>
-                        <select id="archiveMonthSelect" onchange="renderArchiveData()"></select>
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="max-width: 300px; margin-bottom: 0;">
+                            <label>اختر الشهر المؤرشف:</label>
+                            <select id="archiveMonthSelect" onchange="renderArchiveData()"></select>
+                        </div>
+                        <button id="btnExportArchPdf" class="btn btn-success" style="display: none;" onclick="exportArchivePDF()"><i class="fa-solid fa-file-pdf"></i> تصدير الأرشيف PDF</button>
+                        <button id="btnDeleteArch" class="btn btn-danger" style="display: none;" onclick="deleteSelectedArchive()"><i class="fa-solid fa-trash-can"></i> حذف هذا الأرشيف</button>
                     </div>
                 </div>
 
@@ -362,7 +383,7 @@
                     <form onsubmit="handleAddSupplier(event)" class="form-grid">
                         <div class="form-group">
                             <label>اسم المورد / الشركة</label>
-                            <input type="text" id="newSupplierName" required placeholder="مثال: شركة التوريدات السريعة">
+                            <input type="text" id="newSupplierName" required placeholder="مثال: الصالة الاقتصادية">
                         </div>
                         <div class="form-group">
                             <label>رقم الهاتف</label>
@@ -396,7 +417,7 @@
                     <form onsubmit="handleAddEmployee(event)" class="form-grid">
                         <div class="form-group">
                             <label>اسم الموظف</label>
-                            <input type="text" id="newEmpName" required placeholder="اسم الموظف">
+                            <input type="text" id="newEmpName" required placeholder="مثال: ابراهيم العلي">
                         </div>
                         <div class="form-group">
                             <label>القسم</label>
@@ -445,57 +466,90 @@
         </div>
     </div>
 
-    <!-- حاوية الـ PDF الخفية المخصصة للتصدير -->
+    <!-- حاوية الـ PDF الاحترافية المحدثة بالكامل والتصميم الحديث -->
     <div id="pdfExportContainer">
-        <div class="pdf-page" id="pdfContent">
-            <div class="pdf-header">
-                <div>
-                    <h2 style="color: #0369a1; margin-bottom: 5px;">Quotations Hub System</h2>
-                    <span style="font-size: 0.8rem; color: #555;">جدول مقارنة عروض الأسعار وطلب العهدة</span>
+        <div class="pdf-document" id="pdfContent">
+            
+            <!-- الرأس والتذييل العلوي الرسميان -->
+            <div class="pdf-top-bar">
+                <div class="pdf-brand-logo">
+                    <i class="fa-solid fa-building-circle-check"></i>
+                    <div>
+                        <div class="pdf-brand-title">Purchasing & Quotations Hub</div>
+                        <div class="pdf-brand-sub">نظام إدارة عروض الأسعار ومتابعة العهد والخدمات</div>
+                    </div>
                 </div>
-                <div style="text-align: left; font-size: 0.8rem; line-height: 1.5;">
-                    <b>التاريخ والوقت:</b> <span id="pdfDateTime"></span><br>
-                    <b>رقم البيان:</b> #QUO-<span id="pdfPoNum"></span>
+                <div class="pdf-meta-box">
+                    <div><b>رقم المستند:</b> <span id="pdfDocRef">#QUO-2026-001</span></div>
+                    <div><b>تاريخ الإصدار:</b> <span id="pdfDateTime"></span></div>
+                    <div><b>الحالة:</b> مراجعة وعرض أسعار رسمية</div>
                 </div>
             </div>
 
-            <div class="pdf-title">بيان عروض الأسعار التقديرية</div>
+            <!-- عنوان التقرير والمستند -->
+            <div class="pdf-doc-title-container">
+                <h2 class="pdf-doc-title" id="pdfDocHeading">بيان عروض الأسعار والطلب الشامل</h2>
+            </div>
 
+            <!-- جدول البيانات المنسق -->
             <table class="pdf-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>القسم</th>
-                        <th>الصنف / البيان</th>
-                        <th>الكمية</th>
-                        <th>المورد المقترح</th>
-                        <th>المستفيد</th>
-                        <th>الإجمالي (ر.س)</th>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 22%;">القسم</th>
+                        <th style="width: 25%;">الصنف / البيان</th>
+                        <th style="width: 8%;">الكمية</th>
+                        <th style="width: 13%;">سعر الوحدة</th>
+                        <th style="width: 15%;">المورد المقترح</th>
+                        <th style="width: 12%;">المستفيد</th>
+                        <th style="width: 15%;">الإجمالي</th>
                     </tr>
                 </thead>
                 <tbody id="pdfTableBody"></tbody>
             </table>
 
-            <div class="pdf-totals">
-                <div><span>المبلغ قبل الضريبة:</span> <b id="pdfSubtotal">0.00 ر.س</b></div>
-                <div><span>ضريبة القيمة المضافة (15%):</span> <b id="pdfTax">0.00 ر.س</b></div>
-                <div style="font-size: 1.05rem; font-weight: bold; color: #0369a1;"><span>الإجمالي النهائي المطلوبة للعهدة:</span> <b id="pdfGrandTotal">0.00 ر.س</b></div>
+            <!-- ملخص الحسابات والمالية -->
+            <div class="pdf-summary-section">
+                <div class="pdf-summary-box">
+                    <div class="pdf-summary-row">
+                        <span>المبلغ الإجمالي قبل الضريبة:</span>
+                        <b id="pdfSubtotal">0.00 ر.س</b>
+                    </div>
+                    <div class="pdf-summary-row">
+                        <span>إجمالي ضريبة القيمة المضافة (15%):</span>
+                        <b id="pdfTax">0.00 ر.س</b>
+                    </div>
+                    <div class="pdf-summary-row final">
+                        <span>الإجمالي الكلي المستحق:</span>
+                        <b id="pdfGrandTotal">0.00 ر.س</b>
+                    </div>
+                    <div class="pdf-summary-row" id="pdfPettyCashRow" style="display: none; background: #f8fafc;">
+                        <span>مبلغ العهدة المعتمدة:</span>
+                        <b id="pdfPettyCashVal">0.00 ر.س</b>
+                    </div>
+                    <div class="pdf-summary-row" id="pdfRemainingRow" style="display: none; background: #f8fafc;">
+                        <span>المتبقي من العهدة:</span>
+                        <b id="pdfRemainingVal">0.00 ر.س</b>
+                    </div>
+                </div>
             </div>
 
-            <div style="clear: both;"></div>
-
-            <div class="pdf-footer">
-                <div>
-                    <p>إعداد الموظف / المسؤول</p>
-                    <br><br>
-                    <p>التوقيع: ............................</p>
+            <!-- جزء الاعتمادات التوقيع -->
+            <div class="pdf-signatures">
+                <div class="pdf-sig-box">
+                    <b>إعداد المسؤول / القسم</b>
+                    <div class="pdf-sig-line"> التوقيع والتاريخ</div>
                 </div>
-                <div>
-                    <p>اعتماد الإدارة</p>
-                    <br><br>
-                    <p>التوقيع والختم: ............................</p>
+                <div class="pdf-sig-box">
+                    <b>مراجعة التدقيق المالي</b>
+                    <div class="pdf-sig-line"> التوقيع والتاريخ</div>
+                </div>
+                <div class="pdf-sig-box">
+                    <b>اعتماد إدارة المشتريات والختم</b>
+                    <div class="pdf-sig-line"> التوقيع والختم الرسمية</div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -503,15 +557,16 @@
         // Data LocalStorage Initialization
         let db = {
             items: JSON.parse(localStorage.getItem('ph_items')) || [
-                { id: 1, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 21.00 },
-                { id: 2, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 18.00 },
+                { id: 1, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00 },
+                { id: 2, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00 },
                 { id: 3, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
             ],
             suppliers: JSON.parse(localStorage.getItem('ph_suppliers')) || [
-                { id: 1, name: 'مؤسسة التوريدات السريعة', phone: '0500000000' }
+                { id: 1, name: 'الصاله الاقتصادية', phone: '' }
             ],
             employees: JSON.parse(localStorage.getItem('ph_employees')) || [
-                { id: 1, name: 'أحمد - إدارة المشتريات', dept: 'المشتريات' }
+                { id: 1, name: 'ابراهيم العلي', dept: 'الإدارة' },
+                { id: 2, name: 'الكل', dept: 'عام' }
             ],
             currentPettyCash: parseFloat(localStorage.getItem('ph_petty_cash')) || 0,
             orders: JSON.parse(localStorage.getItem('ph_orders')) || [],
@@ -702,7 +757,7 @@
 
             db.orders.push(newOrder);
             saveDb();
-            alert(`تمت إضافة عرض السعر إلى القائمة الشاملة بنجاح!`);
+            alert(`تمت إضافة عرض السعر إلى القائمة بنجاح!`);
         }
 
         // Render Master Orders Table (Quotation Summary Page)
@@ -779,6 +834,8 @@
                 select.innerHTML = '<option value="">لا توجد أشهر محفوظة بالأرشيف بعد</option>';
                 document.getElementById('archiveStatsGrid').style.display = 'none';
                 document.getElementById('archiveBox').style.display = 'none';
+                document.getElementById('btnExportArchPdf').style.display = 'none';
+                document.getElementById('btnDeleteArch').style.display = 'none';
                 return;
             }
 
@@ -794,11 +851,15 @@
             if(!arch) {
                 document.getElementById('archiveStatsGrid').style.display = 'none';
                 document.getElementById('archiveBox').style.display = 'none';
+                document.getElementById('btnExportArchPdf').style.display = 'none';
+                document.getElementById('btnDeleteArch').style.display = 'none';
                 return;
             }
 
             document.getElementById('archiveStatsGrid').style.display = 'grid';
             document.getElementById('archiveBox').style.display = 'block';
+            document.getElementById('btnExportArchPdf').style.display = 'inline-flex';
+            document.getElementById('btnDeleteArch').style.display = 'inline-flex';
 
             document.getElementById('archPettyCash').innerText = arch.pettyCash.toFixed(2) + ' ر.س';
             document.getElementById('archSpent').innerText = arch.spentTotal.toFixed(2) + ' ر.س';
@@ -823,23 +884,35 @@
             });
         }
 
-        // Export PDF
-        function exportPDF() {
-            if(db.orders.length === 0) {
-                alert('لا توجد عناصر مضافة لتصديرها إلى PDF!');
-                return;
-            }
+        // Delete Selected Archive Item
+        function deleteSelectedArchive() {
+            const select = document.getElementById('archiveMonthSelect');
+            const archId = select.value;
+            const arch = db.archives.find(a => a.id == archId);
 
+            if(!arch) return;
+
+            if(confirm(`هل أنت تأكد من إزالة وأرشفة (${arch.monthTitle}) من السجلات نهائياً؟`)) {
+                db.archives = db.archives.filter(a => a.id != archId);
+                saveDb();
+                alert('تم حذف الشهر المؤرشف بنجاح!');
+                setupArchivePage();
+            }
+        }
+
+        // Common PDF Generator Engine
+        function generatePDF(docHeading, docRef, ordersList, pettyCashVal = null) {
+            document.getElementById('pdfDocHeading').innerText = docHeading;
+            document.getElementById('pdfDocRef').innerText = docRef;
             document.getElementById('pdfDateTime').innerText = new Date().toLocaleString('ar-SA');
-            document.getElementById('pdfPoNum').innerText = Math.floor(1000 + Math.random() * 9000);
 
             const pdfBody = document.getElementById('pdfTableBody');
             pdfBody.innerHTML = '';
             let sub = 0, tax = 0, grand = 0;
 
-            db.orders.forEach((o, index) => {
-                sub += o.subtotal;
-                tax += o.tax;
+            ordersList.forEach((o, index) => {
+                sub += o.subtotal || (o.total / 1.15);
+                tax += o.tax || (o.total - (o.total / 1.15));
                 grand += o.total;
                 pdfBody.innerHTML += `
                     <tr>
@@ -847,9 +920,10 @@
                         <td>${o.cat}</td>
                         <td><b>${o.itemName}</b></td>
                         <td>${o.qty}</td>
+                        <td>${o.unitPrice ? o.unitPrice.toFixed(2) : '-'}</td>
                         <td>${o.supplier}</td>
                         <td>${o.emp}</td>
-                        <td>${o.total.toFixed(2)}</td>
+                        <td><b>${o.total.toFixed(2)}</b></td>
                     </tr>
                 `;
             });
@@ -858,9 +932,19 @@
             document.getElementById('pdfTax').innerText = tax.toFixed(2) + ' ر.س';
             document.getElementById('pdfGrandTotal').innerText = grand.toFixed(2) + ' ر.س';
 
+            if(pettyCashVal !== null) {
+                document.getElementById('pdfPettyCashRow').style.display = 'flex';
+                document.getElementById('pdfRemainingRow').style.display = 'flex';
+                document.getElementById('pdfPettyCashVal').innerText = pettyCashVal.toFixed(2) + ' ر.س';
+                document.getElementById('pdfRemainingVal').innerText = (pettyCashVal - grand).toFixed(2) + ' ر.س';
+            } else {
+                document.getElementById('pdfPettyCashRow').style.display = 'none';
+                document.getElementById('pdfRemainingRow').style.display = 'none';
+            }
+
             const element = document.getElementById('pdfContent');
 
-            html2canvas(element, { scale: 2 }).then(canvas => {
+            html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
@@ -868,8 +952,29 @@
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
                 pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                pdf.save(`بيان_عروض_الاسعار_${Date.now()}.pdf`);
+                pdf.save(`${docHeading.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
             });
+        }
+
+        // Export Current Month PDF
+        function exportCurrentPDF() {
+            if(db.orders.length === 0) {
+                alert('لا توجد عناصر مضافة لتصديرها إلى PDF!');
+                return;
+            }
+            const ref = `#QUO-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+            generatePDF('بيان عروض الأسعار للشهر الحالي', ref, db.orders);
+        }
+
+        // Export Selected Archive PDF
+        function exportArchivePDF() {
+            const archId = document.getElementById('archiveMonthSelect').value;
+            const arch = db.archives.find(a => a.id == archId);
+
+            if(!arch) return;
+
+            const ref = `#ARCH-${arch.id.toString().substr(-5)}`;
+            generatePDF(`تقرير أرشفة عروض أسعار (${arch.monthTitle})`, ref, arch.orders, arch.pettyCash);
         }
 
         // Suppliers Page
