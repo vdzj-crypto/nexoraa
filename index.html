@@ -28,14 +28,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Sidebar Navigation */
         .sidebar { width: 270px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 20px 12px; flex-shrink: 0; }
         .sidebar-brand { font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 25px; color: #38bdf8; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .sidebar-menu { list-style: none; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.88rem; transition: 0.2s; }
         .sidebar-menu li a:hover, .sidebar-menu li a.active { background: var(--primary); color: #fff; font-weight: bold; }
 
-        /* Main Content Area */
         .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
         header { background: var(--bg-card); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .clock-box { font-size: 0.85rem; font-weight: bold; color: var(--primary-dark); background: #e0f2fe; padding: 6px 14px; border-radius: 20px; border: 1px solid #bae6fd; }
@@ -44,7 +42,6 @@
         .page-section { display: none; }
         .page-section.active-page { display: block; }
 
-        /* Buttons & Forms */
         .btn { padding: 9px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.2s; }
         .btn:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); }
@@ -67,35 +64,27 @@
         th, td { text-align: right; padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
         th { color: var(--text-muted); background: rgba(0,0,0,0.02); }
 
-        /* Modal Popup */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 999; }
         .modal-card { background: #fff; width: 90%; max-width: 400px; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-        /* ===== PDF Modern Template Layout ===== */
         #pdfExportContainer { position: absolute; left: -9999px; top: -9999px; }
         .pdf-document { width: 800px; padding: 35px; background: #ffffff; color: #1e293b; font-family: sans-serif; direction: rtl; box-sizing: border-box; }
-        
         .pdf-top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
         .pdf-brand-logo { display: flex; align-items: center; gap: 12px; }
         .pdf-brand-logo i { font-size: 2.2rem; color: #0284c7; }
         .pdf-brand-title { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin: 0; }
         .pdf-brand-sub { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
-        
         .pdf-meta-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 15px; text-align: right; font-size: 0.8rem; color: #334155; line-height: 1.6; }
-        
         .pdf-doc-title-container { text-align: center; margin: 20px 0; background: #f0f9ff; border-radius: 6px; padding: 10px; border: 1px solid #bae6fd; }
         .pdf-doc-title { font-size: 1.25rem; font-weight: bold; color: #0369a1; margin: 0; }
-
         .pdf-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .pdf-table th { background: #0f172a; color: #ffffff; padding: 10px 8px; text-align: right; font-size: 0.8rem; font-weight: 600; }
         .pdf-table td { padding: 9px 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.82rem; color: #334155; text-align: right; }
         .pdf-table tr:nth-child(even) td { background-color: #f8fafc; }
-
         .pdf-summary-section { margin-top: 25px; display: flex; justify-content: flex-end; }
         .pdf-summary-box { width: 320px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
         .pdf-summary-row { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 0.83rem; border-bottom: 1px solid #f1f5f9; color: #475569; }
         .pdf-summary-row.final { background: #0284c7; color: #ffffff; font-weight: bold; font-size: 0.95rem; border: none; }
-
         .pdf-signatures { margin-top: 60px; display: flex; justify-content: space-between; text-align: center; font-size: 0.85rem; color: #334155; }
         .pdf-sig-box { width: 220px; }
         .pdf-sig-line { margin-top: 45px; border-top: 1px dashed #94a3b8; }
@@ -103,27 +92,21 @@
 </head>
 <body>
 
-    <!-- القائمة الجانبية -->
     <div class="sidebar">
-        <div class="sidebar-brand">
-            <i class="fa-solid fa-tags"></i> Quotations Hub
-        </div>
+        <div class="sidebar-brand"><i class="fa-solid fa-tags"></i> Quotations Hub</div>
         <ul class="sidebar-menu">
             <li><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم</a></li>
-            
             <li><a href="#" class="nav-link" onclick="switchTab('cat_hospitality', event)"><i class="fa-solid fa-mug-hot"></i> عروض الضيافة والبوفيه</a></li>
             <li><a href="#" class="nav-link" onclick="switchTab('cat_cleaning', event)"><i class="fa-solid fa-broom"></i> عروض النظافة</a></li>
             <li><a href="#" class="nav-link" onclick="switchTab('cat_stationery', event)"><i class="fa-solid fa-print"></i> عروض القرطاسية والإلكترونيات</a></li>
-            
             <li><a href="#" class="nav-link" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;" onclick="switchTab('quotation_summary', event)"><i class="fa-solid fa-file-signature"></i> عروض الأسعار والعهدة الشاملة</a></li>
             <li><a href="#" class="nav-link" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24;" onclick="switchTab('monthly_archive', event)"><i class="fa-solid fa-box-archive"></i> أرشيف العروض والعهد الشهرية</a></li>
-            
+            <li><a href="#" class="nav-link" onclick="switchTab('items_manage', event)"><i class="fa-solid fa-list-check"></i> إدارة وتعديل الأصناف</a></li>
             <li><a href="#" class="nav-link" onclick="switchTab('suppliers', event)"><i class="fa-solid fa-truck"></i> إدارة الموردين</a></li>
             <li><a href="#" class="nav-link" onclick="switchTab('employees', event)"><i class="fa-solid fa-user-group"></i> إدارة الموظفين</a></li>
         </ul>
     </div>
 
-    <!-- المحتوى الرئيسي -->
     <div class="main-wrapper">
         <header>
             <h3 id="pageTitle">لوحة التحكم</h3>
@@ -132,7 +115,7 @@
 
         <div class="content">
 
-            <!-- 1. صفحة لوحة التحكم -->
+            <!-- 1. لوحة التحكم -->
             <div id="dashboard" class="page-section active-page">
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -160,7 +143,7 @@
                 </div>
             </div>
 
-            <!-- 2. صفحة الضيافة والبوفيه -->
+            <!-- 2. الضيافة والبوفيه -->
             <div id="cat_hospitality" class="page-section">
                 <div class="box">
                     <h3>☕ تسجيل عرض سعر - قسم الضيافة والبوفيه</h3>
@@ -181,6 +164,14 @@
                             <input type="number" id="price_hosp" step="0.01" oninput="calcFormTotal('hosp')" required>
                         </div>
                         <div class="form-group">
+                            <label>نوع معاملة الضريبة</label>
+                            <select id="tax_type_hosp" onchange="calcFormTotal('hosp')">
+                                <option value="inclusive" selected>السعر شامل الضريبة (15%)</option>
+                                <option value="add">غير شامل (إضافة 15%)</option>
+                                <option value="none">بدون ضريبة (0%)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>المورد صاحب عرض السعر</label>
                             <select id="sup_hosp"></select>
                         </div>
@@ -189,8 +180,8 @@
                             <select id="emp_hosp"></select>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" id="tax_hosp" checked onchange="calcFormTotal('hosp')"> السعر يشمل ضريبة 15%</label>
-                            <input type="number" id="tot_hosp" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
+                            <label>الإجمالي النهائي</label>
+                            <input type="number" id="tot_hosp" readonly style="font-weight: bold; color: var(--primary-dark);">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة إلى قائمة عروض الأسعار</button>
@@ -199,7 +190,7 @@
                 </div>
             </div>
 
-            <!-- 3. صفحة النظافة -->
+            <!-- 3. النظافة -->
             <div id="cat_cleaning" class="page-section">
                 <div class="box">
                     <h3>🧹 تسجيل عرض سعر - قسم النظافة</h3>
@@ -220,6 +211,14 @@
                             <input type="number" id="price_clean" step="0.01" oninput="calcFormTotal('clean')" required>
                         </div>
                         <div class="form-group">
+                            <label>نوع معاملة الضريبة</label>
+                            <select id="tax_type_clean" onchange="calcFormTotal('clean')">
+                                <option value="inclusive" selected>السعر شامل الضريبة (15%)</option>
+                                <option value="add">غير شامل (إضافة 15%)</option>
+                                <option value="none">بدون ضريبة (0%)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>المورد صاحب عرض السعر</label>
                             <select id="sup_clean"></select>
                         </div>
@@ -228,8 +227,8 @@
                             <select id="emp_clean"></select>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" id="tax_clean" checked onchange="calcFormTotal('clean')"> السعر يشمل ضريبة 15%</label>
-                            <input type="number" id="tot_clean" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
+                            <label>الإجمالي النهائي</label>
+                            <input type="number" id="tot_clean" readonly style="font-weight: bold; color: var(--primary-dark);">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة إلى قائمة عروض الأسعار</button>
@@ -238,7 +237,7 @@
                 </div>
             </div>
 
-            <!-- 4. صفحة القرطاسية والإلكترونيات -->
+            <!-- 4. القرطاسية والإلكترونيات -->
             <div id="cat_stationery" class="page-section">
                 <div class="box">
                     <h3>📄 تسجيل عرض سعر - القرطاسية والإلكترونيات</h3>
@@ -259,6 +258,14 @@
                             <input type="number" id="price_stat" step="0.01" oninput="calcFormTotal('stat')" required>
                         </div>
                         <div class="form-group">
+                            <label>نوع معاملة الضريبة</label>
+                            <select id="tax_type_stat" onchange="calcFormTotal('stat')">
+                                <option value="inclusive" selected>السعر شامل الضريبة (15%)</option>
+                                <option value="add">غير شامل (إضافة 15%)</option>
+                                <option value="none">بدون ضريبة (0%)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>المورد صاحب عرض السعر</label>
                             <select id="sup_stat"></select>
                         </div>
@@ -267,8 +274,8 @@
                             <select id="emp_stat"></select>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" id="tax_stat" checked onchange="calcFormTotal('stat')"> السعر يشمل ضريبة 15%</label>
-                            <input type="number" id="tot_stat" readonly style="font-weight: bold; color: var(--primary-dark); margin-top: 5px;">
+                            <label>الإجمالي النهائي</label>
+                            <input type="number" id="tot_stat" readonly style="font-weight: bold; color: var(--primary-dark);">
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> إضافة إلى قائمة عروض الأسعار</button>
@@ -277,7 +284,7 @@
                 </div>
             </div>
 
-            <!-- 5. صفحة قائمة عروض الأسعار الشاملة والعهدة -->
+            <!-- 5. عروض الأسعار والعهدة الشاملة -->
             <div id="quotation_summary" class="page-section">
                 <div class="box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div>
@@ -290,7 +297,6 @@
                     </div>
                 </div>
 
-                <!-- إعداد وتحديث مبلغ العهدة المستلمة -->
                 <div class="box">
                     <h4>💰 إدارة عهدة الشهر الحالي</h4>
                     <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; align-items: flex-end;">
@@ -324,7 +330,7 @@
                 </div>
             </div>
 
-            <!-- 6. أرشيف عروض الأسعار والعهد الشهرية -->
+            <!-- 6. الأرشيف -->
             <div id="monthly_archive" class="page-section">
                 <div class="box">
                     <h3>📦 أرشيف عروض الأسعار والعهد السابقة</h3>
@@ -340,7 +346,6 @@
                     </div>
                 </div>
 
-                <!-- ملخص الحسابات للشهر المختار -->
                 <div class="stats-grid" id="archiveStatsGrid" style="display: none;">
                     <div class="stat-card">
                         <h4>العهدة المستلمة للشهر</h4>
@@ -376,7 +381,25 @@
                 </div>
             </div>
 
-            <!-- 7. إدارة الموردين -->
+            <!-- 7. إدارة وتعديل الأصناف -->
+            <div id="items_manage" class="page-section">
+                <div class="box">
+                    <h3>إدارة وقائمة جميع الأصناف</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم الصنف</th>
+                                <th>القسم</th>
+                                <th>السعر الافتراضي (ر.س)</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageItemsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 8. إدارة الموردين -->
             <div id="suppliers" class="page-section">
                 <div class="box">
                     <h3>إضافة مورد جديد</h3>
@@ -410,7 +433,7 @@
                 </div>
             </div>
 
-            <!-- 8. إدارة الموظفين -->
+            <!-- 9. إدارة الموظفين -->
             <div id="employees" class="page-section">
                 <div class="box">
                     <h3>إضافة موظف / جهة طالبة</h3>
@@ -447,7 +470,7 @@
         </div>
     </div>
 
-    <!-- نافذة إضافة صنف سريعة من داخل القسم (Quick Add Modal) -->
+    <!-- Quick Add Modal -->
     <div class="modal-overlay" id="quickAddModal">
         <div class="modal-card">
             <h4 style="margin-bottom: 15px; color: var(--primary-dark);" id="modalTitle">إضافة صنف جديد</h4>
@@ -466,11 +489,29 @@
         </div>
     </div>
 
-    <!-- حاوية الـ PDF الاحترافية المحدثة بالكامل والتصميم الحديث -->
+    <!-- Edit Item Modal -->
+    <div class="modal-overlay" id="editItemModal">
+        <div class="modal-card">
+            <h4 style="margin-bottom: 15px; color: var(--primary-dark);">تعديل بيانات الصنف</h4>
+            <input type="hidden" id="editItemId">
+            <div class="form-group">
+                <label>اسم الصنف</label>
+                <input type="text" id="editItemName">
+            </div>
+            <div class="form-group">
+                <label>السعر الافتراضي (ر.س)</label>
+                <input type="number" id="editItemPrice" step="0.01">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn" style="background: var(--text-muted);" onclick="closeEditItemModal()">إلغاء</button>
+                <button class="btn btn-success" onclick="saveEditItem()">حفظ التعديل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Layout Container -->
     <div id="pdfExportContainer">
         <div class="pdf-document" id="pdfContent">
-            
-            <!-- الرأس والتذييل العلوي الرسميان -->
             <div class="pdf-top-bar">
                 <div class="pdf-brand-logo">
                     <i class="fa-solid fa-building-circle-check"></i>
@@ -486,12 +527,10 @@
                 </div>
             </div>
 
-            <!-- عنوان التقرير والمستند -->
             <div class="pdf-doc-title-container">
                 <h2 class="pdf-doc-title" id="pdfDocHeading">بيان عروض الأسعار والطلب الشامل</h2>
             </div>
 
-            <!-- جدول البيانات المنسق -->
             <table class="pdf-table">
                 <thead>
                     <tr>
@@ -508,7 +547,6 @@
                 <tbody id="pdfTableBody"></tbody>
             </table>
 
-            <!-- ملخص الحسابات والمالية -->
             <div class="pdf-summary-section">
                 <div class="pdf-summary-box">
                     <div class="pdf-summary-row">
@@ -534,7 +572,6 @@
                 </div>
             </div>
 
-            <!-- جزء الاعتمادات التوقيع -->
             <div class="pdf-signatures">
                 <div class="pdf-sig-box">
                     <b>إعداد المسؤول / القسم</b>
@@ -549,17 +586,16 @@
                     <div class="pdf-sig-line"> التوقيع والختم الرسمية</div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-        // Data LocalStorage Initialization
         let db = {
             items: JSON.parse(localStorage.getItem('ph_items')) || [
-                { id: 1, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00 },
-                { id: 2, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00 },
-                { id: 3, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
+                { id: 1, name: 'قرنفل ( مسمار) 250جم', cat: 'الضيافة والبوفيه', price: 22.00 },
+                { id: 2, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00 },
+                { id: 3, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00 },
+                { id: 4, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
             ],
             suppliers: JSON.parse(localStorage.getItem('ph_suppliers')) || [
                 { id: 1, name: 'الصاله الاقتصادية', phone: '' }
@@ -592,7 +628,6 @@
             updateDashboardStats();
         }
 
-        // Live Clock Functionality
         function updateClock() {
             const now = new Date();
             const dateStr = now.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -602,7 +637,6 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Modal Functionality for Quick Add Item
         function openQuickAddModal(catName, prefix) {
             currentActiveCat = catName;
             currentActivePrefix = prefix;
@@ -635,7 +669,6 @@
             autoFillPrice(currentActivePrefix);
         }
 
-        // Tab Navigation
         function switchTab(tabId, event) {
             if(event) event.preventDefault();
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active-page'));
@@ -651,6 +684,7 @@
                 cat_stationery: 'عروض القرطاسية والإلكترونيات',
                 quotation_summary: 'عروض الأسعار والعهدة الشاملة',
                 monthly_archive: 'أرشيف العروض والعهد الشهرية',
+                items_manage: 'إدارة وتعديل الأصناف',
                 suppliers: 'إدارة الموردين',
                 employees: 'إدارة الموظفين'
             };
@@ -665,11 +699,11 @@
                 document.getElementById('currentPettyCashInput').value = db.currentPettyCash || '';
             }
             if(tabId === 'monthly_archive') setupArchivePage();
+            if(tabId === 'items_manage') renderManageItemsPage();
             if(tabId === 'suppliers') renderSuppliersPage();
             if(tabId === 'employees') renderEmployeesPage();
         }
 
-        // Save Petty Cash Amount
         function savePettyCash() {
             const val = parseFloat(document.getElementById('currentPettyCashInput').value) || 0;
             db.currentPettyCash = val;
@@ -677,7 +711,6 @@
             alert('تم حفظ مبلغ العهدة بنجاح!');
         }
 
-        // Populate Form Specific Options
         function populateCategoryForm(prefix) {
             const catName = prefixMap[prefix];
             const itemSelect = document.getElementById(`item_${prefix}`);
@@ -710,13 +743,23 @@
             }
         }
 
+        // الدالة الحسابية المحدثة للضريبة بالخيارات الثلاثة
         function calcFormTotal(prefix) {
             const qty = parseFloat(document.getElementById(`qty_${prefix}`).value) || 1;
             const unitPrice = parseFloat(document.getElementById(`price_${prefix}`).value) || 0;
-            const hasTax = document.getElementById(`tax_${prefix}`).checked;
+            const taxType = document.getElementById(`tax_type_${prefix}`).value;
 
-            const sub = qty * unitPrice;
-            const total = hasTax ? sub * 1.15 : sub;
+            let total = 0;
+            const rawSub = qty * unitPrice;
+
+            if (taxType === 'inclusive') {
+                total = rawSub; // لا يضيف مبالغ إضافية فوق السعر
+            } else if (taxType === 'add') {
+                total = rawSub * 1.15; // يضيف 15% ضريبة
+            } else if (taxType === 'none') {
+                total = rawSub; // بدون ضريبة (0%)
+            }
+
             document.getElementById(`tot_${prefix}`).value = total.toFixed(2);
         }
 
@@ -734,10 +777,24 @@
 
             const qty = parseFloat(document.getElementById(`qty_${prefix}`).value);
             const unitPrice = parseFloat(document.getElementById(`price_${prefix}`).value);
-            const hasTax = document.getElementById(`tax_${prefix}`).checked;
-            const subtotal = qty * unitPrice;
-            const tax = hasTax ? subtotal * 0.15 : 0;
-            const total = subtotal + tax;
+            const taxType = document.getElementById(`tax_type_${prefix}`).value;
+
+            let subtotal = 0, tax = 0, total = 0;
+            const rawSub = qty * unitPrice;
+
+            if (taxType === 'inclusive') {
+                total = rawSub;
+                subtotal = total / 1.15;
+                tax = total - subtotal;
+            } else if (taxType === 'add') {
+                subtotal = rawSub;
+                tax = subtotal * 0.15;
+                total = subtotal + tax;
+            } else if (taxType === 'none') {
+                subtotal = rawSub;
+                tax = 0;
+                total = rawSub;
+            }
 
             itemObj.price = unitPrice;
 
@@ -752,15 +809,15 @@
                 subtotal: subtotal,
                 tax: tax,
                 total: total,
+                taxType: taxType,
                 datetime: new Date().toLocaleString('ar-SA')
             };
 
             db.orders.push(newOrder);
             saveDb();
-            alert(`تمت إضافة عرض السعر إلى القائمة بنجاح!`);
+            alert(`تمت إضافة عرض السعر بنجاح!`);
         }
 
-        // Render Master Orders Table (Quotation Summary Page)
         function renderMasterOrdersTable() {
             const tbody = document.getElementById('masterOrdersTableBody');
             tbody.innerHTML = '';
@@ -793,7 +850,6 @@
             renderMasterOrdersTable();
         }
 
-        // Archiving Logic
         function archiveCurrentMonth() {
             if(db.orders.length === 0) {
                 alert('لا توجد بيانات عروض أسعار لحفظها وأرشفة هذا الشهر!');
@@ -825,7 +881,6 @@
             renderMasterOrdersTable();
         }
 
-        // Setup & Render Archive Page
         function setupArchivePage() {
             const select = document.getElementById('archiveMonthSelect');
             select.innerHTML = '<option value="">-- اختر الشهر --</option>';
@@ -884,7 +939,6 @@
             });
         }
 
-        // Delete Selected Archive Item
         function deleteSelectedArchive() {
             const select = document.getElementById('archiveMonthSelect');
             const archId = select.value;
@@ -900,7 +954,64 @@
             }
         }
 
-        // Common PDF Generator Engine
+        // إدارة الأصناف وتعديلها
+        function renderManageItemsPage() {
+            const tbody = document.getElementById('manageItemsTableBody');
+            tbody.innerHTML = '';
+
+            db.items.forEach(i => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${i.name}</b></td>
+                        <td>${i.cat}</td>
+                        <td>${i.price.toFixed(2)} ر.س</td>
+                        <td>
+                            <button class="btn btn-warning" onclick="openEditItemModal(${i.id})"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
+                            <button class="btn btn-danger" onclick="deleteItem(${i.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openEditItemModal(id) {
+            const item = db.items.find(i => i.id === id);
+            if(!item) return;
+
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemPrice').value = item.price;
+            document.getElementById('editItemModal').style.display = 'flex';
+        }
+
+        function closeEditItemModal() {
+            document.getElementById('editItemModal').style.display = 'none';
+        }
+
+        function saveEditItem() {
+            const id = parseInt(document.getElementById('editItemId').value);
+            const name = document.getElementById('editItemName').value.trim();
+            const price = parseFloat(document.getElementById('editItemPrice').value) || 0;
+
+            const item = db.items.find(i => i.id === id);
+            if(item && name) {
+                item.name = name;
+                item.price = price;
+                saveDb();
+                closeEditItemModal();
+                renderManageItemsPage();
+            }
+        }
+
+        function deleteItem(id) {
+            if(confirm('هل أنت تأكد من حذف هذا الصنف نهائياً؟')) {
+                db.items = db.items.filter(i => i.id !== id);
+                saveDb();
+                renderManageItemsPage();
+            }
+        }
+
+        // تصدير PDF
         function generatePDF(docHeading, docRef, ordersList, pettyCashVal = null) {
             document.getElementById('pdfDocHeading').innerText = docHeading;
             document.getElementById('pdfDocRef').innerText = docRef;
@@ -911,8 +1022,8 @@
             let sub = 0, tax = 0, grand = 0;
 
             ordersList.forEach((o, index) => {
-                sub += o.subtotal || (o.total / 1.15);
-                tax += o.tax || (o.total - (o.total / 1.15));
+                sub += o.subtotal || 0;
+                tax += o.tax || 0;
                 grand += o.total;
                 pdfBody.innerHTML += `
                     <tr>
@@ -956,7 +1067,6 @@
             });
         }
 
-        // Export Current Month PDF
         function exportCurrentPDF() {
             if(db.orders.length === 0) {
                 alert('لا توجد عناصر مضافة لتصديرها إلى PDF!');
@@ -966,7 +1076,6 @@
             generatePDF('بيان عروض الأسعار للشهر الحالي', ref, db.orders);
         }
 
-        // Export Selected Archive PDF
         function exportArchivePDF() {
             const archId = document.getElementById('archiveMonthSelect').value;
             const arch = db.archives.find(a => a.id == archId);
@@ -977,7 +1086,6 @@
             generatePDF(`تقرير أرشفة عروض أسعار (${arch.monthTitle})`, ref, arch.orders, arch.pettyCash);
         }
 
-        // Suppliers Page
         function renderSuppliersPage() {
             const tbody = document.getElementById('suppliersTableBody');
             tbody.innerHTML = '';
@@ -1011,7 +1119,6 @@
             renderSuppliersPage();
         }
 
-        // Employees Page
         function renderEmployeesPage() {
             const tbody = document.getElementById('employeesTableBody');
             tbody.innerHTML = '';
@@ -1062,7 +1169,6 @@
             }
         }
 
-        // Init Dashboard Stats
         updateDashboardStats();
     </script>
 </body>
