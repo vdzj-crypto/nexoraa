@@ -71,7 +71,7 @@
         th { color: var(--text-muted); background: rgba(0,0,0,0.02); }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 999; }
-        .modal-card { background: #fff; width: 90%; max-width: 400px; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-card { background: #fff; width: 90%; max-width: 450px; padding: 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
         #pdfExportContainer { position: absolute; left: -9999px; top: -9999px; }
         .pdf-document { width: 800px; padding: 35px; background: #ffffff; color: #1e293b; font-family: sans-serif; direction: rtl; box-sizing: border-box; }
@@ -187,7 +187,7 @@
                             <select id="sup_hosp"></select>
                         </div>
                         <div class="form-group">
-                            <label>الموظف / الجهة الطالبة</label>
+                            <label>المستفيد / الجهة الطالبة</label>
                             <select id="emp_hosp"></select>
                         </div>
                         <div class="form-group">
@@ -234,7 +234,7 @@
                             <select id="sup_clean"></select>
                         </div>
                         <div class="form-group">
-                            <label>الموظف / الجهة الطالبة</label>
+                            <label>المستفيد / الجهة الطالبة</label>
                             <select id="emp_clean"></select>
                         </div>
                         <div class="form-group">
@@ -281,7 +281,7 @@
                             <select id="sup_stat"></select>
                         </div>
                         <div class="form-group">
-                            <label>الموظف / الجهة الطالبة</label>
+                            <label>المستفيد / الجهة الطالبة</label>
                             <select id="emp_stat"></select>
                         </div>
                         <div class="form-group">
@@ -525,6 +525,38 @@
             <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
                 <button class="btn" style="background: var(--text-muted);" onclick="closeEditItemModal()">إلغاء</button>
                 <button class="btn btn-success" onclick="saveEditItem()">حفظ التعديل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔥 Modal تعديل الطلب في جدول عروض الأسعار الشاملة -->
+    <div class="modal-overlay" id="editOrderModal">
+        <div class="modal-card">
+            <h4 style="margin-bottom: 15px; color: var(--primary-dark);">تعديل الطلب / المستفيد</h4>
+            <input type="hidden" id="editOrderId">
+            <div class="form-group">
+                <label>اسم الصنف</label>
+                <input type="text" id="editOrderName" disabled style="background:#e2e8f0;">
+            </div>
+            <div class="form-group">
+                <label>الكمية</label>
+                <input type="number" id="editOrderQty" min="1">
+            </div>
+            <div class="form-group">
+                <label>السعر الفردي (ر.س)</label>
+                <input type="number" id="editOrderPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>المورد</label>
+                <select id="editOrderSupplier"></select>
+            </div>
+            <div class="form-group">
+                <label>المستفيد / الجهة الطالبة</label>
+                <select id="editOrderEmp"></select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn" style="background: var(--text-muted);" onclick="closeEditOrderModal()">إلغاء</button>
+                <button class="btn btn-success" onclick="saveEditOrder()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات</button>
             </div>
         </div>
     </div>
@@ -793,7 +825,11 @@
             if(supSelect) supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
 
             const empSelect = document.getElementById(`emp_${prefix}`);
-            if(empSelect) empSelect.innerHTML = db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            if(empSelect) {
+                let empOptions = '<option value="الكل" selected>الكل / عام</option>';
+                empOptions += db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+                empSelect.innerHTML = empOptions;
+            }
 
             autoFillPriceAndSupplier(prefix);
         }
@@ -869,7 +905,7 @@
                 qty: qty,
                 unitPrice: unitPrice,
                 supplier: document.getElementById(`sup_${prefix}`).value,
-                emp: document.getElementById(`emp_${prefix}`).value,
+                emp: document.getElementById(`emp_${prefix}`).value || 'الكل',
                 subtotal: subtotal,
                 tax: tax,
                 total: total,
@@ -904,12 +940,85 @@
                         <td>${o.emp}</td>
                         <td><b>${o.total.toFixed(2)} ر.س</b></td>
                         <td>
+                            <button class="btn btn-warning" style="padding: 4px 8px; font-size: 0.75rem;" onclick="openEditOrderModal(${o.id})" title="تعديل الطلب"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
                             <button class="btn btn-duplicate" style="padding: 4px 8px; font-size: 0.75rem;" onclick="duplicateOrder(${o.id})" title="تكرار الطلب"><i class="fa-solid fa-copy"></i> تكرار</button>
                             <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteMasterOrder(${o.id})"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
             });
+        }
+
+        // 🔥 دوال فتح وتعديل الطلبات في قائمة عروض الأسعار
+        function openEditOrderModal(orderId) {
+            const order = db.orders.find(o => o.id === orderId);
+            if(!order) return;
+
+            document.getElementById('editOrderId').value = order.id;
+            document.getElementById('editOrderName').value = order.itemName;
+            document.getElementById('editOrderQty').value = order.qty;
+            document.getElementById('editOrderPrice').value = order.unitPrice;
+
+            // تحديث قائمة الموردين
+            const supSelect = document.getElementById('editOrderSupplier');
+            supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            supSelect.value = order.supplier;
+
+            // تحديث قائمة الموظفين
+            const empSelect = document.getElementById('editOrderEmp');
+            let empOptions = '<option value="الكل">الكل / عام</option>';
+            empOptions += db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            empSelect.innerHTML = empOptions;
+            empSelect.value = order.emp || 'الكل';
+
+            document.getElementById('editOrderModal').style.display = 'flex';
+        }
+
+        function closeEditOrderModal() {
+            document.getElementById('editOrderModal').style.display = 'none';
+        }
+
+        function saveEditOrder() {
+            const orderId = parseInt(document.getElementById('editOrderId').value);
+            const order = db.orders.find(o => o.id === orderId);
+
+            if(!order) return;
+
+            const qty = parseFloat(document.getElementById('editOrderQty').value) || 1;
+            const unitPrice = parseFloat(document.getElementById('editOrderPrice').value) || 0;
+            const supplier = document.getElementById('editOrderSupplier').value;
+            const emp = document.getElementById('editOrderEmp').value;
+
+            // إعادة حساب المبالغ حسب نوع الضريبة الأصلي للطلب
+            let subtotal = 0, tax = 0, total = 0;
+            const rawSub = qty * unitPrice;
+
+            if (order.taxType === 'inclusive') {
+                total = rawSub;
+                subtotal = total / 1.15;
+                tax = total - subtotal;
+            } else if (order.taxType === 'add') {
+                subtotal = rawSub;
+                tax = subtotal * 0.15;
+                total = subtotal + tax;
+            } else if (order.taxType === 'none') {
+                subtotal = rawSub;
+                tax = 0;
+                total = rawSub;
+            }
+
+            // تحديث كائن الطلب
+            order.qty = qty;
+            order.unitPrice = unitPrice;
+            order.supplier = supplier;
+            order.emp = emp;
+            order.subtotal = subtotal;
+            order.tax = tax;
+            order.total = total;
+
+            syncToCloud();
+            closeEditOrderModal();
+            alert('تم تعديل الطلب وحفظ البيانات بالسحابة بنجاح!');
         }
 
         function duplicateOrder(orderId) {
@@ -929,8 +1038,10 @@
         }
 
         function deleteMasterOrder(id) {
-            db.orders = db.orders.filter(o => o.id !== id);
-            syncToCloud();
+            if(confirm('هل أنت تأكد من إزالة هذا الطلب من القائمة؟')) {
+                db.orders = db.orders.filter(o => o.id !== id);
+                syncToCloud();
+            }
         }
 
         function archiveCurrentMonth() {
