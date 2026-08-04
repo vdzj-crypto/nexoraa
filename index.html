@@ -645,7 +645,7 @@
             'stat': 'القرطاسية والإلكترونيات'
         };
 
-        // المزامنة الحية المباشرة مع السحابة
+        // المزامنة الحية المباشرة مع السحابة بدون الاستبدال بالافتراضيات
         fbDb.ref('procurement_hub').on('value', (snapshot) => {
             const cloudData = snapshot.val();
             if (cloudData) {
@@ -655,17 +655,6 @@
                 db.currentPettyCash = cloudData.currentPettyCash || 0;
                 db.orders = cloudData.orders || [];
                 db.archives = cloudData.archives || [];
-            } else {
-                // بيانات افتراضية لأول مرة
-                db.suppliers = [{ id: 1, name: 'الصاله الاقتصادية', phone: '' }];
-                db.items = [
-                    { id: 1, name: 'قرنفل ( مسمار) 250جم', cat: 'الضيافة والبوفيه', price: 22.00, defaultSupplier: 'الصاله الاقتصادية' },
-                    { id: 2, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00, defaultSupplier: 'الصاله الاقتصادية' },
-                    { id: 3, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00, defaultSupplier: 'الصاله الاقتصادية' },
-                    { id: 4, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00, defaultSupplier: 'الصاله الاقتصادية' }
-                ];
-                db.employees = [{ id: 1, name: 'ابراهيم العلي', dept: 'الإدارة' }, { id: 2, name: 'الكل', dept: 'عام' }];
-                syncToCloud();
             }
             updateDashboardStats();
             renderMasterOrdersTable();
