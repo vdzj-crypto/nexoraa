@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Price Quotations Hub - نظام عروض الأسعار والعهد</title>
+    <title>Price Quotations Hub - نظام عروض الأسعار والعهد السحابي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- مكتبات الـ PDF -->
+    <!-- مكتبات PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- مكتبات التخزين السحابي (Firebase) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
         :root {
@@ -47,6 +51,8 @@
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: #fff; }
         .btn-danger { background: var(--danger); }
+        .btn-duplicate { background: #8b5cf6; color: #fff; }
+        .btn-duplicate:hover { background: #7c3aed; }
         .btn-sm-add { padding: 4px 8px; font-size: 0.75rem; background: #16a34a; border-radius: 4px; border: none; color: white; cursor: pointer; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
@@ -88,6 +94,8 @@
         .pdf-signatures { margin-top: 60px; display: flex; justify-content: space-between; text-align: center; font-size: 0.85rem; color: #334155; }
         .pdf-sig-box { width: 220px; }
         .pdf-sig-line { margin-top: 45px; border-top: 1px dashed #94a3b8; }
+        
+        .sync-badge { font-size: 0.75rem; background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #86efac; }
     </style>
 </head>
 <body>
@@ -110,7 +118,10 @@
     <div class="main-wrapper">
         <header>
             <h3 id="pageTitle">لوحة التحكم</h3>
-            <div class="clock-box" id="liveClock"><i class="fa-regular fa-clock"></i> جاري التحميل...</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span class="sync-badge"><i class="fa-solid fa-cloud-check"></i> متصل بالسحابة (مستمر)</span>
+                <div class="clock-box" id="liveClock"><i class="fa-regular fa-clock"></i> جاري التحميل...</div>
+            </div>
         </header>
 
         <div class="content">
@@ -136,9 +147,9 @@
                     </div>
                 </div>
                 <div class="box">
-                    <h3>أهلاً بك في نظام Price Quotations Hub 🏷️</h3>
+                    <h3>أهلاً بك في نظام Price Quotations Hub ☁️</h3>
                     <p style="color: var(--text-muted); margin-top: 10px; line-height: 1.6;">
-                        هذا النظام مخصص لإدارة وتسجيل عروض أسعار الأصناف المقترحة، ومتابعة العهدة وأرشفتها وتصديرها كتقارير رسمية بصيغة PDF.
+                        هذا النظام متصل الآن بالسحابة المباشرة! أي بيانات، أصناف، أو موظفين تقوم بإضافتهم سيتم تحديثها فوراً عند جميع المستخدمين والأجهزة المتصلة.
                     </p>
                 </div>
             </div>
@@ -322,7 +333,7 @@
                                 <th>المورد</th>
                                 <th>المستفيد</th>
                                 <th>الإجمالي</th>
-                                <th>إجراء</th>
+                                <th>إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="masterOrdersTableBody"></tbody>
@@ -590,23 +601,30 @@
     </div>
 
     <script>
+        // ------------------------------------------------------------------
+        // 🔥 بيانات الربط المباشرة لمشروعك على Firebase
+        // ------------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyA24F059SMrievnJ9hdba_wakEXKEBftaQ",
+            authDomain: "my-purchases-3919a.firebaseapp.com",
+            databaseURL: "https://my-purchases-3919a-default-rtdb.firebaseio.com",
+            projectId: "my-purchases-3919a",
+            storageBucket: "my-purchases-3919a.firebasestorage.app",
+            messagingSenderId: "367507963283",
+            appId: "1:367507963283:web:f8a7e0964177eb05a96813"
+        };
+
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const fbDb = firebase.database();
+
         let db = {
-            items: JSON.parse(localStorage.getItem('ph_items')) || [
-                { id: 1, name: 'قرنفل ( مسمار) 250جم', cat: 'الضيافة والبوفيه', price: 22.00 },
-                { id: 2, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00 },
-                { id: 3, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00 },
-                { id: 4, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
-            ],
-            suppliers: JSON.parse(localStorage.getItem('ph_suppliers')) || [
-                { id: 1, name: 'الصاله الاقتصادية', phone: '' }
-            ],
-            employees: JSON.parse(localStorage.getItem('ph_employees')) || [
-                { id: 1, name: 'ابراهيم العلي', dept: 'الإدارة' },
-                { id: 2, name: 'الكل', dept: 'عام' }
-            ],
-            currentPettyCash: parseFloat(localStorage.getItem('ph_petty_cash')) || 0,
-            orders: JSON.parse(localStorage.getItem('ph_orders')) || [],
-            archives: JSON.parse(localStorage.getItem('ph_archives')) || []
+            items: [],
+            suppliers: [],
+            employees: [],
+            currentPettyCash: 0,
+            orders: [],
+            archives: []
         };
 
         let currentActiveCat = '';
@@ -618,14 +636,34 @@
             'stat': 'القرطاسية والإلكترونيات'
         };
 
-        function saveDb() {
-            localStorage.setItem('ph_items', JSON.stringify(db.items));
-            localStorage.setItem('ph_suppliers', JSON.stringify(db.suppliers));
-            localStorage.setItem('ph_employees', JSON.stringify(db.employees));
-            localStorage.setItem('ph_petty_cash', db.currentPettyCash);
-            localStorage.setItem('ph_orders', JSON.stringify(db.orders));
-            localStorage.setItem('ph_archives', JSON.stringify(db.archives));
+        // المزامنة الحية المباشرة مع السحابة
+        fbDb.ref('procurement_hub').on('value', (snapshot) => {
+            const cloudData = snapshot.val();
+            if (cloudData) {
+                db.items = cloudData.items || [];
+                db.suppliers = cloudData.suppliers || [];
+                db.employees = cloudData.employees || [];
+                db.currentPettyCash = cloudData.currentPettyCash || 0;
+                db.orders = cloudData.orders || [];
+                db.archives = cloudData.archives || [];
+            } else {
+                // بيانات افتراضية لأول مرة
+                db.items = [
+                    { id: 1, name: 'قرنفل ( مسمار) 250جم', cat: 'الضيافة والبوفيه', price: 22.00 },
+                    { id: 2, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00 },
+                    { id: 3, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00 },
+                    { id: 4, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
+                ];
+                db.suppliers = [{ id: 1, name: 'الصاله الاقتصادية', phone: '' }];
+                db.employees = [{ id: 1, name: 'ابراهيم العلي', dept: 'الإدارة' }, { id: 2, name: 'الكل', dept: 'عام' }];
+                syncToCloud();
+            }
             updateDashboardStats();
+            renderMasterOrdersTable();
+        });
+
+        function syncToCloud() {
+            fbDb.ref('procurement_hub').set(db);
         }
 
         function updateClock() {
@@ -661,7 +699,7 @@
 
             const newItem = { id: Date.now(), name: name, cat: currentActiveCat, price: price };
             db.items.push(newItem);
-            saveDb();
+            syncToCloud();
             closeQuickAddModal();
 
             populateCategoryForm(currentActivePrefix);
@@ -707,8 +745,8 @@
         function savePettyCash() {
             const val = parseFloat(document.getElementById('currentPettyCashInput').value) || 0;
             db.currentPettyCash = val;
-            saveDb();
-            alert('تم حفظ مبلغ العهدة بنجاح!');
+            syncToCloud();
+            alert('تم حفظ مبلغ العهدة بالسحابة بنجاح!');
         }
 
         function populateCategoryForm(prefix) {
@@ -743,7 +781,6 @@
             }
         }
 
-        // الدالة الحسابية المحدثة للضريبة بالخيارات الثلاثة
         function calcFormTotal(prefix) {
             const qty = parseFloat(document.getElementById(`qty_${prefix}`).value) || 1;
             const unitPrice = parseFloat(document.getElementById(`price_${prefix}`).value) || 0;
@@ -752,13 +789,9 @@
             let total = 0;
             const rawSub = qty * unitPrice;
 
-            if (taxType === 'inclusive') {
-                total = rawSub; // لا يضيف مبالغ إضافية فوق السعر
-            } else if (taxType === 'add') {
-                total = rawSub * 1.15; // يضيف 15% ضريبة
-            } else if (taxType === 'none') {
-                total = rawSub; // بدون ضريبة (0%)
-            }
+            if (taxType === 'inclusive') total = rawSub;
+            else if (taxType === 'add') total = rawSub * 1.15;
+            else if (taxType === 'none') total = rawSub;
 
             document.getElementById(`tot_${prefix}`).value = total.toFixed(2);
         }
@@ -814,12 +847,13 @@
             };
 
             db.orders.push(newOrder);
-            saveDb();
-            alert(`تمت إضافة عرض السعر بنجاح!`);
+            syncToCloud();
+            alert(`تمت إضافة عرض السعر بنجاح إلى السحابة!`);
         }
 
         function renderMasterOrdersTable() {
             const tbody = document.getElementById('masterOrdersTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
 
             if(db.orders.length === 0) {
@@ -838,16 +872,35 @@
                         <td>${o.supplier}</td>
                         <td>${o.emp}</td>
                         <td><b>${o.total.toFixed(2)} ر.س</b></td>
-                        <td><button class="btn btn-danger" onclick="deleteMasterOrder(${o.id})"><i class="fa-solid fa-trash"></i></button></td>
+                        <td>
+                            <button class="btn btn-duplicate" style="padding: 4px 8px; font-size: 0.75rem;" onclick="duplicateOrder(${o.id})" title="تكرار الطلب"><i class="fa-solid fa-copy"></i> تكرار</button>
+                            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteMasterOrder(${o.id})"><i class="fa-solid fa-trash"></i></button>
+                        </td>
                     </tr>
                 `;
             });
         }
 
+        // 💥 خيار النسخ / تكرار الطلب بضغطة زر
+        function duplicateOrder(orderId) {
+            const targetOrder = db.orders.find(o => o.id === orderId);
+            if (!targetOrder) return;
+
+            const duplicated = {
+                ...targetOrder,
+                id: Date.now(),
+                itemName: targetOrder.itemName + " (نسخة)",
+                datetime: new Date().toLocaleString('ar-SA')
+            };
+
+            db.orders.push(duplicated);
+            syncToCloud();
+            alert('تم تكرار ونسخ الطلب بنجاح!');
+        }
+
         function deleteMasterOrder(id) {
             db.orders = db.orders.filter(o => o.id !== id);
-            saveDb();
-            renderMasterOrdersTable();
+            syncToCloud();
         }
 
         function archiveCurrentMonth() {
@@ -876,9 +929,8 @@
             db.orders = [];
             db.currentPettyCash = 0;
 
-            saveDb();
-            alert(`تمت أرشفة عروض وعهد (${monthName}) بنجاح!`);
-            renderMasterOrdersTable();
+            syncToCloud();
+            alert(`تمت أرشفة عروض وعهد (${monthName}) بنجاح بالسحابة!`);
         }
 
         function setupArchivePage() {
@@ -948,13 +1000,12 @@
 
             if(confirm(`هل أنت تأكد من إزالة وأرشفة (${arch.monthTitle}) من السجلات نهائياً؟`)) {
                 db.archives = db.archives.filter(a => a.id != archId);
-                saveDb();
+                syncToCloud();
                 alert('تم حذف الشهر المؤرشف بنجاح!');
                 setupArchivePage();
             }
         }
 
-        // إدارة الأصناف وتعديلها
         function renderManageItemsPage() {
             const tbody = document.getElementById('manageItemsTableBody');
             tbody.innerHTML = '';
@@ -997,7 +1048,7 @@
             if(item && name) {
                 item.name = name;
                 item.price = price;
-                saveDb();
+                syncToCloud();
                 closeEditItemModal();
                 renderManageItemsPage();
             }
@@ -1006,12 +1057,11 @@
         function deleteItem(id) {
             if(confirm('هل أنت تأكد من حذف هذا الصنف نهائياً؟')) {
                 db.items = db.items.filter(i => i.id !== id);
-                saveDb();
+                syncToCloud();
                 renderManageItemsPage();
             }
         }
 
-        // تصدير PDF
         function generatePDF(docHeading, docRef, ordersList, pettyCashVal = null) {
             document.getElementById('pdfDocHeading').innerText = docHeading;
             document.getElementById('pdfDocRef').innerText = docRef;
@@ -1107,7 +1157,7 @@
                 name: document.getElementById('newSupplierName').value,
                 phone: document.getElementById('newSupplierPhone').value
             });
-            saveDb();
+            syncToCloud();
             renderSuppliersPage();
             document.getElementById('newSupplierName').value = '';
             document.getElementById('newSupplierPhone').value = '';
@@ -1115,7 +1165,7 @@
 
         function deleteSupplier(id) {
             db.suppliers = db.suppliers.filter(s => s.id !== id);
-            saveDb();
+            syncToCloud();
             renderSuppliersPage();
         }
 
@@ -1140,7 +1190,7 @@
                 name: document.getElementById('newEmpName').value,
                 dept: document.getElementById('newEmpDept').value
             });
-            saveDb();
+            syncToCloud();
             renderEmployeesPage();
             document.getElementById('newEmpName').value = '';
             document.getElementById('newEmpDept').value = '';
@@ -1148,7 +1198,7 @@
 
         function deleteEmployee(id) {
             db.employees = db.employees.filter(e => e.id !== id);
-            saveDb();
+            syncToCloud();
             renderEmployeesPage();
         }
 
@@ -1168,8 +1218,6 @@
                 remainingElem.style.color = 'var(--success)';
             }
         }
-
-        updateDashboardStats();
     </script>
 </body>
 </html>
