@@ -103,15 +103,15 @@
     <div class="sidebar">
         <div class="sidebar-brand"><i class="fa-solid fa-tags"></i> Quotations Hub</div>
         <ul class="sidebar-menu">
-            <li><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('cat_hospitality', event)"><i class="fa-solid fa-mug-hot"></i> عروض الضيافة والبوفيه</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('cat_cleaning', event)"><i class="fa-solid fa-broom"></i> عروض النظافة</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('cat_stationery', event)"><i class="fa-solid fa-print"></i> عروض القرطاسية والإلكترونيات</a></li>
-            <li><a href="#" class="nav-link" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;" onclick="switchTab('quotation_summary', event)"><i class="fa-solid fa-file-signature"></i> عروض الأسعار والعهدة الشاملة</a></li>
-            <li><a href="#" class="nav-link" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24;" onclick="switchTab('monthly_archive', event)"><i class="fa-solid fa-box-archive"></i> أرشيف العروض والعهد الشهرية</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('items_manage', event)"><i class="fa-solid fa-list-check"></i> إدارة وتعديل الأصناف</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('suppliers', event)"><i class="fa-solid fa-truck"></i> إدارة الموردين</a></li>
-            <li><a href="#" class="nav-link" onclick="switchTab('employees', event)"><i class="fa-solid fa-user-group"></i> إدارة الموظفين</a></li>
+            <li><a href="#" id="link_dashboard" class="nav-link active" onclick="switchTab('dashboard', event)"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم</a></li>
+            <li><a href="#" id="link_cat_hospitality" class="nav-link" onclick="switchTab('cat_hospitality', event)"><i class="fa-solid fa-mug-hot"></i> عروض الضيافة والبوفيه</a></li>
+            <li><a href="#" id="link_cat_cleaning" class="nav-link" onclick="switchTab('cat_cleaning', event)"><i class="fa-solid fa-broom"></i> عروض النظافة</a></li>
+            <li><a href="#" id="link_cat_stationery" class="nav-link" onclick="switchTab('cat_stationery', event)"><i class="fa-solid fa-print"></i> عروض القرطاسية والإلكترونيات</a></li>
+            <li><a href="#" id="link_quotation_summary" class="nav-link" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;" onclick="switchTab('quotation_summary', event)"><i class="fa-solid fa-file-signature"></i> عروض الأسعار والعهدة الشاملة</a></li>
+            <li><a href="#" id="link_monthly_archive" class="nav-link" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24;" onclick="switchTab('monthly_archive', event)"><i class="fa-solid fa-box-archive"></i> أرشيف العروض والعهد الشهرية</a></li>
+            <li><a href="#" id="link_items_manage" class="nav-link" onclick="switchTab('items_manage', event)"><i class="fa-solid fa-list-check"></i> إدارة وتعديل الأصناف</a></li>
+            <li><a href="#" id="link_suppliers" class="nav-link" onclick="switchTab('suppliers', event)"><i class="fa-solid fa-truck"></i> إدارة الموردين</a></li>
+            <li><a href="#" id="link_employees" class="nav-link" onclick="switchTab('employees', event)"><i class="fa-solid fa-user-group"></i> إدارة الموظفين</a></li>
         </ul>
     </div>
 
@@ -636,6 +636,7 @@
             archives: []
         };
 
+        let activeTabId = 'dashboard';
         let currentActiveCat = '';
         let currentActivePrefix = '';
 
@@ -645,7 +646,7 @@
             'stat': 'القرطاسية والإلكترونيات'
         };
 
-        // المزامنة الحية المباشرة مع السحابة بدون الاستبدال بالافتراضيات
+        // المزامنة الحية المباشرة مع السحابة
         fbDb.ref('procurement_hub').on('value', (snapshot) => {
             const cloudData = snapshot.val();
             if (cloudData) {
@@ -656,12 +657,27 @@
                 db.orders = cloudData.orders || [];
                 db.archives = cloudData.archives || [];
             }
-            updateDashboardStats();
-            renderMasterOrdersTable();
+            refreshAllViews();
         });
 
         function syncToCloud() {
             fbDb.ref('procurement_hub').set(db);
+        }
+
+        // دالة تحديث الواجهات تلقائياً حسب الصفحة المفتوحة
+        function refreshAllViews() {
+            updateDashboardStats();
+            renderMasterOrdersTable();
+            renderManageItemsPage();
+            renderSuppliersPage();
+            renderEmployeesPage();
+            
+            // تحديث قوائم النموذج النشط حالياً
+            ['hosp', 'clean', 'stat'].forEach(prefix => {
+                populateCategoryForm(prefix);
+            });
+
+            if(activeTabId === 'monthly_archive') setupArchivePage();
         }
 
         function updateClock() {
@@ -712,11 +728,14 @@
 
         function switchTab(tabId, event) {
             if(event) event.preventDefault();
+            activeTabId = tabId;
+
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active-page'));
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
 
             document.getElementById(tabId).classList.add('active-page');
-            if(event) event.currentTarget.classList.add('active');
+            const linkElem = document.getElementById(`link_${tabId}`);
+            if(linkElem) linkElem.classList.add('active');
 
             const titles = {
                 dashboard: 'لوحة التحكم',
@@ -755,6 +774,9 @@
         function populateCategoryForm(prefix) {
             const catName = prefixMap[prefix];
             const itemSelect = document.getElementById(`item_${prefix}`);
+            if(!itemSelect) return;
+
+            const selectedValue = itemSelect.value;
             itemSelect.innerHTML = '';
 
             const items = db.items.filter(i => i.cat === catName);
@@ -764,19 +786,22 @@
                 items.forEach(i => {
                     itemSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`;
                 });
+                if(selectedValue) itemSelect.value = selectedValue;
             }
 
             const supSelect = document.getElementById(`sup_${prefix}`);
-            supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            if(supSelect) supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
 
             const empSelect = document.getElementById(`emp_${prefix}`);
-            empSelect.innerHTML = db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+            if(empSelect) empSelect.innerHTML = db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
 
             autoFillPriceAndSupplier(prefix);
         }
 
         function autoFillPriceAndSupplier(prefix) {
-            const itemId = document.getElementById(`item_${prefix}`).value;
+            const itemElem = document.getElementById(`item_${prefix}`);
+            if(!itemElem) return;
+            const itemId = itemElem.value;
             const item = db.items.find(i => i.id == itemId);
             if(item) {
                 document.getElementById(`price_${prefix}`).value = item.price;
@@ -940,6 +965,7 @@
 
         function setupArchivePage() {
             const select = document.getElementById('archiveMonthSelect');
+            if(!select) return;
             select.innerHTML = '<option value="">-- اختر الشهر --</option>';
 
             if(db.archives.length === 0) {
@@ -1013,6 +1039,7 @@
 
         function renderManageItemsPage() {
             const tbody = document.getElementById('manageItemsTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
 
             db.items.forEach(i => {
@@ -1151,6 +1178,7 @@
 
         function renderSuppliersPage() {
             const tbody = document.getElementById('suppliersTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             db.suppliers.forEach(s => {
                 tbody.innerHTML += `
@@ -1184,6 +1212,7 @@
 
         function renderEmployeesPage() {
             const tbody = document.getElementById('employeesTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             db.employees.forEach(e => {
                 tbody.innerHTML += `
