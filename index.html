@@ -164,7 +164,7 @@
                                 الصنف 
                                 <button type="button" class="btn-sm-add" onclick="openQuickAddModal('الضيافة والبوفيه', 'hosp')"><i class="fa-solid fa-plus"></i> صنف جديد</button>
                             </label>
-                            <select id="item_hosp" onchange="autoFillPrice('hosp')"></select>
+                            <select id="item_hosp" onchange="autoFillPriceAndSupplier('hosp')"></select>
                         </div>
                         <div class="form-group">
                             <label>الكمية المطلوبة</label>
@@ -211,7 +211,7 @@
                                 الصنف 
                                 <button type="button" class="btn-sm-add" onclick="openQuickAddModal('أدوات النظافة', 'clean')"><i class="fa-solid fa-plus"></i> صنف جديد</button>
                             </label>
-                            <select id="item_clean" onchange="autoFillPrice('clean')"></select>
+                            <select id="item_clean" onchange="autoFillPriceAndSupplier('clean')"></select>
                         </div>
                         <div class="form-group">
                             <label>الكمية المطلوبة</label>
@@ -258,7 +258,7 @@
                                 الصنف 
                                 <button type="button" class="btn-sm-add" onclick="openQuickAddModal('القرطاسية والإلكترونيات', 'stat')"><i class="fa-solid fa-plus"></i> صنف جديد</button>
                             </label>
-                            <select id="item_stat" onchange="autoFillPrice('stat')"></select>
+                            <select id="item_stat" onchange="autoFillPriceAndSupplier('stat')"></select>
                         </div>
                         <div class="form-group">
                             <label>الكمية المطلوبة</label>
@@ -402,6 +402,7 @@
                                 <th>اسم الصنف</th>
                                 <th>القسم</th>
                                 <th>السعر الافتراضي (ر.س)</th>
+                                <th>المورد الافتراضي</th>
                                 <th>إجراءات</th>
                             </tr>
                         </thead>
@@ -493,6 +494,10 @@
                 <label>السعر الافتراضي (ر.س)</label>
                 <input type="number" id="quickItemPrice" step="0.01" placeholder="0.00">
             </div>
+            <div class="form-group">
+                <label>المورد الافتراضي</label>
+                <select id="quickItemSupplier"></select>
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
                 <button class="btn" style="background: var(--text-muted);" onclick="closeQuickAddModal()">إلغاء</button>
                 <button class="btn btn-success" onclick="saveQuickItem()">حفظ وإضافة</button>
@@ -512,6 +517,10 @@
             <div class="form-group">
                 <label>السعر الافتراضي (ر.س)</label>
                 <input type="number" id="editItemPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>المورد الافتراضي</label>
+                <select id="editItemSupplier"></select>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
                 <button class="btn" style="background: var(--text-muted);" onclick="closeEditItemModal()">إلغاء</button>
@@ -648,13 +657,13 @@
                 db.archives = cloudData.archives || [];
             } else {
                 // بيانات افتراضية لأول مرة
-                db.items = [
-                    { id: 1, name: 'قرنفل ( مسمار) 250جم', cat: 'الضيافة والبوفيه', price: 22.00 },
-                    { id: 2, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00 },
-                    { id: 3, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00 },
-                    { id: 4, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00 }
-                ];
                 db.suppliers = [{ id: 1, name: 'الصاله الاقتصادية', phone: '' }];
+                db.items = [
+                    { id: 1, name: 'قرنفل ( مسمار) 250جم', cat: 'الضيافة والبوفيه', price: 22.00, defaultSupplier: 'الصاله الاقتصادية' },
+                    { id: 2, name: 'شاي كبوس', cat: 'الضيافة والبوفيه', price: 8.00, defaultSupplier: 'الصاله الاقتصادية' },
+                    { id: 3, name: 'ورق A4', cat: 'القرطاسية والإلكترونيات', price: 55.00, defaultSupplier: 'الصاله الاقتصادية' },
+                    { id: 4, name: 'صابون يدين 5 لتر', cat: 'أدوات النظافة', price: 35.00, defaultSupplier: 'الصاله الاقتصادية' }
+                ];
                 db.employees = [{ id: 1, name: 'ابراهيم العلي', dept: 'الإدارة' }, { id: 2, name: 'الكل', dept: 'عام' }];
                 syncToCloud();
             }
@@ -681,6 +690,10 @@
             document.getElementById('modalTitle').innerText = `إضافة صنف جديد لـ (${catName})`;
             document.getElementById('quickItemName').value = '';
             document.getElementById('quickItemPrice').value = '';
+
+            const supSelect = document.getElementById('quickItemSupplier');
+            supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+
             document.getElementById('quickAddModal').style.display = 'flex';
         }
 
@@ -691,20 +704,21 @@
         function saveQuickItem() {
             const name = document.getElementById('quickItemName').value.trim();
             const price = parseFloat(document.getElementById('quickItemPrice').value) || 0;
+            const supplier = document.getElementById('quickItemSupplier').value;
 
             if(!name) {
                 alert('يرجى أدخال اسم الصنف!');
                 return;
             }
 
-            const newItem = { id: Date.now(), name: name, cat: currentActiveCat, price: price };
+            const newItem = { id: Date.now(), name: name, cat: currentActiveCat, price: price, defaultSupplier: supplier };
             db.items.push(newItem);
             syncToCloud();
             closeQuickAddModal();
 
             populateCategoryForm(currentActivePrefix);
             document.getElementById(`item_${currentActivePrefix}`).value = newItem.id;
-            autoFillPrice(currentActivePrefix);
+            autoFillPriceAndSupplier(currentActivePrefix);
         }
 
         function switchTab(tabId, event) {
@@ -769,14 +783,17 @@
             const empSelect = document.getElementById(`emp_${prefix}`);
             empSelect.innerHTML = db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
 
-            autoFillPrice(prefix);
+            autoFillPriceAndSupplier(prefix);
         }
 
-        function autoFillPrice(prefix) {
+        function autoFillPriceAndSupplier(prefix) {
             const itemId = document.getElementById(`item_${prefix}`).value;
             const item = db.items.find(i => i.id == itemId);
             if(item) {
                 document.getElementById(`price_${prefix}`).value = item.price;
+                if(item.defaultSupplier) {
+                    document.getElementById(`sup_${prefix}`).value = item.defaultSupplier;
+                }
                 calcFormTotal(prefix);
             }
         }
@@ -881,7 +898,6 @@
             });
         }
 
-        // 💥 خيار النسخ / تكرار الطلب بضغطة زر
         function duplicateOrder(orderId) {
             const targetOrder = db.orders.find(o => o.id === orderId);
             if (!targetOrder) return;
@@ -1016,6 +1032,7 @@
                         <td><b>${i.name}</b></td>
                         <td>${i.cat}</td>
                         <td>${i.price.toFixed(2)} ر.س</td>
+                        <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:bold;">${i.defaultSupplier || 'غير حدد'}</span></td>
                         <td>
                             <button class="btn btn-warning" onclick="openEditItemModal(${i.id})"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
                             <button class="btn btn-danger" onclick="deleteItem(${i.id})"><i class="fa-solid fa-trash"></i> حذف</button>
@@ -1032,6 +1049,11 @@
             document.getElementById('editItemId').value = item.id;
             document.getElementById('editItemName').value = item.name;
             document.getElementById('editItemPrice').value = item.price;
+
+            const supSelect = document.getElementById('editItemSupplier');
+            supSelect.innerHTML = db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            if(item.defaultSupplier) supSelect.value = item.defaultSupplier;
+
             document.getElementById('editItemModal').style.display = 'flex';
         }
 
@@ -1043,11 +1065,13 @@
             const id = parseInt(document.getElementById('editItemId').value);
             const name = document.getElementById('editItemName').value.trim();
             const price = parseFloat(document.getElementById('editItemPrice').value) || 0;
+            const supplier = document.getElementById('editItemSupplier').value;
 
             const item = db.items.find(i => i.id === id);
             if(item && name) {
                 item.name = name;
                 item.price = price;
+                item.defaultSupplier = supplier;
                 syncToCloud();
                 closeEditItemModal();
                 renderManageItemsPage();
