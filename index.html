@@ -106,6 +106,9 @@
                 <a href="#" onclick="showPage('custody')" class="nav-link" id="link-custody">
                     <i class="fa-solid fa-wallet text-lg text-amber-400"></i> إدارة العُهد والمشتريات
                 </a>
+                <a href="#" onclick="showPage('archive')" class="nav-link" id="link-archive">
+                    <i class="fa-solid fa-box-archive text-lg text-indigo-400"></i> أرشيف المشتريات والعهد
+                </a>
                 <a href="#" onclick="showPage('summary')" class="nav-link" id="link-summary">
                     <i class="fa-solid fa-list-check text-lg"></i> الملخص الشامل والطباعة
                 </a>
@@ -130,7 +133,7 @@
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> متصل بالسحابة
             </span>
-            <div class="text-xs text-slate-500 mt-2">الإصدار v3.2 - مكتمل</div>
+            <div class="text-xs text-slate-500 mt-2">الإصدار v3.5 - محدث</div>
         </div>
     </aside>
 
@@ -161,20 +164,21 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let db = {
     items: JSON.parse(localStorage.getItem('db_items')) || [
-        { id: 1, category: 'stationery', name: 'كرتون ورق A4', default_supplier: 'مكتبة جرير', price_type: 'fixed', price: 59.80, raw_price: 52 },
-        { id: 2, category: 'hospitality', name: 'شاي كبوس', default_supplier: 'الصالة الاقتصادية', price_type: 'fixed', price: 18.50, raw_price: 18.50 },
-        { id: 3, category: 'cleaning', name: 'منظف أرضيات', default_supplier: 'الصالة الاقتصادية', price_type: 'variable', price: 0 }
+        { id: 1, category: 'stationery', name: 'كرتون ورق A4', default_supplier: 'شركة بيست اكستو', price_type: 'fixed', price: 59.80, raw_price: 52 },
+        { id: 2, category: 'stationery', name: 'دباسه روكو', default_supplier: 'شركة بيست اكستو', price_type: 'fixed', price: 20.70, raw_price: 18 },
+        { id: 3, category: 'stationery', name: 'حبر ليزر 17 A', default_supplier: 'قرطاسية السبعين', price_type: 'fixed', price: 75.90, raw_price: 66 }
     ],
     suppliers: JSON.parse(localStorage.getItem('db_suppliers')) || [
-        { id: 1, name: 'الصالة الاقتصادية' },
-        { id: 2, name: 'مكتبة جرير' }
+        { id: 1, name: 'شركة بيست اكستو' },
+        { id: 2, name: 'قرطاسية السبعين' }
     ],
     employees: JSON.parse(localStorage.getItem('db_employees')) || [
-        { id: 1, name: 'إبراهيم العلي (المشتريات)' },
-        { id: 2, name: 'قسم IT' }
+        { id: 1, name: 'إبراهيم العلي' },
+        { id: 2, name: 'محمد القحطاني' },
+        { id: 3, name: 'قسم IT' }
     ],
     custodies: JSON.parse(localStorage.getItem('db_custodies')) || [
-        { id: 101, title: 'عهدة مشتريات شهر أغسطس', emp_name: 'إبراهيم العلي (المشتريات)', amount: 5000, status: 'active' }
+        { id: 101, title: 'عهده مشتريات 7/15', emp_name: 'إبراهيم العلي', amount: 5000, status: 'active', is_archived: false }
     ],
     quotations: JSON.parse(localStorage.getItem('db_quotations')) || []
 };
@@ -200,6 +204,7 @@ function showPage(pageId) {
     if (pageId === 'dashboard') renderDashboard(container);
     else if (['hospitality', 'cleaning', 'stationery'].includes(pageId)) renderQuotationPage(container, pageId);
     else if (pageId === 'custody') renderCustodyPage(container);
+    else if (pageId === 'archive') renderArchivePage(container);
     else if (pageId === 'summary') renderSummaryPage(container);
     else if (pageId === 'manage-items') renderManageItemsPage(container);
     else if (pageId === 'manage-suppliers') renderManageSuppliersPage(container);
@@ -210,24 +215,23 @@ function showPage(pageId) {
 // 3. شاشات النظام والوظائف
 // =============================================================
 
-// --- 3.1 لوحة التحكم ---
 function renderDashboard(c) {
     document.getElementById('page-title').innerText = 'لوحة التحكم الرئيسية';
     document.getElementById('page-subtitle').innerText = 'ملخص الأداء وعرض حركة العُهد والمشتريات';
 
-    const totalQuotes = db.quotations.length;
-    const totalAmount = db.quotations.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
-    const activeCustodies = db.custodies.filter(c => c.status === 'active').length;
+    const activeQuotes = db.quotations.filter(q => !q.is_archived);
+    const totalAmount = activeQuotes.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
+    const activeCustodies = db.custodies.filter(c => c.status === 'active' && !c.is_archived).length;
 
     c.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="card-custom p-6 border-r-4 border-blue-600">
-                <p class="text-xs font-bold text-slate-400 uppercase">إجمالي المشتريات والعروض</p>
+                <p class="text-xs font-bold text-slate-400 uppercase">إجمالي المشتريات (النشطة)</p>
                 <h3 class="text-2xl font-black mt-2 text-slate-800">${totalAmount} <span class="text-xs font-normal">ر.س</span></h3>
             </div>
             <div class="card-custom p-6 border-r-4 border-emerald-600">
-                <p class="text-xs font-bold text-slate-400 uppercase">عدد عروض الأسعار</p>
-                <h3 class="text-3xl font-black mt-2 text-slate-800">${totalQuotes}</h3>
+                <p class="text-xs font-bold text-slate-400 uppercase">عدد العروض النشطة</p>
+                <h3 class="text-3xl font-black mt-2 text-slate-800">${activeQuotes.length}</h3>
             </div>
             <div class="card-custom p-6 border-r-4 border-amber-500">
                 <p class="text-xs font-bold text-slate-400 uppercase">العهُد النشطة حالياً</p>
@@ -241,14 +245,14 @@ function renderDashboard(c) {
     `;
 }
 
-// --- 3.2 صفحة إدخال عروض الأسعار (مع السعر الثابت والخصم) ---
+// --- شاشة إضافة وتسجيل عروض الأسعار (مضاف لها الموظف طالب الصنف) ---
 function renderQuotationPage(c, cat) {
     const titles = { hospitality: 'عروض الضيافة والبوفيه', cleaning: 'عروض أدوات النظافة', stationery: 'عروض القرطاسية والإلكترونيات' };
     document.getElementById('page-title').innerText = titles[cat];
-    document.getElementById('page-subtitle').innerText = 'تسجيل وإدخال الأسعار والربط التلقائي للعهدة';
+    document.getElementById('page-subtitle').innerText = 'تسجيل وإدخال الأسعار والربط بالمطالبين والعهد';
 
     const categoryItems = db.items.filter(i => i.category === cat);
-    const activeCustodies = db.custodies.filter(cust => cust.status === 'active');
+    const activeCustodies = db.custodies.filter(cust => cust.status === 'active' && !cust.is_archived);
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
@@ -257,9 +261,9 @@ function renderQuotationPage(c, cat) {
             <form onsubmit="addQuotation(event, '${cat}')" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-2">اختر الصنف</label>
-                    <select id="q-item" required onchange="onItemSelect()" class="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500">
+                    <select id="q-item" required onchange="onItemSelect()" class="w-full p-2.5 border rounded-xl">
                         <option value="">اختر الصنف...</option>
-                        ${categoryItems.map(i => `<option value="${i.name}">${i.name} ${i.price_type === 'fixed' ? `(شامل: ${i.price} ر.س)` : ''}</option>`).join('')}
+                        ${categoryItems.map(i => `<option value="${i.name}">${i.name} ${i.price_type === 'fixed' ? `(${i.price} ر.س)` : ''}</option>`).join('')}
                     </select>
                 </div>
 
@@ -269,14 +273,14 @@ function renderQuotationPage(c, cat) {
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">سعر الوحدة (ر.س)</label>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">سعر الوحدة الشامل (ر.س)</label>
                     <input type="number" step="0.01" id="q-price" required oninput="calcTotal()" placeholder="0.00" class="w-full p-2.5 border rounded-xl">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-2">الخصم / العرض (إن وجد)</label>
                     <div class="flex gap-1">
-                        <input type="number" step="0.01" id="q-discount" value="0" oninput="calcTotal()" placeholder="0" class="w-2/3 p-2.5 border rounded-xl">
+                        <input type="number" step="0.01" id="q-discount" value="0" oninput="calcTotal()" class="w-2/3 p-2.5 border rounded-xl">
                         <select id="q-discount-type" onchange="calcTotal()" class="w-1/3 p-2.5 border rounded-xl text-xs">
                             <option value="amount">ر.س</option>
                             <option value="percent">%</option>
@@ -285,10 +289,10 @@ function renderQuotationPage(c, cat) {
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">معاملة الضريبة</label>
-                    <select id="q-tax" onchange="calcTotal()" class="w-full p-2.5 border rounded-xl">
-                        <option value="15">السعر شامل الضريبة (15%)</option>
-                        <option value="0">تصفير الضريبة (0%)</option>
+                    <label class="block text-xs font-bold text-blue-700 mb-2"><i class="fa-solid fa-user-tag me-1"></i> الموظف / الجهة الطالبة</label>
+                    <select id="q-requester" required class="w-full p-2.5 border border-blue-300 rounded-xl bg-blue-50/50 font-medium">
+                        <option value="">اختر الموظف طالب الصنف...</option>
+                        ${db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
                     </select>
                 </div>
 
@@ -304,7 +308,7 @@ function renderQuotationPage(c, cat) {
                     <label class="block text-xs font-bold text-slate-600 mb-2">ربط بمصدر التمويل / العُهدة</label>
                     <select id="q-custody" class="w-full p-2.5 border rounded-xl bg-amber-50 font-semibold">
                         <option value="">حساب الشركة المباشر (بدون عُهدة)</option>
-                        ${activeCustodies.map(cust => `<option value="${cust.id}">عُهدة: ${cust.title} (${cust.emp_name})</option>`).join('')}
+                        ${activeCustodies.map(cust => `<option value="${cust.id}">${cust.title}</option>`).join('')}
                     </select>
                 </div>
 
@@ -328,6 +332,7 @@ function renderQuotationPage(c, cat) {
                     <thead>
                         <tr class="bg-slate-100 text-xs text-slate-600">
                             <th class="p-3">الصنف</th>
+                            <th class="p-3">الموظف طالب الصنف</th>
                             <th class="p-3">الكمية</th>
                             <th class="p-3">السعر الفردي</th>
                             <th class="p-3">الخصم</th>
@@ -338,16 +343,17 @@ function renderQuotationPage(c, cat) {
                         </tr>
                     </thead>
                     <tbody>
-                        ${db.quotations.filter(q => q.category === cat).map(q => {
+                        ${db.quotations.filter(q => q.category === cat && !q.is_archived).map(q => {
                             const custodyObj = db.custodies.find(c => c.id == q.custody_id);
                             return `
                                 <tr class="border-b text-sm">
-                                    <td class="p-3 font-semibold">${q.item_name}</td>
+                                    <td class="p-3 font-semibold text-slate-800">${q.item_name}</td>
+                                    <td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-user me-1"></i>${q.requester || 'غير محدد'}</span></td>
                                     <td class="p-3">${q.quantity}</td>
                                     <td class="p-3">${q.price} ر.س</td>
-                                    <td class="p-3 text-red-500 font-bold">${q.discount > 0 ? `-${q.discount} ${q.discount_type === 'percent' ? '%' : 'ر.س'}` : '-'}</td>
+                                    <td class="p-3 text-red-500 font-bold">${q.discount > 0 ? `-${q.discount}` : '-'}</td>
                                     <td class="p-3"><span class="bg-slate-100 px-2 py-1 rounded text-xs font-bold">${q.supplier}</span></td>
-                                    <td class="p-3"><span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold">${custodyObj ? custodyObj.title : 'مباشر'}</span></td>
+                                    <td class="p-3"><span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold">${custodyObj ? custodyObj.title : 'حساب مباشر'}</span></td>
                                     <td class="p-3 font-black text-emerald-600">${q.total} ر.س</td>
                                     <td class="p-3 text-center">
                                         <button onclick="deleteQuote(${q.id}, '${cat}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
@@ -381,13 +387,7 @@ function calcTotal() {
     const discountType = document.getElementById('q-discount-type').value;
 
     let totalWithoutDisc = qty * price;
-    let discAmount = 0;
-
-    if (discountType === 'percent') {
-        discAmount = totalWithoutDisc * (discount / 100);
-    } else {
-        discAmount = discount;
-    }
+    let discAmount = (discountType === 'percent') ? totalWithoutDisc * (discount / 100) : discount;
 
     let finalTotal = Math.max(0, totalWithoutDisc - discAmount);
     document.getElementById('q-total').value = finalTotal.toFixed(2);
@@ -403,10 +403,11 @@ function addQuotation(e, cat) {
         price: parseFloat(document.getElementById('q-price').value),
         discount: parseFloat(document.getElementById('q-discount').value) || 0,
         discount_type: document.getElementById('q-discount-type').value,
-        tax_type: document.getElementById('q-tax').value,
+        requester: document.getElementById('q-requester').value,
         supplier: document.getElementById('q-supplier').value,
         custody_id: document.getElementById('q-custody').value,
         total: parseFloat(document.getElementById('q-total').value),
+        is_archived: false,
         date: new Date().toISOString().split('T')[0]
     };
 
@@ -421,18 +422,20 @@ function deleteQuote(id, cat) {
     renderQuotationPage(document.getElementById('app-content'), cat);
 }
 
-// --- 3.3 إدارة العُهد المالية وتصفية الحسابات ---
+// --- إدارة العهد الجارية وقابلية أزفتها ---
 function renderCustodyPage(c) {
     document.getElementById('page-title').innerText = 'إدارة العُهد المالية وتصفية الحسابات';
-    document.getElementById('page-subtitle').innerText = 'تسليم العهد، تتبع المشتريات، وإغلاق الفرق المالي';
+    document.getElementById('page-subtitle').innerText = 'فتح عهد جديدة وتصفيتها ونقل المغلقة منها إلى الأرشيف';
+
+    const activeCustodiesList = db.custodies.filter(cust => !cust.is_archived);
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
             <h3 class="text-lg font-bold mb-4 text-slate-800">فتح عُهدة مالية جديدة</h3>
             <form onsubmit="addCustody(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" id="cust-title" placeholder="عنوان العهدة (مثال: عهدة نظافة - أغسطس)" required class="p-2.5 border rounded-xl">
+                <input type="text" id="cust-title" placeholder="عنوان العهدة (مثال: عهدة مشتريات 7/15)" required class="p-2.5 border rounded-xl">
                 <select id="cust-emp" required class="p-2.5 border rounded-xl">
-                    <option value="">الموظف المسؤول...</option>
+                    <option value="">الموظف أمين العهدة...</option>
                     ${db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
                 </select>
                 <input type="number" step="0.01" id="cust-amount" placeholder="مبلغ العهدة (ر.س)" required class="p-2.5 border rounded-xl">
@@ -443,17 +446,17 @@ function renderCustodyPage(c) {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            ${db.custodies.map(cust => {
+            ${activeCustodiesList.map(cust => {
                 const spent = db.quotations.filter(q => q.custody_id == cust.id).reduce((s, q) => s + Number(q.total || 0), 0);
                 const diff = cust.amount - spent;
                 const isClosed = cust.status === 'closed';
 
                 return `
-                    <div class="card-custom p-6 border-t-4 ${isClosed ? 'border-gray-400 opacity-75' : diff >= 0 ? 'border-emerald-500' : 'border-red-500'}">
+                    <div class="card-custom p-6 border-t-4 ${isClosed ? 'border-gray-400 opacity-90' : diff >= 0 ? 'border-emerald-500' : 'border-red-500'}">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h4 class="font-bold text-lg text-slate-800">${cust.title}</h4>
-                                <p class="text-xs text-slate-500"><i class="fa-solid fa-user me-1"></i> المسؤول: ${cust.emp_name}</p>
+                                <p class="text-xs text-slate-500"><i class="fa-solid fa-user me-1"></i> أمين العهدة: ${cust.emp_name}</p>
                             </div>
                             <span class="px-3 py-1 rounded-full text-xs font-bold ${isClosed ? 'bg-slate-200 text-slate-600' : 'bg-emerald-100 text-emerald-700'}">
                                 ${isClosed ? 'مُغلقة ومصفاة' : 'نشطة'}
@@ -470,22 +473,21 @@ function renderCustodyPage(c) {
                                 <span class="font-black text-blue-600 text-sm">${spent.toFixed(2)} ر.س</span>
                             </div>
                             <div>
-                                <span class="block text-xs font-bold ${diff >= 0 ? 'text-emerald-600' : 'text-red-600'}">الفارق / المتبقي</span>
+                                <span class="block text-xs font-bold ${diff >= 0 ? 'text-emerald-600' : 'text-red-600'}">المتبقي / الفارق</span>
                                 <span class="font-black text-sm ${diff >= 0 ? 'text-emerald-600' : 'text-red-600'}">${Math.abs(diff).toFixed(2)} ر.س</span>
                             </div>
                         </div>
 
-                        <div class="text-xs p-3 rounded-lg mb-4 ${diff >= 0 ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}">
-                            ${diff >= 0 
-                                ? `<i class="fa-solid fa-circle-check me-1"></i> <b>مبلغ متبقي للشركة:</b> يجب على الموظف إعادة (${diff.toFixed(2)} ر.س) للحساب.` 
-                                : `<i class="fa-solid fa-triangle-exclamation me-1"></i> <b>عجز / مستحقات للموظف:</b> يجب صرف فارق (${Math.abs(diff).toFixed(2)} ر.س) للموظف.`}
-                        </div>
-
-                        <div class="flex justify-between items-center pt-2 border-t">
-                            <button onclick="toggleCustodyStatus(${cust.id})" class="text-xs font-bold px-3 py-2 rounded-lg ${isClosed ? 'bg-slate-200 text-slate-700' : 'bg-amber-500 text-white'}">
-                                ${isClosed ? 'إعادة فتح العهدة' : 'إقفال وتصفية العهدة'}
-                            </button>
-                            <button onclick="deleteCustody(${cust.id})" class="text-red-500 text-xs hover:underline">حذف العُهدة</button>
+                        <div class="flex justify-between items-center pt-3 border-t">
+                            <div class="flex gap-2">
+                                <button onclick="toggleCustodyStatus(${cust.id})" class="text-xs font-bold px-3 py-2 rounded-lg ${isClosed ? 'bg-slate-200 text-slate-700' : 'bg-amber-500 text-white'}">
+                                    ${isClosed ? 'إعادة فتح العهدة' : 'إقفال وتصفية'}
+                                </button>
+                                <button onclick="archiveCustody(${cust.id})" class="text-xs font-bold px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg">
+                                    <i class="fa-solid fa-box-archive me-1"></i> أرشفة
+                                </button>
+                            </div>
+                            <button onclick="deleteCustody(${cust.id})" class="text-red-500 text-xs hover:underline">حذف</button>
                         </div>
                     </div>
                 `;
@@ -501,7 +503,8 @@ function addCustody(e) {
         title: document.getElementById('cust-title').value,
         emp_name: document.getElementById('cust-emp').value,
         amount: parseFloat(document.getElementById('cust-amount').value),
-        status: 'active'
+        status: 'active',
+        is_archived: false
     };
     db.custodies.push(cust);
     saveLocal();
@@ -517,13 +520,112 @@ function toggleCustodyStatus(id) {
     }
 }
 
+function archiveCustody(id) {
+    const cust = db.custodies.find(c => c.id === id);
+    if (cust) {
+        cust.is_archived = true;
+        // أرشفة جميع مشتريات هذه العهدة أيضاً
+        db.quotations.forEach(q => {
+            if (q.custody_id == id) q.is_archived = true;
+        });
+        saveLocal();
+        renderCustodyPage(document.getElementById('app-content'));
+    }
+}
+
 function deleteCustody(id) {
     db.custodies = db.custodies.filter(c => c.id !== id);
     saveLocal();
     renderCustodyPage(document.getElementById('app-content'));
 }
 
-// --- 3.4 إدارة الأصناف والأسعار الثابتة (مع احتساب الضريبة) ---
+// --- قسم الأرشيف الشامل للعهد والمشتريات الشهرية ---
+function renderArchivePage(c) {
+    document.getElementById('page-title').innerText = 'أرشيف المشتريات والعهد الشهرية';
+    document.getElementById('page-subtitle').innerText = 'السجلات المكتملة والمؤرشفة للرجوع إليها في أي وقت';
+
+    const archivedCustodies = db.custodies.filter(c => c.is_archived);
+    const archivedQuotations = db.quotations.filter(q => q.is_archived);
+
+    c.innerHTML = `
+        <div class="card-custom p-6 mb-8 border-t-4 border-indigo-600">
+            <h3 class="text-lg font-bold mb-4 text-slate-800"><i class="fa-solid fa-box-archive text-indigo-600 me-2"></i> العُهد المؤرشفة والمقفلة</h3>
+            ${archivedCustodies.length === 0 ? '<p class="text-xs text-slate-400">لا توجد عهد مؤرشفة حالياً.</p>' : `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${archivedCustodies.map(cust => {
+                        const spent = db.quotations.filter(q => q.custody_id == cust.id).reduce((s, q) => s + Number(q.total || 0), 0);
+                        return `
+                            <div class="p-4 border rounded-xl bg-slate-50 flex justify-between items-center">
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">${cust.title}</h5>
+                                    <p class="text-xs text-slate-500">المسؤول: ${cust.emp_name} | الإجمالي: ${cust.amount} ر.س</p>
+                                </div>
+                                <button onclick="unarchiveCustody(${cust.id})" class="text-xs bg-white border px-3 py-1.5 rounded-lg font-bold text-slate-700 hover:bg-slate-100">
+                                    إعادة من الأرشيف
+                                </button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `}
+        </div>
+
+        <div class="card-custom p-6">
+            <h3 class="text-lg font-bold mb-4 text-slate-800">سجل المشتريات والطلبات المؤرشفة</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-xs text-slate-600">
+                            <th class="p-3">الصنف</th>
+                            <th class="p-3">طالب الصنف</th>
+                            <th class="p-3">المورد</th>
+                            <th class="p-3">الإجمالي</th>
+                            <th class="p-3">التاريخ</th>
+                            <th class="p-3 text-center">إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${archivedQuotations.map(q => `
+                            <tr class="border-b text-xs">
+                                <td class="p-3 font-semibold">${q.item_name}</td>
+                                <td class="p-3">${q.requester || 'غير محدد'}</td>
+                                <td class="p-3">${q.supplier}</td>
+                                <td class="p-3 font-bold text-emerald-600">${q.total} ر.س</td>
+                                <td class="p-3 text-slate-400">${q.date || '-'}</td>
+                                <td class="p-3 text-center">
+                                    <button onclick="unarchiveQuote(${q.id})" class="text-indigo-600 hover:underline font-bold">إعادة للنشط</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function unarchiveCustody(id) {
+    const cust = db.custodies.find(c => c.id === id);
+    if (cust) {
+        cust.is_archived = false;
+        db.quotations.forEach(q => {
+            if (q.custody_id == id) q.is_archived = false;
+        });
+        saveLocal();
+        renderArchivePage(document.getElementById('app-content'));
+    }
+}
+
+function unarchiveQuote(id) {
+    const q = db.quotations.find(quote => quote.id === id);
+    if (q) {
+        q.is_archived = false;
+        saveLocal();
+        renderArchivePage(document.getElementById('app-content'));
+    }
+}
+
+// --- باقي إدارات الأصناف والموردين والموظفين والملخص ---
 function renderManageItemsPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الأصناف والأسعار الثابتة';
     document.getElementById('page-subtitle').innerText = 'تحديد أسعار الأصناف وحساب الضريبة تلقائياً';
@@ -596,17 +698,11 @@ function renderManageItemsPage(c) {
                                 <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md">
                                     السعر النهائي (شامل الضريبة): ${Number(item.price).toFixed(2)} ر.س
                                 </span>
-                                ${item.raw_price ? `
-                                    <span class="text-xs text-slate-400">
-                                        (السعر قبل الضريبة: ${item.raw_price} ر.س)
-                                    </span>
-                                ` : ''}
                             ` : '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">سعر متغير</span>'}
 
                             <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">المورد: ${item.default_supplier || 'غير محدد'}</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="editItem(${item.id})" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
@@ -639,7 +735,7 @@ function addNewItem(e) {
 
     let finalPrice = rawPrice;
     if (priceType === 'fixed' && taxMode === 'add_tax') {
-        finalPrice = rawPrice * 1.15; // احتساب الـ 15% ضريبة
+        finalPrice = rawPrice * 1.15;
     }
 
     const item = {
@@ -657,28 +753,15 @@ function addNewItem(e) {
     renderManageItemsPage(document.getElementById('app-content'));
 }
 
-function editItem(id) {
-    const item = db.items.find(i => i.id === id);
-    if (!item) return;
-    const newPrice = prompt(`تعديل السعر الثابت النهائي للصنف (${item.name}):`, item.price);
-    if (newPrice !== null) {
-        item.price = parseFloat(newPrice) || 0;
-        item.price_type = 'fixed';
-        saveLocal();
-        renderManageItemsPage(document.getElementById('app-content'));
-    }
-}
-
 function deleteItem(id) {
     db.items = db.items.filter(i => i.id !== id);
     saveLocal();
     renderManageItemsPage(document.getElementById('app-content'));
 }
 
-// --- 3.5 إدارة الموردين والموظفين ---
 function renderManageSuppliersPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الموردين';
-    document.getElementById('page-subtitle').innerText = 'إضافة وتحديث جهات التوريد والمحلات';
+    document.getElementById('page-subtitle').innerText = 'إضافة وتحديث جهات التوريد';
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
@@ -689,12 +772,12 @@ function renderManageSuppliersPage(c) {
             </form>
         </div>
         <div class="card-custom p-6">
-            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموردين المسجلين</h3>
+            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموردين</h3>
             <div class="divide-y">
                 ${db.suppliers.map(s => `
                     <div class="py-3 flex justify-between items-center">
                         <span class="font-bold text-slate-700">${s.name}</span>
-                        <button onclick="deleteSupplier(${s.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="deleteSupplier(${s.id})" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `).join('')}
             </div>
@@ -717,7 +800,7 @@ function deleteSupplier(id) {
 
 function renderManageEmployeesPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الموظفين والجهات';
-    document.getElementById('page-subtitle').innerText = 'إضافة المستفيدين وأصحاب العُهد المالية';
+    document.getElementById('page-subtitle').innerText = 'تسجيل قائمة الموظفين والجهات الطالبة';
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
@@ -728,12 +811,12 @@ function renderManageEmployeesPage(c) {
             </form>
         </div>
         <div class="card-custom p-6">
-            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموظفين والاقسام</h3>
+            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموظفين والأقسام</h3>
             <div class="divide-y">
                 ${db.employees.map(e => `
                     <div class="py-3 flex justify-between items-center">
                         <span class="font-bold text-slate-700">${e.name}</span>
-                        <button onclick="deleteEmployee(${e.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="deleteEmployee(${e.id})" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `).join('')}
             </div>
@@ -754,12 +837,12 @@ function deleteEmployee(id) {
     renderManageEmployeesPage(document.getElementById('app-content'));
 }
 
-// --- 3.6 التقرير والطباعة (الملخص الشامل) ---
 function renderSummaryPage(c) {
-    document.getElementById('page-title').innerText = 'الملخص الشامل وتصدير الـ PDF';
-    document.getElementById('page-subtitle').innerText = 'عرض وتصدير كافة العروض والمصروفات والعهد';
+    document.getElementById('page-title').innerText = 'الملخص الشامل والطباعة';
+    document.getElementById('page-subtitle').innerText = 'تصدير التقرير النهائي بالكامل موضح به الموظفين والموردين والعهدة';
 
-    const grandTotal = db.quotations.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
+    const activeQuotes = db.quotations.filter(q => !q.is_archived);
+    const grandTotal = activeQuotes.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
 
     c.innerHTML = `
         <div class="mb-6 flex justify-end">
@@ -771,10 +854,10 @@ function renderSummaryPage(c) {
         <div id="pdf-content" class="card-custom p-8 bg-white">
             <div class="flex justify-between items-center mb-6 border-b pb-4">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800">ملخص المشتريات والتسعير العام</h2>
-                    <p class="text-xs text-slate-500 mt-1">تقرير شامل للعمليات والعهد</p>
+                    <h2 class="text-2xl font-black text-slate-800">تقرير المشتريات وعروض الأسعار</h2>
+                    <p class="text-xs text-slate-500 mt-1">كشف تفصيلي بالطلبات والموظفين والمصادر</p>
                 </div>
-                <div class="text-xs text-slate-400">تاريخ التقرير: ${new Date().toLocaleDateString('ar-SA')}</div>
+                <div class="text-xs text-slate-400">التاريخ: ${new Date().toLocaleDateString('ar-SA')}</div>
             </div>
 
             <table class="w-full text-right border-collapse border mb-6">
@@ -782,24 +865,26 @@ function renderSummaryPage(c) {
                     <tr class="bg-slate-100 text-xs">
                         <th class="border p-2">#</th>
                         <th class="border p-2">الصنف</th>
+                        <th class="border p-2">طالب الصنف</th>
                         <th class="border p-2">الكمية</th>
-                        <th class="border p-2">السعر</th>
+                        <th class="border p-2">السعر الفردي</th>
                         <th class="border p-2">المورد</th>
-                        <th class="border p-2">مصدر التمويل</th>
+                        <th class="border p-2">التمويل/العهدة</th>
                         <th class="border p-2">الإجمالي</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${db.quotations.map((q, idx) => {
+                    ${activeQuotes.map((q, idx) => {
                         const custodyObj = db.custodies.find(c => c.id == q.custody_id);
                         return `
                             <tr class="text-xs">
                                 <td class="border p-2">${idx + 1}</td>
                                 <td class="border p-2 font-bold">${q.item_name}</td>
+                                <td class="border p-2">${q.requester || '-'}</td>
                                 <td class="border p-2">${q.quantity}</td>
                                 <td class="border p-2">${q.price} ر.س</td>
                                 <td class="border p-2">${q.supplier}</td>
-                                <td class="border p-2">${custodyObj ? `عُهدة: ${custodyObj.title}` : 'حساب مباشر'}</td>
+                                <td class="border p-2">${custodyObj ? custodyObj.title : 'حساب مباشر'}</td>
                                 <td class="border p-2 font-bold text-emerald-600">${q.total} ر.س</td>
                             </tr>
                         `;
@@ -808,8 +893,8 @@ function renderSummaryPage(c) {
             </table>
 
             <div class="flex justify-between items-center border-t pt-4">
-                <span class="text-sm font-bold text-slate-500">عدد العروض: ${db.quotations.length}</span>
-                <span class="text-xl font-black text-emerald-600">الإجمالي الكلي: ${grandTotal} ر.س</span>
+                <span class="text-sm font-bold text-slate-500">إجمالي الطلبات: ${activeQuotes.length}</span>
+                <span class="text-xl font-black text-emerald-600">المبلغ الإجمالي الكلي: ${grandTotal} ر.س</span>
             </div>
         </div>
     `;
@@ -819,15 +904,12 @@ function exportPDF() {
     const el = document.getElementById('pdf-content');
     html2pdf().set({ 
         margin: 10, 
-        filename: 'Procurement_Report.pdf', 
+        filename: 'Procurement_Summary.pdf', 
         html2canvas: { scale: 2 }, 
         jsPDF: { format: 'a4', orientation: 'landscape' } 
     }).from(el).save();
 }
 
-// =============================================================
-// 4. تشغيل النظام والتوقيت
-// =============================================================
 window.onload = () => {
     setInterval(() => {
         const clockEl = document.getElementById('clock-text');
