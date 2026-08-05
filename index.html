@@ -9,7 +9,7 @@
     <!-- مكتبات PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- مكتبات التخزين السحابي (Firebase) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1414,8 +1414,44 @@
                 remainingElem.style.color = 'var(--danger)';
             } else {
                 remainingElem.style.color = 'var(--success)';
-            }
+            }// --- إعدادات الاتصال بـ Supabase ---
+const SUPABASE_URL = 'https://vhzkwpfecausuaklagcq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_01gWxJcTz2yL4VU8vZQgyQ_Xn9rCdc2';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// --- دالة المزامنة السحابية (حفظ الأصناف وعروض الأسعار) ---
+async function syncToCloud() {
+    try {
+        await _supabase.from('items').delete().neq('id', 0);
+        await _supabase.from('items').insert([{ data: db }]);
+        console.log('تم حفظ البيانات في السحابة بنجاح');
+    } catch (err) {
+        console.error('خطأ في حفظ البيانات:', err);
+    }
+}
+
+// --- دالة استرجاع البيانات عند فتح الموقع ---
+async function loadFromCloud() {
+    try {
+        const { data, error } = await _supabase.from('items').select('data');
+        if (data && data.length > 0 && data[0].data) {
+            db = data[0].data; // تحديث بيانات السيستم بالأصناف المحفوظة سحابياً
+            
+            // إعادة تحديث الشاشة
+            if (typeof renderEmployeesPage === 'function') renderEmployeesPage();
+            if (typeof updateDashboardStats === 'function') updateDashboardStats();
+            if (typeof renderItems === 'function') renderItems();
+            if (typeof renderArchives === 'function') renderArchives();
         }
+    } catch (err) {
+        console.error('خطأ في جلب البيانات:', err);
+    }
+}
+
+// تشغيل جلب البيانات فور فتح الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    loadFromCloud();
+});
     </script>
 </body>
 </html>
