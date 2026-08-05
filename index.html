@@ -148,7 +148,7 @@
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> متصل بـ Supabase
             </span>
-            <div class="text-xs text-slate-500 mt-2">الإصدار v2.4</div>
+            <div class="text-xs text-slate-500 mt-2">الإصدار v2.5</div>
         </div>
     </aside>
 
@@ -184,10 +184,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // =============================================================
 let db = {
     items: JSON.parse(localStorage.getItem('db_items')) || [
-        { id: 1, category: 'hospitality', name: 'شاي كبوس' },
-        { id: 2, category: 'hospitality', name: 'قهوة عربية' },
-        { id: 3, category: 'cleaning', name: 'منظف أرضيات' },
-        { id: 4, category: 'stationery', name: 'ورق طباعة A4' }
+        { id: 1, category: 'hospitality', name: 'شاي كبوس', default_supplier: 'الصالة الاقتصادية' },
+        { id: 2, category: 'hospitality', name: 'قهوة عربية', default_supplier: 'أسواق التميمي' },
+        { id: 3, category: 'cleaning', name: 'منظف أرضيات', default_supplier: 'الصالة الاقتصادية' },
+        { id: 4, category: 'stationery', name: 'ورق طباعة A4', default_supplier: 'مكتبة جرير' }
     ],
     suppliers: JSON.parse(localStorage.getItem('db_suppliers')) || [
         { id: 1, name: 'الصالة الاقتصادية' },
@@ -307,7 +307,6 @@ function renderDashboard(c) {
             </div>
         </div>
 
-        <!-- توزيع العروض حسب الأقسام -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="card-custom p-6">
                 <h4 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-mug-hot text-amber-500"></i> الضيافة والبوفيه</h4>
@@ -355,7 +354,7 @@ function renderQuotationPage(c, cat) {
             <form onsubmit="addQuotation(event, '${cat}')" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-2">الصنف</label>
-                    <select id="q-item" required class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <select id="q-item" required onchange="onItemSelect()" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">اختر الصنف...</option>
                         ${categoryItems.map(i => `<option value="${i.name}">${i.name}</option>`).join('')}
                     </select>
@@ -372,15 +371,15 @@ function renderQuotationPage(c, cat) {
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">نوع معاملة الضريبة</label>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">معاملة الضريبة</label>
                     <select id="q-tax" onchange="calcTotal()" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="15">السعر شامل الضريبة (15%)</option>
-                        <option value="0">غير شامل الضريبة</option>
+                        <option value="0">تصفير الضريبة (0%)</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">المورد</label>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">المورد (ينربط تلقائياً بالصنف)</label>
                     <select id="q-supplier" required class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">اختر المورد...</option>
                         ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
@@ -431,7 +430,7 @@ function renderQuotationPage(c, cat) {
                                 <td class="p-3 font-semibold text-slate-800">${q.item_name}</td>
                                 <td class="p-3">${q.quantity}</td>
                                 <td class="p-3">${q.price} ر.س</td>
-                                <td class="p-3 text-xs text-slate-500">${q.tax_type == '15' ? 'شامل (15%)' : 'بدون ضريبة'}</td>
+                                <td class="p-3 text-xs text-slate-500">${q.tax_type == '15' ? 'شامل (15%)' : 'معفي/صفرية (0%)'}</td>
                                 <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-xs font-bold">${q.supplier}</span></td>
                                 <td class="p-3">${q.beneficiary}</td>
                                 <td class="p-3 font-black text-emerald-600">${q.total} ر.س</td>
@@ -452,11 +451,26 @@ function renderQuotationPage(c, cat) {
     `;
 }
 
+// دالة اختيار الصنف والتحديد التلقائي للمورد
+function onItemSelect() {
+    const selectedItemName = document.getElementById('q-item').value;
+    const itemObj = db.items.find(i => i.name === selectedItemName);
+    if (itemObj && itemObj.default_supplier) {
+        document.getElementById('q-supplier').value = itemObj.default_supplier;
+    }
+}
+
 function calcTotal() {
     const qty = parseFloat(document.getElementById('q-qty').value) || 0;
     const price = parseFloat(document.getElementById('q-price').value) || 0;
-    const total = (qty * price).toFixed(2);
-    document.getElementById('q-total').value = total;
+    const taxType = document.getElementById('q-tax').value;
+    
+    // إذا تصفير الضريبة، يحسب السعر مباشرة بدون إضافة نسبة
+    let total = qty * price;
+    if (taxType === "15") {
+        total = total; // إذا كان شامل الضريبة
+    }
+    document.getElementById('q-total').value = total.toFixed(2);
 }
 
 async function addQuotation(e, cat) {
@@ -489,21 +503,25 @@ async function deleteQuote(id, cat) {
     renderQuotationPage(document.getElementById('app-content'), cat);
 }
 
-// --- 4.3 صفحة إدارة الأصناف ---
+// --- 4.3 صفحة إدارة الأصناف (مع إمكانية التعديل والربط بالمورد) ---
 function renderManageItemsPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الأصناف';
-    document.getElementById('page-subtitle').innerText = 'إضافة وتعديل الأصناف والمنتجات الخاصة بكل قسم';
+    document.getElementById('page-subtitle').innerText = 'إضافة، تعديل، وربط الأصناف بالموردين المعتمدين';
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة صنف جديد</h3>
-            <form onsubmit="addNewItem(event)" class="flex flex-col md:flex-row gap-4">
-                <select id="item-cat" required class="p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none md:w-1/4">
+            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة صنف جديد ورابط المورد</h3>
+            <form onsubmit="addNewItem(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <select id="item-cat" required class="p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <option value="hospitality">الضيافة والبوفيه</option>
                     <option value="cleaning">أدوات النظافة</option>
                     <option value="stationery">القرطاسية والإلكترونيات</option>
                 </select>
-                <input type="text" id="item-name" placeholder="اسم الصنف الجديد (مثل: قهوة، مناديل...)" required class="flex-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <input type="text" id="item-name" placeholder="اسم الصنف (مثل: شاي كبوس)" required class="p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <select id="item-supplier" required class="p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="">اختر المورد المرتبط تلقائياً...</option>
+                    ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
+                </select>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition">
                     <i class="fa-solid fa-plus me-1"></i> إضافة الصنف
                 </button>
@@ -520,10 +538,16 @@ function renderManageItemsPage(c) {
                                 ${item.category === 'hospitality' ? 'الضيافة' : item.category === 'cleaning' ? 'النظافة' : 'القرطاسية'}
                             </span>
                             <span class="font-bold text-slate-700">${item.name}</span>
+                            <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-md">المورد: <b>${item.default_supplier || 'غير محدد'}</b></span>
                         </div>
-                        <button onclick="deleteItem(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="editItem(${item.id})" class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteItem(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                 `).join('')}
             </div>
@@ -536,11 +560,25 @@ async function addNewItem(e) {
     const item = {
         id: Date.now(),
         category: document.getElementById('item-cat').value,
-        name: document.getElementById('item-name').value
+        name: document.getElementById('item-name').value,
+        default_supplier: document.getElementById('item-supplier').value
     };
     db.items.push(item);
     saveLocal();
     try { await supabaseClient.from('items').insert([item]); } catch (err) {}
+    renderManageItemsPage(document.getElementById('app-content'));
+}
+
+async function editItem(id) {
+    const item = db.items.find(i => i.id === id);
+    if (!item) return;
+
+    const newName = prompt("تعديل اسم الصنف:", item.name);
+    if (!newName) return;
+
+    item.name = newName;
+    saveLocal();
+    try { await supabaseClient.from('items').update({ name: newName }).eq('id', id); } catch (err) {}
     renderManageItemsPage(document.getElementById('app-content'));
 }
 
@@ -551,10 +589,10 @@ async function deleteItem(id) {
     renderManageItemsPage(document.getElementById('app-content'));
 }
 
-// --- 4.4 صفحة إدارة الموردين ---
+// --- 4.4 صفحة إدارة الموردين (مع إمكانية التعديل) ---
 function renderManageSuppliersPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الموردين';
-    document.getElementById('page-subtitle').innerText = 'تسجيل قوائم الشركات والمحلات الموردة';
+    document.getElementById('page-subtitle').innerText = 'تسجيل وتعديل قوائم الشركات والمحلات الموردة';
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
@@ -573,9 +611,14 @@ function renderManageSuppliersPage(c) {
                 ${db.suppliers.map(sup => `
                     <div class="py-3 flex justify-between items-center hover:bg-slate-50 px-3 rounded-lg">
                         <span class="font-bold text-slate-700"><i class="fa-solid fa-store me-2 text-slate-400"></i> ${sup.name}</span>
-                        <button onclick="deleteSupplier(${sup.id})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="editSupplier(${sup.id})" class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteSupplier(${sup.id})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                 `).join('')}
             </div>
@@ -592,6 +635,19 @@ async function addNewSupplier(e) {
     renderManageSuppliersPage(document.getElementById('app-content'));
 }
 
+async function editSupplier(id) {
+    const sup = db.suppliers.find(s => s.id === id);
+    if (!sup) return;
+
+    const newName = prompt("تعديل اسم المورد:", sup.name);
+    if (!newName) return;
+
+    sup.name = newName;
+    saveLocal();
+    try { await supabaseClient.from('suppliers').update({ name: newName }).eq('id', id); } catch (err) {}
+    renderManageSuppliersPage(document.getElementById('app-content'));
+}
+
 async function deleteSupplier(id) {
     db.suppliers = db.suppliers.filter(s => s.id !== id);
     saveLocal();
@@ -599,7 +655,7 @@ async function deleteSupplier(id) {
     renderManageSuppliersPage(document.getElementById('app-content'));
 }
 
-// --- 4.5 صفحة إدارة الموظفين والجهات ---
+// --- 4.5 صفحة إدارة الموظفين والجهات (مع إمكانية التعديل) ---
 function renderManageEmployeesPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الموظفين والجهات';
     document.getElementById('page-subtitle').innerText = 'التحكم في أسماء الجهات والموظفين المستفيدين من المشتريات';
@@ -621,9 +677,14 @@ function renderManageEmployeesPage(c) {
                 ${db.employees.map(emp => `
                     <div class="py-3 flex justify-between items-center hover:bg-slate-50 px-3 rounded-lg">
                         <span class="font-bold text-slate-700"><i class="fa-solid fa-user-tie me-2 text-slate-400"></i> ${emp.name}</span>
-                        <button onclick="deleteEmployee(${emp.id})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="editEmployee(${emp.id})" class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteEmployee(${emp.id})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                 `).join('')}
             </div>
@@ -637,6 +698,19 @@ async function addNewEmployee(e) {
     db.employees.push(emp);
     saveLocal();
     try { await supabaseClient.from('employees').insert([emp]); } catch (err) {}
+    renderManageEmployeesPage(document.getElementById('app-content'));
+}
+
+async function editEmployee(id) {
+    const emp = db.employees.find(e => e.id === id);
+    if (!emp) return;
+
+    const newName = prompt("تعديل اسم الموظف/الجهة:", emp.name);
+    if (!newName) return;
+
+    emp.name = newName;
+    saveLocal();
+    try { await supabaseClient.from('employees').update({ name: newName }).eq('id', id); } catch (err) {}
     renderManageEmployeesPage(document.getElementById('app-content'));
 }
 
