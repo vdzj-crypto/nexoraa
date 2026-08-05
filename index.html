@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotations Hub - منصة عروض الأسعار والعهدة</title>
+    <title>Quotations Hub - منصة عروض الأسعار والعهد</title>
     
     <!-- Bootstrap 5 RTL & FontAwesome & TailwindCSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- HTML2PDF & Supabase JS Libraries -->
+    <!-- HTML2PDF & Chart.js & Supabase JS Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -133,7 +134,7 @@
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> متصل بالسحابة
             </span>
-            <div class="text-xs text-slate-500 mt-2">الإصدار v3.5 - محدث</div>
+            <div class="text-xs text-slate-500 mt-2">الإصدار v3.8 - مجمّل المعاينة</div>
         </div>
     </aside>
 
@@ -215,6 +216,7 @@ function showPage(pageId) {
 // 3. شاشات النظام والوظائف
 // =============================================================
 
+// --- لوحة التحكم المحدثة بالتصميم الجمالي الجديد ---
 function renderDashboard(c) {
     document.getElementById('page-title').innerText = 'لوحة التحكم الرئيسية';
     document.getElementById('page-subtitle').innerText = 'ملخص الأداء وعرض حركة العُهد والمشتريات';
@@ -222,30 +224,121 @@ function renderDashboard(c) {
     const activeQuotes = db.quotations.filter(q => !q.is_archived);
     const totalAmount = activeQuotes.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
     const activeCustodies = db.custodies.filter(c => c.status === 'active' && !c.is_archived).length;
+    const recentQuotes = activeQuotes.slice(-5).reverse();
 
     c.innerHTML = `
+        <!-- 1. كروت الإحصائيات الجمالية -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="card-custom p-6 border-r-4 border-blue-600">
-                <p class="text-xs font-bold text-slate-400 uppercase">إجمالي المشتريات (النشطة)</p>
-                <h3 class="text-2xl font-black mt-2 text-slate-800">${totalAmount} <span class="text-xs font-normal">ر.س</span></h3>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">إجمالي المشتريات</p>
+                        <h3 class="text-2xl font-black mt-2 text-slate-800">${totalAmount} <span class="text-xs font-normal">ر.س</span></h3>
+                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl text-2xl">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                </div>
             </div>
-            <div class="card-custom p-6 border-r-4 border-emerald-600">
-                <p class="text-xs font-bold text-slate-400 uppercase">عدد العروض النشطة</p>
-                <h3 class="text-3xl font-black mt-2 text-slate-800">${activeQuotes.length}</h3>
+
+            <div class="card-custom p-6 border-r-4 border-emerald-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">العروض النشطة</p>
+                        <h3 class="text-3xl font-black mt-2 text-slate-800">${activeQuotes.length}</h3>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-2xl">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                    </div>
+                </div>
             </div>
+
             <div class="card-custom p-6 border-r-4 border-amber-500">
-                <p class="text-xs font-bold text-slate-400 uppercase">العهُد النشطة حالياً</p>
-                <h3 class="text-3xl font-black mt-2 text-amber-600">${activeCustodies}</h3>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">العُهد النشطة</p>
+                        <h3 class="text-3xl font-black mt-2 text-amber-600">${activeCustodies}</h3>
+                    </div>
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl text-2xl">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
             </div>
-            <div class="card-custom p-6 border-r-4 border-purple-600">
-                <p class="text-xs font-bold text-slate-400 uppercase">الأصناف المسجلة</p>
-                <h3 class="text-3xl font-black mt-2 text-slate-800">${db.items.length}</h3>
+
+            <div class="card-custom p-6 border-r-4 border-purple-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">الأصناف المسجلة</p>
+                        <h3 class="text-3xl font-black mt-2 text-slate-800">${db.items.length}</h3>
+                    </div>
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-2xl text-2xl">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <!-- 2. جدول أحدث العمليات والاختصارات -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            
+            <!-- أحدث الطلبات المسجلة -->
+            <div class="lg:col-span-2 card-custom p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-clock-rotate-left me-2 text-blue-600"></i>أحدث الطلبات المسجلة</h3>
+                    <button onclick="showPage('summary')" class="text-xs font-bold text-blue-600 hover:underline">عرض الكل</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-xs text-slate-500">
+                                <th class="p-2.5">الصنف</th>
+                                <th class="p-2.5">الطالب</th>
+                                <th class="p-2.5">المورد</th>
+                                <th class="p-2.5">الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${recentQuotes.length === 0 ? '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">لا توجد طلبات مسجلة حديثاً</td></tr>' : 
+                            recentQuotes.map(q => `
+                                <tr class="border-b text-xs hover:bg-slate-50/80">
+                                    <td class="p-2.5 font-bold text-slate-700">${q.item_name}</td>
+                                    <td class="p-2.5"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">${q.requester || '-'}</span></td>
+                                    <td class="p-2.5 text-slate-500">${q.supplier}</td>
+                                    <td class="p-2.5 font-black text-emerald-600">${q.total} ر.س</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- اختصارات وإجراءات سريعة -->
+            <div class="card-custom p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-bolt text-amber-500 me-2"></i>إجراءات سريعة</h3>
+                    <div class="space-y-3">
+                        <button onclick="showPage('stationery')" class="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 transition text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span><i class="fa-solid fa-plus-circle text-blue-600 me-2"></i>إضافة عرض سعر قرطاسية</span>
+                            <i class="fa-solid fa-chevron-left text-slate-400"></i>
+                        </button>
+                        <button onclick="showPage('custody')" class="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 transition text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span><i class="fa-solid fa-wallet text-amber-600 me-2"></i>فتح عُهدة مالية جديدة</span>
+                            <i class="fa-solid fa-chevron-left text-slate-400"></i>
+                        </button>
+                        <button onclick="showPage('summary')" class="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 transition text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-pdf text-red-500 me-2"></i>تصدير التقرير الشامل</span>
+                            <i class="fa-solid fa-chevron-left text-slate-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     `;
 }
 
-// --- شاشة إضافة وتسجيل عروض الأسعار (مضاف لها الموظف طالب الصنف) ---
+// --- شاشات الإدخال وقواعد البيانات والعهد والمؤرشفات بنفس الآلية المشروحة سابقاً ---
 function renderQuotationPage(c, cat) {
     const titles = { hospitality: 'عروض الضيافة والبوفيه', cleaning: 'عروض أدوات النظافة', stationery: 'عروض القرطاسية والإلكترونيات' };
     document.getElementById('page-title').innerText = titles[cat];
@@ -422,7 +515,6 @@ function deleteQuote(id, cat) {
     renderQuotationPage(document.getElementById('app-content'), cat);
 }
 
-// --- إدارة العهد الجارية وقابلية أزفتها ---
 function renderCustodyPage(c) {
     document.getElementById('page-title').innerText = 'إدارة العُهد المالية وتصفية الحسابات';
     document.getElementById('page-subtitle').innerText = 'فتح عهد جديدة وتصفيتها ونقل المغلقة منها إلى الأرشيف';
@@ -524,7 +616,6 @@ function archiveCustody(id) {
     const cust = db.custodies.find(c => c.id === id);
     if (cust) {
         cust.is_archived = true;
-        // أرشفة جميع مشتريات هذه العهدة أيضاً
         db.quotations.forEach(q => {
             if (q.custody_id == id) q.is_archived = true;
         });
@@ -539,7 +630,6 @@ function deleteCustody(id) {
     renderCustodyPage(document.getElementById('app-content'));
 }
 
-// --- قسم الأرشيف الشامل للعهد والمشتريات الشهرية ---
 function renderArchivePage(c) {
     document.getElementById('page-title').innerText = 'أرشيف المشتريات والعهد الشهرية';
     document.getElementById('page-subtitle').innerText = 'السجلات المكتملة والمؤرشفة للرجوع إليها في أي وقت';
@@ -553,7 +643,6 @@ function renderArchivePage(c) {
             ${archivedCustodies.length === 0 ? '<p class="text-xs text-slate-400">لا توجد عهد مؤرشفة حالياً.</p>' : `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     ${archivedCustodies.map(cust => {
-                        const spent = db.quotations.filter(q => q.custody_id == cust.id).reduce((s, q) => s + Number(q.total || 0), 0);
                         return `
                             <div class="p-4 border rounded-xl bg-slate-50 flex justify-between items-center">
                                 <div>
@@ -625,7 +714,6 @@ function unarchiveQuote(id) {
     }
 }
 
-// --- باقي إدارات الأصناف والموردين والموظفين والملخص ---
 function renderManageItemsPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الأصناف والأسعار الثابتة';
     document.getElementById('page-subtitle').innerText = 'تحديد أسعار الأصناف وحساب الضريبة تلقائياً';
@@ -634,7 +722,6 @@ function renderManageItemsPage(c) {
         <div class="card-custom p-6 mb-8">
             <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة صنف جديد</h3>
             <form onsubmit="addNewItem(event)" class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">القسم</label>
                     <select id="item-cat" required class="w-full p-2.5 border rounded-xl text-sm">
@@ -643,12 +730,10 @@ function renderManageItemsPage(c) {
                         <option value="cleaning">أدوات النظافة</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">اسم الصنف</label>
                     <input type="text" id="item-name" placeholder="مثال: كرتون ورق A4" required class="w-full p-2.5 border rounded-xl text-sm">
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">نوع التسعير</label>
                     <select id="item-price-type" onchange="togglePriceInput()" class="w-full p-2.5 border rounded-xl text-sm">
@@ -656,12 +741,10 @@ function renderManageItemsPage(c) {
                         <option value="variable">سعر متغير عند العرض</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">السعر المُدخل (ر.س)</label>
                     <input type="number" step="0.01" id="item-fixed-price" placeholder="52" class="w-full p-2.5 border rounded-xl text-sm">
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">احتساب الضريبة (15%)</label>
                     <select id="item-tax-mode" class="w-full p-2.5 border rounded-xl text-sm bg-blue-50 font-bold text-blue-900">
@@ -669,7 +752,6 @@ function renderManageItemsPage(c) {
                         <option value="inclusive">شامل الضريبة جاهز</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">المورد الافتراضي</label>
                     <select id="item-supplier" required class="w-full p-2.5 border rounded-xl text-sm">
@@ -677,7 +759,6 @@ function renderManageItemsPage(c) {
                         ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
                     </select>
                 </div>
-
                 <div class="md:col-span-6 flex justify-end mt-2">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> حفظ الصنف بالسعر النهائي
@@ -693,13 +774,11 @@ function renderManageItemsPage(c) {
                     <div class="py-3 flex justify-between items-center hover:bg-slate-50 px-3 rounded-lg">
                         <div class="flex items-center gap-3">
                             <span class="font-bold text-slate-800 text-base">${item.name}</span>
-                            
                             ${item.price_type === 'fixed' ? `
                                 <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md">
                                     السعر النهائي (شامل الضريبة): ${Number(item.price).toFixed(2)} ر.س
                                 </span>
                             ` : '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">سعر متغير</span>'}
-
                             <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">المورد: ${item.default_supplier || 'غير محدد'}</span>
                         </div>
                         <div class="flex gap-2">
