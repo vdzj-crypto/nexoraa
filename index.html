@@ -3,38 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotations Hub - منصة عروض الأسعار والعهد</title>
+    <title>Quotations Hub - منصة عروض الأسعار والمشتريات والعُهد</title>
     
-    <!-- Bootstrap 5 RTL & FontAwesome & TailwindCSS -->
+    <!-- Frameworks & CSS Libraries -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- HTML2PDF & Chart.js & Supabase JS Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Firebase SDK Compat Core -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
         
+        :root {
+            --primary-dark: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent-color: #2563eb;
+        }
+
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
 
         .sidebar {
-            background-color: #1b2537;
+            background-color: var(--sidebar-bg);
             color: #ffffff;
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
         .sidebar .nav-link {
             color: #94a3b8;
-            border-radius: 10px;
-            padding: 12px 18px;
-            margin-bottom: 6px;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -45,959 +56,1153 @@
         .sidebar .nav-link:hover {
             color: #ffffff;
             background-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(-3px);
         }
 
         .sidebar .nav-link.active {
             color: #ffffff;
-            background-color: #2563eb;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            background-color: var(--accent-color);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            font-weight: 700;
         }
 
         .card-custom {
             background: #ffffff;
-            border-radius: 14px;
+            border-radius: 16px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
         }
 
-        .btn-custom-primary {
-            background-color: #10b981;
-            color: white;
+        .card-custom:hover {
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-custom th {
+            background-color: #f1f5f9;
+            color: #475569;
             font-weight: 700;
+            padding: 14px 16px;
+            font-size: 0.825rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table-custom td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+
+        .table-custom tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pending { background-color: #fef3c7; color: #d97706; }
+        .status-approved { background-color: #d1fae5; color: #059669; }
+        .status-rejected { background-color: #fee2e2; color: #dc2626; }
+        .status-completed { background-color: #e0e7ff; color: #4338ca; }
+
+        .form-input-custom {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input-custom:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-primary-custom {
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 10px;
             transition: all 0.2s;
         }
 
-        .btn-custom-primary:hover {
-            background-color: #059669;
+        .btn-primary-custom:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .sidebar { display: none !important; }
+            main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+            body { background: white !important; }
+            .card-custom { border: none !important; box-shadow: none !important; }
         }
     </style>
 </head>
 <body class="bg-slate-50">
 
-<div class="flex flex-col md:flex-row min-h-screen">
-    
-    <!-- الشريط الجانبي (Sidebar) -->
-    <aside class="w-full md:w-72 sidebar p-5 flex flex-col justify-between shadow-xl">
-        <div>
-            <!-- اسم التطبيق والشعار -->
-            <div class="flex items-center gap-3 mb-10 px-2 pt-2">
-                <div class="bg-blue-600 p-2.5 rounded-xl text-white">
-                    <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+    <!-- 1. شاشة تسجيل الدخول -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="inline-flex p-3 bg-blue-600 text-white rounded-2xl mb-3 shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-file-invoice-dollar text-3xl"></i>
                 </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-wide text-white">Quotations Hub</h1>
-                    <p class="text-xs text-slate-400">إدارة عروض الأسعار والعهد</p>
-                </div>
-            </div>
-            
-            <!-- القائمة الرئيسية -->
-            <nav class="nav flex-column">
-                <a href="#" onclick="showPage('dashboard')" class="nav-link active" id="link-dashboard">
-                    <i class="fa-solid fa-chart-pie text-lg"></i> لوحة التحكم
-                </a>
-                <a href="#" onclick="showPage('hospitality')" class="nav-link" id="link-hospitality">
-                    <i class="fa-solid fa-mug-hot text-lg"></i> الضيافة والبوفيه
-                </a>
-                <a href="#" onclick="showPage('cleaning')" class="nav-link" id="link-cleaning">
-                    <i class="fa-solid fa-pump-soap text-lg"></i> أدوات النظافة
-                </a>
-                <a href="#" onclick="showPage('stationery')" class="nav-link" id="link-stationery">
-                    <i class="fa-solid fa-print text-lg"></i> القرطاسية والإلكترونيات
-                </a>
-                <a href="#" onclick="showPage('custody')" class="nav-link" id="link-custody">
-                    <i class="fa-solid fa-wallet text-lg text-amber-400"></i> إدارة العُهد والمشتريات
-                </a>
-                <a href="#" onclick="showPage('archive')" class="nav-link" id="link-archive">
-                    <i class="fa-solid fa-box-archive text-lg text-indigo-400"></i> أرشيف المشتريات والعهد
-                </a>
-                <a href="#" onclick="showPage('summary')" class="nav-link" id="link-summary">
-                    <i class="fa-solid fa-list-check text-lg"></i> الملخص الشامل والطباعة
-                </a>
-
-                <div class="my-4 border-t border-slate-700/60"></div>
-                
-                <div class="px-3 mb-2 text-xs font-bold text-slate-400 tracking-wider">الإدارة والإعدادات</div>
-                
-                <a href="#" onclick="showPage('manage-items')" class="nav-link" id="link-manage-items">
-                    <i class="fa-solid fa-boxes-stacked text-lg"></i> الأصناف والأسعار الثابتة
-                </a>
-                <a href="#" onclick="showPage('manage-suppliers')" class="nav-link" id="link-manage-suppliers">
-                    <i class="fa-solid fa-truck-field text-lg"></i> الموردين
-                </a>
-                <a href="#" onclick="showPage('manage-employees')" class="nav-link" id="link-manage-employees">
-                    <i class="fa-solid fa-users text-lg"></i> الموظفين والجهات
-                </a>
-            </nav>
-        </div>
-
-        <div class="pt-6 border-t border-slate-700/60 text-center">
-            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> متصل بالسحابة
-            </span>
-            <div class="text-xs text-slate-500 mt-2">الإصدار v3.8 - مجمّل المعاينة</div>
-        </div>
-    </aside>
-
-    <!-- المحتوى الرئيسي -->
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
-        <header class="flex justify-between items-center mb-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-            <div>
-                <h2 id="page-title" class="text-2xl font-black text-slate-800">لوحة التحكم</h2>
-                <p id="page-subtitle" class="text-xs text-slate-500 mt-1">نظرة عامة على العروض والإحصائيات</p>
-            </div>
-            <div id="live-time" class="text-sm font-bold text-slate-600 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200 flex items-center gap-2">
-                <i class="fa-regular fa-clock text-blue-500"></i>
-                <span id="clock-text">--:--:--</span>
-            </div>
-        </header>
-
-        <div id="app-content"></div>
-    </main>
-</div>
-
-<script>
-// =============================================================
-// 1. إعدادات وقواعد البيانات المحلية والمزامن
-// =============================================================
-const SUPABASE_URL = 'https://vhzkwpfecausuaklagcq.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_01gWxJcTz2yL4VU8vZQgyQ_Xn9rCdc2';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let db = {
-    items: JSON.parse(localStorage.getItem('db_items')) || [
-        { id: 1, category: 'stationery', name: 'كرتون ورق A4', default_supplier: 'شركة بيست اكستو', price_type: 'fixed', price: 59.80, raw_price: 52 },
-        { id: 2, category: 'stationery', name: 'دباسه روكو', default_supplier: 'شركة بيست اكستو', price_type: 'fixed', price: 20.70, raw_price: 18 },
-        { id: 3, category: 'stationery', name: 'حبر ليزر 17 A', default_supplier: 'قرطاسية السبعين', price_type: 'fixed', price: 75.90, raw_price: 66 }
-    ],
-    suppliers: JSON.parse(localStorage.getItem('db_suppliers')) || [
-        { id: 1, name: 'شركة بيست اكستو' },
-        { id: 2, name: 'قرطاسية السبعين' }
-    ],
-    employees: JSON.parse(localStorage.getItem('db_employees')) || [
-        { id: 1, name: 'إبراهيم العلي' },
-        { id: 2, name: 'محمد القحطاني' },
-        { id: 3, name: 'قسم IT' }
-    ],
-    custodies: JSON.parse(localStorage.getItem('db_custodies')) || [
-        { id: 101, title: 'عهده مشتريات 7/15', emp_name: 'إبراهيم العلي', amount: 5000, status: 'active', is_archived: false }
-    ],
-    quotations: JSON.parse(localStorage.getItem('db_quotations')) || []
-};
-
-function saveLocal() {
-    localStorage.setItem('db_items', JSON.stringify(db.items));
-    localStorage.setItem('db_suppliers', JSON.stringify(db.suppliers));
-    localStorage.setItem('db_employees', JSON.stringify(db.employees));
-    localStorage.setItem('db_custodies', JSON.stringify(db.custodies));
-    localStorage.setItem('db_quotations', JSON.stringify(db.quotations));
-}
-
-// =============================================================
-// 2. إدارة التبويبات
-// =============================================================
-function showPage(pageId) {
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    const activeLink = document.getElementById(`link-${pageId}`);
-    if (activeLink) activeLink.classList.add('active');
-
-    const container = document.getElementById('app-content');
-    
-    if (pageId === 'dashboard') renderDashboard(container);
-    else if (['hospitality', 'cleaning', 'stationery'].includes(pageId)) renderQuotationPage(container, pageId);
-    else if (pageId === 'custody') renderCustodyPage(container);
-    else if (pageId === 'archive') renderArchivePage(container);
-    else if (pageId === 'summary') renderSummaryPage(container);
-    else if (pageId === 'manage-items') renderManageItemsPage(container);
-    else if (pageId === 'manage-suppliers') renderManageSuppliersPage(container);
-    else if (pageId === 'manage-employees') renderManageEmployeesPage(container);
-}
-
-// =============================================================
-// 3. شاشات النظام والوظائف
-// =============================================================
-
-// --- لوحة التحكم المحدثة بالتصميم الجمالي الجديد ---
-function renderDashboard(c) {
-    document.getElementById('page-title').innerText = 'لوحة التحكم الرئيسية';
-    document.getElementById('page-subtitle').innerText = 'ملخص الأداء وعرض حركة العُهد والمشتريات';
-
-    const activeQuotes = db.quotations.filter(q => !q.is_archived);
-    const totalAmount = activeQuotes.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
-    const activeCustodies = db.custodies.filter(c => c.status === 'active' && !c.is_archived).length;
-    const recentQuotes = activeQuotes.slice(-5).reverse();
-
-    c.innerHTML = `
-        <!-- 1. كروت الإحصائيات الجمالية -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="card-custom p-6 border-r-4 border-blue-600">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase">إجمالي المشتريات</p>
-                        <h3 class="text-2xl font-black mt-2 text-slate-800">${totalAmount} <span class="text-xs font-normal">ر.س</span></h3>
-                    </div>
-                    <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl text-2xl">
-                        <i class="fa-solid fa-sack-dollar"></i>
-                    </div>
-                </div>
+                <h2 class="text-2xl font-black text-slate-800">Quotations Hub</h2>
+                <p class="text-xs text-slate-500 mt-1">منصة إدارة عروض الأسعار والمشتريات والعُهد المالية</p>
             </div>
 
-            <div class="card-custom p-6 border-r-4 border-emerald-500">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase">العروض النشطة</p>
-                        <h3 class="text-3xl font-black mt-2 text-slate-800">${activeQuotes.length}</h3>
-                    </div>
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-2xl">
-                        <i class="fa-solid fa-file-circle-check"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-custom p-6 border-r-4 border-amber-500">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase">العُهد النشطة</p>
-                        <h3 class="text-3xl font-black mt-2 text-amber-600">${activeCustodies}</h3>
-                    </div>
-                    <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl text-2xl">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-custom p-6 border-r-4 border-purple-500">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase">الأصناف المسجلة</p>
-                        <h3 class="text-3xl font-black mt-2 text-slate-800">${db.items.length}</h3>
-                    </div>
-                    <div class="p-3 bg-purple-50 text-purple-600 rounded-2xl text-2xl">
-                        <i class="fa-solid fa-boxes-stacked"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. جدول أحدث العمليات والاختصارات -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            
-            <!-- أحدث الطلبات المسجلة -->
-            <div class="lg:col-span-2 card-custom p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-clock-rotate-left me-2 text-blue-600"></i>أحدث الطلبات المسجلة</h3>
-                    <button onclick="showPage('summary')" class="text-xs font-bold text-blue-600 hover:underline">عرض الكل</button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-xs text-slate-500">
-                                <th class="p-2.5">الصنف</th>
-                                <th class="p-2.5">الطالب</th>
-                                <th class="p-2.5">المورد</th>
-                                <th class="p-2.5">الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${recentQuotes.length === 0 ? '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">لا توجد طلبات مسجلة حديثاً</td></tr>' : 
-                            recentQuotes.map(q => `
-                                <tr class="border-b text-xs hover:bg-slate-50/80">
-                                    <td class="p-2.5 font-bold text-slate-700">${q.item_name}</td>
-                                    <td class="p-2.5"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">${q.requester || '-'}</span></td>
-                                    <td class="p-2.5 text-slate-500">${q.supplier}</td>
-                                    <td class="p-2.5 font-black text-emerald-600">${q.total} ر.س</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- اختصارات وإجراءات سريعة -->
-            <div class="card-custom p-6 flex flex-col justify-between">
+            <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-bolt text-amber-500 me-2"></i>إجراءات سريعة</h3>
-                    <div class="space-y-3">
-                        <button onclick="showPage('stationery')" class="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 transition text-xs font-bold text-slate-700 flex items-center justify-between">
-                            <span><i class="fa-solid fa-plus-circle text-blue-600 me-2"></i>إضافة عرض سعر قرطاسية</span>
-                            <i class="fa-solid fa-chevron-left text-slate-400"></i>
-                        </button>
-                        <button onclick="showPage('custody')" class="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 transition text-xs font-bold text-slate-700 flex items-center justify-between">
-                            <span><i class="fa-solid fa-wallet text-amber-600 me-2"></i>فتح عُهدة مالية جديدة</span>
-                            <i class="fa-solid fa-chevron-left text-slate-400"></i>
-                        </button>
-                        <button onclick="showPage('summary')" class="w-full text-right p-3 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 transition text-xs font-bold text-slate-700 flex items-center justify-between">
-                            <span><i class="fa-solid fa-file-pdf text-red-500 me-2"></i>تصدير التقرير الشامل</span>
-                            <i class="fa-solid fa-chevron-left text-slate-400"></i>
-                        </button>
-                    </div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+                    <input type="email" id="login-email" required placeholder="user@company.com" class="form-input-custom">
                 </div>
-            </div>
-
-        </div>
-    `;
-}
-
-// --- شاشات الإدخال وقواعد البيانات والعهد والمؤرشفات بنفس الآلية المشروحة سابقاً ---
-function renderQuotationPage(c, cat) {
-    const titles = { hospitality: 'عروض الضيافة والبوفيه', cleaning: 'عروض أدوات النظافة', stationery: 'عروض القرطاسية والإلكترونيات' };
-    document.getElementById('page-title').innerText = titles[cat];
-    document.getElementById('page-subtitle').innerText = 'تسجيل وإدخال الأسعار والربط بالمطالبين والعهد';
-
-    const categoryItems = db.items.filter(i => i.category === cat);
-    const activeCustodies = db.custodies.filter(cust => cust.status === 'active' && !cust.is_archived);
-
-    c.innerHTML = `
-        <div class="card-custom p-6 mb-8">
-            <h3 class="text-lg font-bold mb-6 text-slate-800 border-b pb-3">إضافة عرض سعر جديد</h3>
-            
-            <form onsubmit="addQuotation(event, '${cat}')" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">اختر الصنف</label>
-                    <select id="q-item" required onchange="onItemSelect()" class="w-full p-2.5 border rounded-xl">
-                        <option value="">اختر الصنف...</option>
-                        ${categoryItems.map(i => `<option value="${i.name}">${i.name} ${i.price_type === 'fixed' ? `(${i.price} ر.س)` : ''}</option>`).join('')}
-                    </select>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="form-input-custom">
                 </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">الكمية</label>
-                    <input type="number" id="q-qty" value="1" min="1" required oninput="calcTotal()" class="w-full p-2.5 border rounded-xl">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">سعر الوحدة الشامل (ر.س)</label>
-                    <input type="number" step="0.01" id="q-price" required oninput="calcTotal()" placeholder="0.00" class="w-full p-2.5 border rounded-xl">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">الخصم / العرض (إن وجد)</label>
-                    <div class="flex gap-1">
-                        <input type="number" step="0.01" id="q-discount" value="0" oninput="calcTotal()" class="w-2/3 p-2.5 border rounded-xl">
-                        <select id="q-discount-type" onchange="calcTotal()" class="w-1/3 p-2.5 border rounded-xl text-xs">
-                            <option value="amount">ر.س</option>
-                            <option value="percent">%</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-blue-700 mb-2"><i class="fa-solid fa-user-tag me-1"></i> الموظف / الجهة الطالبة</label>
-                    <select id="q-requester" required class="w-full p-2.5 border border-blue-300 rounded-xl bg-blue-50/50 font-medium">
-                        <option value="">اختر الموظف طالب الصنف...</option>
-                        ${db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">المورد المرتبط</label>
-                    <select id="q-supplier" required class="w-full p-2.5 border rounded-xl">
-                        <option value="">اختر المورد...</option>
-                        ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">ربط بمصدر التمويل / العُهدة</label>
-                    <select id="q-custody" class="w-full p-2.5 border rounded-xl bg-amber-50 font-semibold">
-                        <option value="">حساب الشركة المباشر (بدون عُهدة)</option>
-                        ${activeCustodies.map(cust => `<option value="${cust.id}">${cust.title}</option>`).join('')}
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">الإجمالي النهائي</label>
-                    <input type="text" id="q-total" readonly placeholder="0.00" class="w-full p-2.5 border rounded-xl bg-slate-100 font-black text-emerald-600 text-lg">
-                </div>
-
-                <div class="md:col-span-4 flex justify-end mt-2">
-                    <button type="submit" class="btn-custom-primary py-2.5 px-6 rounded-xl flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> حفظ وعرض التسعيرة
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div class="card-custom p-6">
-            <h3 class="text-base font-bold mb-4 text-slate-800">العروض المسجلة</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-xs text-slate-600">
-                            <th class="p-3">الصنف</th>
-                            <th class="p-3">الموظف طالب الصنف</th>
-                            <th class="p-3">الكمية</th>
-                            <th class="p-3">السعر الفردي</th>
-                            <th class="p-3">الخصم</th>
-                            <th class="p-3">المورد</th>
-                            <th class="p-3">التمويل/العهدة</th>
-                            <th class="p-3">الإجمالي</th>
-                            <th class="p-3 text-center">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${db.quotations.filter(q => q.category === cat && !q.is_archived).map(q => {
-                            const custodyObj = db.custodies.find(c => c.id == q.custody_id);
-                            return `
-                                <tr class="border-b text-sm">
-                                    <td class="p-3 font-semibold text-slate-800">${q.item_name}</td>
-                                    <td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-xs"><i class="fa-solid fa-user me-1"></i>${q.requester || 'غير محدد'}</span></td>
-                                    <td class="p-3">${q.quantity}</td>
-                                    <td class="p-3">${q.price} ر.س</td>
-                                    <td class="p-3 text-red-500 font-bold">${q.discount > 0 ? `-${q.discount}` : '-'}</td>
-                                    <td class="p-3"><span class="bg-slate-100 px-2 py-1 rounded text-xs font-bold">${q.supplier}</span></td>
-                                    <td class="p-3"><span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-bold">${custodyObj ? custodyObj.title : 'حساب مباشر'}</span></td>
-                                    <td class="p-3 font-black text-emerald-600">${q.total} ر.س</td>
-                                    <td class="p-3 text-center">
-                                        <button onclick="deleteQuote(${q.id}, '${cat}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-}
-
-function onItemSelect() {
-    const selectedName = document.getElementById('q-item').value;
-    const itemObj = db.items.find(i => i.name === selectedName);
-    if (itemObj) {
-        if (itemObj.default_supplier) document.getElementById('q-supplier').value = itemObj.default_supplier;
-        if (itemObj.price_type === 'fixed') {
-            document.getElementById('q-price').value = itemObj.price;
-        }
-        calcTotal();
-    }
-}
-
-function calcTotal() {
-    const qty = parseFloat(document.getElementById('q-qty').value) || 0;
-    const price = parseFloat(document.getElementById('q-price').value) || 0;
-    const discount = parseFloat(document.getElementById('q-discount').value) || 0;
-    const discountType = document.getElementById('q-discount-type').value;
-
-    let totalWithoutDisc = qty * price;
-    let discAmount = (discountType === 'percent') ? totalWithoutDisc * (discount / 100) : discount;
-
-    let finalTotal = Math.max(0, totalWithoutDisc - discAmount);
-    document.getElementById('q-total').value = finalTotal.toFixed(2);
-}
-
-function addQuotation(e, cat) {
-    e.preventDefault();
-    const newQ = {
-        id: Date.now(),
-        category: cat,
-        item_name: document.getElementById('q-item').value,
-        quantity: parseFloat(document.getElementById('q-qty').value),
-        price: parseFloat(document.getElementById('q-price').value),
-        discount: parseFloat(document.getElementById('q-discount').value) || 0,
-        discount_type: document.getElementById('q-discount-type').value,
-        requester: document.getElementById('q-requester').value,
-        supplier: document.getElementById('q-supplier').value,
-        custody_id: document.getElementById('q-custody').value,
-        total: parseFloat(document.getElementById('q-total').value),
-        is_archived: false,
-        date: new Date().toISOString().split('T')[0]
-    };
-
-    db.quotations.push(newQ);
-    saveLocal();
-    renderQuotationPage(document.getElementById('app-content'), cat);
-}
-
-function deleteQuote(id, cat) {
-    db.quotations = db.quotations.filter(q => q.id !== id);
-    saveLocal();
-    renderQuotationPage(document.getElementById('app-content'), cat);
-}
-
-function renderCustodyPage(c) {
-    document.getElementById('page-title').innerText = 'إدارة العُهد المالية وتصفية الحسابات';
-    document.getElementById('page-subtitle').innerText = 'فتح عهد جديدة وتصفيتها ونقل المغلقة منها إلى الأرشيف';
-
-    const activeCustodiesList = db.custodies.filter(cust => !cust.is_archived);
-
-    c.innerHTML = `
-        <div class="card-custom p-6 mb-8">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">فتح عُهدة مالية جديدة</h3>
-            <form onsubmit="addCustody(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" id="cust-title" placeholder="عنوان العهدة (مثال: عهدة مشتريات 7/15)" required class="p-2.5 border rounded-xl">
-                <select id="cust-emp" required class="p-2.5 border rounded-xl">
-                    <option value="">الموظف أمين العهدة...</option>
-                    ${db.employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
-                </select>
-                <input type="number" step="0.01" id="cust-amount" placeholder="مبلغ العهدة (ر.س)" required class="p-2.5 border rounded-xl">
-                <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-2.5 rounded-xl">
-                    <i class="fa-solid fa-wallet me-1"></i> فتح العُهدة
+                <div id="login-error" class="text-red-500 text-xs font-bold hidden bg-red-50 p-3 rounded-lg border border-red-200"></div>
+                <button type="submit" id="login-btn" class="w-full btn-primary-custom flex justify-center items-center gap-2">
+                    <span>تسجيل الدخول</span>
                 </button>
             </form>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            ${activeCustodiesList.map(cust => {
-                const spent = db.quotations.filter(q => q.custody_id == cust.id).reduce((s, q) => s + Number(q.total || 0), 0);
-                const diff = cust.amount - spent;
-                const isClosed = cust.status === 'closed';
-
-                return `
-                    <div class="card-custom p-6 border-t-4 ${isClosed ? 'border-gray-400 opacity-90' : diff >= 0 ? 'border-emerald-500' : 'border-red-500'}">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 class="font-bold text-lg text-slate-800">${cust.title}</h4>
-                                <p class="text-xs text-slate-500"><i class="fa-solid fa-user me-1"></i> أمين العهدة: ${cust.emp_name}</p>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold ${isClosed ? 'bg-slate-200 text-slate-600' : 'bg-emerald-100 text-emerald-700'}">
-                                ${isClosed ? 'مُغلقة ومصفاة' : 'نشطة'}
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl mb-4 text-center">
-                            <div>
-                                <span class="block text-xs text-slate-400 font-bold">مبلغ العُهدة</span>
-                                <span class="font-black text-slate-700 text-sm">${cust.amount} ر.س</span>
-                            </div>
-                            <div>
-                                <span class="block text-xs text-slate-400 font-bold">المصروفات</span>
-                                <span class="font-black text-blue-600 text-sm">${spent.toFixed(2)} ر.س</span>
-                            </div>
-                            <div>
-                                <span class="block text-xs font-bold ${diff >= 0 ? 'text-emerald-600' : 'text-red-600'}">المتبقي / الفارق</span>
-                                <span class="font-black text-sm ${diff >= 0 ? 'text-emerald-600' : 'text-red-600'}">${Math.abs(diff).toFixed(2)} ر.س</span>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-between items-center pt-3 border-t">
-                            <div class="flex gap-2">
-                                <button onclick="toggleCustodyStatus(${cust.id})" class="text-xs font-bold px-3 py-2 rounded-lg ${isClosed ? 'bg-slate-200 text-slate-700' : 'bg-amber-500 text-white'}">
-                                    ${isClosed ? 'إعادة فتح العهدة' : 'إقفال وتصفية'}
-                                </button>
-                                <button onclick="archiveCustody(${cust.id})" class="text-xs font-bold px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg">
-                                    <i class="fa-solid fa-box-archive me-1"></i> أرشفة
-                                </button>
-                            </div>
-                            <button onclick="deleteCustody(${cust.id})" class="text-red-500 text-xs hover:underline">حذف</button>
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-}
-
-function addCustody(e) {
-    e.preventDefault();
-    const cust = {
-        id: Date.now(),
-        title: document.getElementById('cust-title').value,
-        emp_name: document.getElementById('cust-emp').value,
-        amount: parseFloat(document.getElementById('cust-amount').value),
-        status: 'active',
-        is_archived: false
-    };
-    db.custodies.push(cust);
-    saveLocal();
-    renderCustodyPage(document.getElementById('app-content'));
-}
-
-function toggleCustodyStatus(id) {
-    const cust = db.custodies.find(c => c.id === id);
-    if (cust) {
-        cust.status = cust.status === 'active' ? 'closed' : 'active';
-        saveLocal();
-        renderCustodyPage(document.getElementById('app-content'));
-    }
-}
-
-function archiveCustody(id) {
-    const cust = db.custodies.find(c => c.id === id);
-    if (cust) {
-        cust.is_archived = true;
-        db.quotations.forEach(q => {
-            if (q.custody_id == id) q.is_archived = true;
-        });
-        saveLocal();
-        renderCustodyPage(document.getElementById('app-content'));
-    }
-}
-
-function deleteCustody(id) {
-    db.custodies = db.custodies.filter(c => c.id !== id);
-    saveLocal();
-    renderCustodyPage(document.getElementById('app-content'));
-}
-
-function renderArchivePage(c) {
-    document.getElementById('page-title').innerText = 'أرشيف المشتريات والعهد الشهرية';
-    document.getElementById('page-subtitle').innerText = 'السجلات المكتملة والمؤرشفة للرجوع إليها في أي وقت';
-
-    const archivedCustodies = db.custodies.filter(c => c.is_archived);
-    const archivedQuotations = db.quotations.filter(q => q.is_archived);
-
-    c.innerHTML = `
-        <div class="card-custom p-6 mb-8 border-t-4 border-indigo-600">
-            <h3 class="text-lg font-bold mb-4 text-slate-800"><i class="fa-solid fa-box-archive text-indigo-600 me-2"></i> العُهد المؤرشفة والمقفلة</h3>
-            ${archivedCustodies.length === 0 ? '<p class="text-xs text-slate-400">لا توجد عهد مؤرشفة حالياً.</p>' : `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    ${archivedCustodies.map(cust => {
-                        return `
-                            <div class="p-4 border rounded-xl bg-slate-50 flex justify-between items-center">
-                                <div>
-                                    <h5 class="font-bold text-slate-800 text-sm">${cust.title}</h5>
-                                    <p class="text-xs text-slate-500">المسؤول: ${cust.emp_name} | الإجمالي: ${cust.amount} ر.س</p>
-                                </div>
-                                <button onclick="unarchiveCustody(${cust.id})" class="text-xs bg-white border px-3 py-1.5 rounded-lg font-bold text-slate-700 hover:bg-slate-100">
-                                    إعادة من الأرشيف
-                                </button>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `}
-        </div>
-
-        <div class="card-custom p-6">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">سجل المشتريات والطلبات المؤرشفة</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-xs text-slate-600">
-                            <th class="p-3">الصنف</th>
-                            <th class="p-3">طالب الصنف</th>
-                            <th class="p-3">المورد</th>
-                            <th class="p-3">الإجمالي</th>
-                            <th class="p-3">التاريخ</th>
-                            <th class="p-3 text-center">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${archivedQuotations.map(q => `
-                            <tr class="border-b text-xs">
-                                <td class="p-3 font-semibold">${q.item_name}</td>
-                                <td class="p-3">${q.requester || 'غير محدد'}</td>
-                                <td class="p-3">${q.supplier}</td>
-                                <td class="p-3 font-bold text-emerald-600">${q.total} ر.س</td>
-                                <td class="p-3 text-slate-400">${q.date || '-'}</td>
-                                <td class="p-3 text-center">
-                                    <button onclick="unarchiveQuote(${q.id})" class="text-indigo-600 hover:underline font-bold">إعادة للنشط</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+            <div class="mt-6 text-center">
+                <p class="text-xs text-slate-400">جميع الحقوق محفوظة &copy; Quotations Hub 2026</p>
             </div>
         </div>
-    `;
-}
+    </div>
 
-function unarchiveCustody(id) {
-    const cust = db.custodies.find(c => c.id === id);
-    if (cust) {
-        cust.is_archived = false;
-        db.quotations.forEach(q => {
-            if (q.custody_id == id) q.is_archived = false;
-        });
-        saveLocal();
-        renderArchivePage(document.getElementById('app-content'));
-    }
-}
+    <!-- 2. الواجهة الرئيسية للتطبيق -->
+    <div id="app-screen" class="hidden flex flex-col md:flex-row min-h-screen">
+        
+        <!-- القائمة الجانبية Navigation Sidebar -->
+        <aside class="w-full md:w-72 sidebar p-5 flex flex-col justify-between shadow-xl no-print">
+            <div>
+                <div class="flex items-center gap-3 mb-8 px-2 pt-2">
+                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-md">
+                        <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-black text-white">Quotations Hub</h1>
+                        <p id="user-role-badge" class="text-xs text-amber-400 font-bold">جاري المزامنة...</p>
+                    </div>
+                </div>
+                
+                <nav class="nav flex-column" id="main-nav">
+                    <!-- يتم بناء عناصر Navigation بناءً على الصلاحيات عبر JS -->
+                </nav>
+            </div>
 
-function unarchiveQuote(id) {
-    const q = db.quotations.find(quote => quote.id === id);
-    if (q) {
-        q.is_archived = false;
-        saveLocal();
-        renderArchivePage(document.getElementById('app-content'));
-    }
-}
-
-function renderManageItemsPage(c) {
-    document.getElementById('page-title').innerText = 'إدارة الأصناف والأسعار الثابتة';
-    document.getElementById('page-subtitle').innerText = 'تحديد أسعار الأصناف وحساب الضريبة تلقائياً';
-
-    c.innerHTML = `
-        <div class="card-custom p-6 mb-8">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة صنف جديد</h3>
-            <form onsubmit="addNewItem(event)" class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">القسم</label>
-                    <select id="item-cat" required class="w-full p-2.5 border rounded-xl text-sm">
-                        <option value="stationery">القرطاسية والإلكترونيات</option>
-                        <option value="hospitality">الضيافة والبوفيه</option>
-                        <option value="cleaning">أدوات النظافة</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم الصنف</label>
-                    <input type="text" id="item-name" placeholder="مثال: كرتون ورق A4" required class="w-full p-2.5 border rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">نوع التسعير</label>
-                    <select id="item-price-type" onchange="togglePriceInput()" class="w-full p-2.5 border rounded-xl text-sm">
-                        <option value="fixed">سعر ثابت</option>
-                        <option value="variable">سعر متغير عند العرض</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">السعر المُدخل (ر.س)</label>
-                    <input type="number" step="0.01" id="item-fixed-price" placeholder="52" class="w-full p-2.5 border rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">احتساب الضريبة (15%)</label>
-                    <select id="item-tax-mode" class="w-full p-2.5 border rounded-xl text-sm bg-blue-50 font-bold text-blue-900">
-                        <option value="add_tax">قبل الضريبة (إضافة 15%+)</option>
-                        <option value="inclusive">شامل الضريبة جاهز</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">المورد الافتراضي</label>
-                    <select id="item-supplier" required class="w-full p-2.5 border rounded-xl text-sm">
-                        <option value="">اختر المورد...</option>
-                        ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="md:col-span-6 flex justify-end mt-2">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> حفظ الصنف بالسعر النهائي
+            <div class="pt-4 border-t border-slate-700/60">
+                <div class="flex items-center justify-between px-2 mb-3">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <i class="fa-solid fa-circle-user text-slate-400 text-lg"></i>
+                        <span id="user-email-display" class="text-xs text-slate-300 font-medium truncate max-w-[140px]"></span>
+                    </div>
+                    <button onclick="handleLogout()" title="تسجيل الخروج" class="text-xs bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-2.5 py-1.5 rounded-lg transition">
+                        <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
-            </form>
-        </div>
-
-        <div class="card-custom p-6">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">دليل الأصناف والأسعار المسجلة</h3>
-            <div class="divide-y">
-                ${db.items.map(item => `
-                    <div class="py-3 flex justify-between items-center hover:bg-slate-50 px-3 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold text-slate-800 text-base">${item.name}</span>
-                            ${item.price_type === 'fixed' ? `
-                                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md">
-                                    السعر النهائي (شامل الضريبة): ${Number(item.price).toFixed(2)} ر.س
-                                </span>
-                            ` : '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">سعر متغير</span>'}
-                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">المورد: ${item.default_supplier || 'غير محدد'}</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="deleteItem(${item.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>
-                `).join('')}
             </div>
-        </div>
-    `;
-}
+        </aside>
 
-function togglePriceInput() {
-    const type = document.getElementById('item-price-type').value;
-    const priceInput = document.getElementById('item-fixed-price');
-    const taxMode = document.getElementById('item-tax-mode');
-    
-    if (type === 'variable') {
-        priceInput.value = '';
-        priceInput.disabled = true;
-        taxMode.disabled = true;
-    } else {
-        priceInput.disabled = false;
-        taxMode.disabled = false;
-    }
-}
-
-function addNewItem(e) {
-    e.preventDefault();
-    const priceType = document.getElementById('item-price-type').value;
-    const rawPrice = parseFloat(document.getElementById('item-fixed-price').value) || 0;
-    const taxMode = document.getElementById('item-tax-mode').value;
-
-    let finalPrice = rawPrice;
-    if (priceType === 'fixed' && taxMode === 'add_tax') {
-        finalPrice = rawPrice * 1.15;
-    }
-
-    const item = {
-        id: Date.now(),
-        category: document.getElementById('item-cat').value,
-        name: document.getElementById('item-name').value,
-        price_type: priceType,
-        raw_price: rawPrice,
-        price: parseFloat(finalPrice.toFixed(2)),
-        default_supplier: document.getElementById('item-supplier').value
-    };
-
-    db.items.push(item);
-    saveLocal();
-    renderManageItemsPage(document.getElementById('app-content'));
-}
-
-function deleteItem(id) {
-    db.items = db.items.filter(i => i.id !== id);
-    saveLocal();
-    renderManageItemsPage(document.getElementById('app-content'));
-}
-
-function renderManageSuppliersPage(c) {
-    document.getElementById('page-title').innerText = 'إدارة الموردين';
-    document.getElementById('page-subtitle').innerText = 'إضافة وتحديث جهات التوريد';
-
-    c.innerHTML = `
-        <div class="card-custom p-6 mb-8">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة مورد جديد</h3>
-            <form onsubmit="addSupplier(event)" class="flex gap-4">
-                <input type="text" id="sup-name" placeholder="اسم المورد الجديد" required class="flex-1 p-2.5 border rounded-xl">
-                <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">إضافة مورد</button>
-            </form>
-        </div>
-        <div class="card-custom p-6">
-            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموردين</h3>
-            <div class="divide-y">
-                ${db.suppliers.map(s => `
-                    <div class="py-3 flex justify-between items-center">
-                        <span class="font-bold text-slate-700">${s.name}</span>
-                        <button onclick="deleteSupplier(${s.id})" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
-
-function addSupplier(e) {
-    e.preventDefault();
-    db.suppliers.push({ id: Date.now(), name: document.getElementById('sup-name').value });
-    saveLocal();
-    renderManageSuppliersPage(document.getElementById('app-content'));
-}
-
-function deleteSupplier(id) {
-    db.suppliers = db.suppliers.filter(s => s.id !== id);
-    saveLocal();
-    renderManageSuppliersPage(document.getElementById('app-content'));
-}
-
-function renderManageEmployeesPage(c) {
-    document.getElementById('page-title').innerText = 'إدارة الموظفين والجهات';
-    document.getElementById('page-subtitle').innerText = 'تسجيل قائمة الموظفين والجهات الطالبة';
-
-    c.innerHTML = `
-        <div class="card-custom p-6 mb-8">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة موظف / قسم جديد</h3>
-            <form onsubmit="addEmployee(event)" class="flex gap-4">
-                <input type="text" id="emp-name" placeholder="اسم الموظف أو القسم" required class="flex-1 p-2.5 border rounded-xl">
-                <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">إضافة موظف</button>
-            </form>
-        </div>
-        <div class="card-custom p-6">
-            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموظفين والأقسام</h3>
-            <div class="divide-y">
-                ${db.employees.map(e => `
-                    <div class="py-3 flex justify-between items-center">
-                        <span class="font-bold text-slate-700">${e.name}</span>
-                        <button onclick="deleteEmployee(${e.id})" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
-
-function addEmployee(e) {
-    e.preventDefault();
-    db.employees.push({ id: Date.now(), name: document.getElementById('emp-name').value });
-    saveLocal();
-    renderManageEmployeesPage(document.getElementById('app-content'));
-}
-
-function deleteEmployee(id) {
-    db.employees = db.employees.filter(e => e.id !== id);
-    saveLocal();
-    renderManageEmployeesPage(document.getElementById('app-content'));
-}
-
-function renderSummaryPage(c) {
-    document.getElementById('page-title').innerText = 'الملخص الشامل والطباعة';
-    document.getElementById('page-subtitle').innerText = 'تصدير التقرير النهائي بالكامل موضح به الموظفين والموردين والعهدة';
-
-    const activeQuotes = db.quotations.filter(q => !q.is_archived);
-    const grandTotal = activeQuotes.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
-
-    c.innerHTML = `
-        <div class="mb-6 flex justify-end">
-            <button onclick="exportPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2">
-                <i class="fa-solid fa-file-pdf"></i> تصدير التقرير PDF
-            </button>
-        </div>
-
-        <div id="pdf-content" class="card-custom p-8 bg-white">
-            <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <!-- المحتوى الرئيسي Main Content Area -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm no-print">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800">تقرير المشتريات وعروض الأسعار</h2>
-                    <p class="text-xs text-slate-500 mt-1">كشف تفصيلي بالطلبات والموظفين والمصادر</p>
+                    <h2 id="page-title" class="text-2xl font-black text-slate-800">---</h2>
+                    <p id="page-subtitle" class="text-xs text-slate-500 mt-1">---</p>
                 </div>
-                <div class="text-xs text-slate-400">التاريخ: ${new Date().toLocaleDateString('ar-SA')}</div>
+                <div class="flex items-center gap-3">
+                    <div class="text-xs font-bold text-slate-600 bg-slate-100 px-4 py-2.5 rounded-xl border flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-blue-600"></i>
+                        <span id="current-user-name">...</span>
+                    </div>
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> طباعة
+                    </button>
+                </div>
+            </header>
+
+            <div id="app-content">
+                <!-- المحتوى يتغير ديناميكياً هنا -->
             </div>
+        </main>
+    </div>
 
-            <table class="w-full text-right border-collapse border mb-6">
-                <thead>
-                    <tr class="bg-slate-100 text-xs">
-                        <th class="border p-2">#</th>
-                        <th class="border p-2">الصنف</th>
-                        <th class="border p-2">طالب الصنف</th>
-                        <th class="border p-2">الكمية</th>
-                        <th class="border p-2">السعر الفردي</th>
-                        <th class="border p-2">المورد</th>
-                        <th class="border p-2">التمويل/العهدة</th>
-                        <th class="border p-2">الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${activeQuotes.map((q, idx) => {
-                        const custodyObj = db.custodies.find(c => c.id == q.custody_id);
-                        return `
-                            <tr class="text-xs">
-                                <td class="border p-2">${idx + 1}</td>
-                                <td class="border p-2 font-bold">${q.item_name}</td>
-                                <td class="border p-2">${q.requester || '-'}</td>
-                                <td class="border p-2">${q.quantity}</td>
-                                <td class="border p-2">${q.price} ر.س</td>
-                                <td class="border p-2">${q.supplier}</td>
-                                <td class="border p-2">${custodyObj ? custodyObj.title : 'حساب مباشر'}</td>
-                                <td class="border p-2 font-bold text-emerald-600">${q.total} ر.س</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-
-            <div class="flex justify-between items-center border-t pt-4">
-                <span class="text-sm font-bold text-slate-500">إجمالي الطلبات: ${activeQuotes.length}</span>
-                <span class="text-xl font-black text-emerald-600">المبلغ الإجمالي الكلي: ${grandTotal} ر.س</span>
+    <!-- Modals (نافذة إضافة وتحرير الموردين والأصناف) -->
+    <div id="generic-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="font-bold text-slate-800 text-base">---</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-body">
+                <!-- أسطر المودال تضاف بالسوفتوير -->
             </div>
         </div>
-    `;
-}
+    </div>
 
-function exportPDF() {
-    const el = document.getElementById('pdf-content');
-    html2pdf().set({ 
-        margin: 10, 
-        filename: 'Procurement_Summary.pdf', 
-        html2canvas: { scale: 2 }, 
-        jsPDF: { format: 'a4', orientation: 'landscape' } 
-    }).from(el).save();
-}
+    <!-- JavaScript Logic -->
+    <script>
+        // 1. Firebase Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVbmyDOHZR7nyQTSEUKWacDyFHdrdMUDY",
+            authDomain: "quotations-hub.firebaseapp.com",
+            projectId: "quotations-hub",
+            storageBucket: "quotations-hub.firebasestorage.app",
+            messagingSenderId: "573711718348",
+            appId: "1:573711718348:web:a573ba9e151e3124d1ef69",
+            measurementId: "G-E5MTZT0N34"
+        };
 
-window.onload = () => {
-    setInterval(() => {
-        const clockEl = document.getElementById('clock-text');
-        if (clockEl) clockEl.innerText = new Date().toLocaleTimeString('ar-SA');
-    }, 1000);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    showPage('dashboard');
-};
-</script>
+        // Application State
+        let currentUser = null;
+        let currentUserProfile = null;
+        let globalSuppliers = [];
+        let globalAgents = [];
 
+        // App Preloader / Auth Change Engine
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        currentUserProfile = userDoc.data();
+                    } else {
+                        currentUserProfile = {
+                            name: user.email.split('@')[0],
+                            role: 'agent',
+                            email: user.email,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        await db.collection('users').doc(user.uid).set(currentUserProfile);
+                    }
+                } catch(e) {
+                    console.error("User profile load error:", e);
+                    currentUserProfile = { name: user.email.split('@')[0], role: 'agent', email: user.email };
+                }
+                await loadGlobalMetadata();
+                showApp();
+            } else {
+                showLogin();
+            }
+        });
+
+        async function loadGlobalMetadata() {
+            try {
+                const agentsSnap = await db.collection('users').where('role', '==', 'agent').get();
+                globalAgents = [];
+                agentsSnap.forEach(doc => globalAgents.push({ id: doc.id, ...doc.data() }));
+
+                const suppliersSnap = await db.collection('suppliers').get();
+                globalSuppliers = [];
+                suppliersSnap.forEach(doc => globalSuppliers.push({ id: doc.id, ...doc.data() }));
+            } catch (e) {
+                console.log("Metadata loading error:", e);
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app-screen').classList.add('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('user-email-display').innerText = currentUser.email;
+            document.getElementById('current-user-name').innerText = currentUserProfile.name || currentUser.email;
+            document.getElementById('user-role-badge').innerText = currentUserProfile.role === 'admin' ? '🛡️ المدير (Admin)' : '📦 مندوب المشتريات';
+
+            buildNavigation();
+            showPage(currentUserProfile.role === 'admin' ? 'dashboard' : 'my-procurements');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const errEl = document.getElementById('login-error');
+            const btn = document.getElementById('login-btn');
+            
+            try {
+                errEl.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i> جاري التحقق...`;
+                btn.disabled = true;
+                await auth.signInWithEmailAndPassword(email, pass);
+            } catch (err) {
+                errEl.innerText = "فشل تسجيل الدخول: تأكد من بيانات الحساب.";
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = `<span>تسجيل الدخول</span>`;
+                btn.disabled = false;
+            }
+        }
+
+        function handleLogout() {
+            auth.signOut();
+        }
+
+        // Navigation Builder Engine
+        function buildNavigation() {
+            const nav = document.getElementById('main-nav');
+            const isAdmin = currentUserProfile.role === 'admin';
+
+            if (isAdmin) {
+                nav.innerHTML = `
+                    <a href="#" onclick="showPage('dashboard')" class="nav-link active" id="link-dashboard"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم الشاملة</a>
+                    <a href="#" onclick="showPage('hospitality')" class="nav-link" id="link-hospitality"><i class="fa-solid fa-mug-hot"></i> الضيافة والبوفيه</a>
+                    <a href="#" onclick="showPage('cleaning')" class="nav-link" id="link-cleaning"><i class="fa-solid fa-pump-soap"></i> أدوات النظافة</a>
+                    <a href="#" onclick="showPage('stationery')" class="nav-link" id="link-stationery"><i class="fa-solid fa-print"></i> القرطاسية والإلكترونيات</a>
+                    <a href="#" onclick="showPage('custody')" class="nav-link" id="link-custody"><i class="fa-solid fa-wallet text-amber-400"></i> إدارة العُهد والمشتريات</a>
+                    <a href="#" onclick="showPage('suppliers')" class="nav-link" id="link-suppliers"><i class="fa-solid fa-truck-field text-emerald-400"></i> قائمة الموردين المعتمدين</a>
+                    <a href="#" onclick="showPage('users-manage')" class="nav-link" id="link-users-manage"><i class="fa-solid fa-users-gear text-blue-400"></i> إدارة الحسابات والصلاحيات</a>
+                `;
+            } else {
+                nav.innerHTML = `
+                    <a href="#" onclick="showPage('my-procurements')" class="nav-link active" id="link-my-procurements"><i class="fa-solid fa-boxes-packing text-emerald-400"></i> قائمتي الخاصة بالمشتريات</a>
+                    <a href="#" onclick="showPage('my-custody')" class="nav-link" id="link-my-custody"><i class="fa-solid fa-wallet text-amber-400"></i> العُهدة المالية الخاصة بي</a>
+                `;
+            }
+        }
+
+        // Router Engine
+        function showPage(pageId) {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const activeLink = document.getElementById(`link-${pageId}`);
+            if (activeLink) activeLink.classList.add('active');
+
+            const container = document.getElementById('app-content');
+
+            if (pageId === 'dashboard') renderAdminDashboard(container);
+            else if (pageId === 'hospitality') renderCategoryPage(container, 'hospitality', 'الضيافة والبوفيه', 'إدارة عروض أسعار الشاي، القهوة، والمستلزمات');
+            else if (pageId === 'cleaning') renderCategoryPage(container, 'cleaning', 'أدوات النظافة', 'إدارة ومتابعة طلبات مواد التنظيف والمطهرات');
+            else if (pageId === 'stationery') renderCategoryPage(container, 'stationery', 'القرطاسية والإلكترونيات', 'متابعة أجهزة المكتب والورقيات والمستلزمات');
+            else if (pageId === 'custody') renderCustodyPage(container);
+            else if (pageId === 'suppliers') renderSuppliersPage(container);
+            else if (pageId === 'users-manage') renderUsersManagement(container);
+            else if (pageId === 'my-procurements') renderAgentProcurements(container);
+            else if (pageId === 'my-custody') renderAgentCustody(container);
+        }
+
+        // 1. Dashboard View
+        async function renderAdminDashboard(c) {
+            document.getElementById('page-title').innerText = 'لوحة تحكم المدير الشاملة';
+            document.getElementById('page-subtitle').innerText = 'نظرة عامة على المشتريات، الموردين، وإجمالي العُهد والمصروفات';
+
+            c.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="card-custom p-5 border-r-4 border-r-blue-600">
+                        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي الميزانية التقديرية</p>
+                        <h3 id="dash-total-est" class="text-2xl font-black text-slate-800">0.00 ر.س</h3>
+                    </div>
+                    <div class="card-custom p-5 border-r-4 border-r-emerald-500">
+                        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي المشتريات المكتملة</p>
+                        <h3 id="dash-total-done" class="text-2xl font-black text-slate-800">0.00 ر.س</h3>
+                    </div>
+                    <div class="card-custom p-5 border-r-4 border-r-amber-500">
+                        <p class="text-xs text-slate-500 font-bold mb-1">طلبات قيد الشراء والتنسيق</p>
+                        <h3 id="dash-pending-count" class="text-2xl font-black text-slate-800">0</h3>
+                    </div>
+                    <div class="card-custom p-5 border-r-4 border-r-purple-600">
+                        <p class="text-xs text-slate-500 font-bold mb-1">مندوبي المشتريات</p>
+                        <h3 class="text-2xl font-black text-slate-800">${globalAgents.length} مندوب</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card-custom p-6">
+                        <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-clock-rotate-left me-2 text-blue-600"></i>آخر التحديثات والمشتريات المضافة</h3>
+                        <div id="dash-recent-list" class="space-y-3">
+                            <div class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تحميل السجلات...</div>
+                        </div>
+                    </div>
+
+                    <div class="card-custom p-6">
+                        <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-chart-simple me-2 text-emerald-600"></i>توزيع المصروفات حسب الأقسام</h3>
+                        <div class="space-y-4 text-xs">
+                            <div>
+                                <div class="flex justify-between font-bold mb-1"><span>قسم الضيافة والبوفيه</span><span id="p-hosp-val">0 ر.س</span></div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5"><div id="p-hosp-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold mb-1"><span>قسم أدوات النظافة</span><span id="p-clean-val">0 ر.س</span></div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5"><div id="p-clean-bar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold mb-1"><span>قسم القرطاسية والإلكترونيات</span><span id="p-stat-val">0 ر.س</span></div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5"><div id="p-stat-bar" class="bg-amber-500 h-2.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Dynamic Dashboard Calculations
+            try {
+                const snap = await db.collection('quotations').get();
+                let totalEst = 0;
+                let totalDone = 0;
+                let pendingCount = 0;
+                let hospTot = 0, cleanTot = 0, statTot = 0;
+                let recentItems = [];
+
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const tot = parseFloat(data.total) || 0;
+                    totalEst += tot;
+
+                    if (data.status === 'تم الشراء والتسليم') {
+                        totalDone += tot;
+                    } else {
+                        pendingCount++;
+                    }
+
+                    if (data.category === 'hospitality') hospTot += tot;
+                    if (data.category === 'cleaning') cleanTot += tot;
+                    if (data.category === 'stationery') statTot += tot;
+
+                    recentItems.push({ id: doc.id, ...data });
+                });
+
+                document.getElementById('dash-total-est').innerText = totalEst.toLocaleString() + ' ر.س';
+                document.getElementById('dash-total-done').innerText = totalDone.toLocaleString() + ' ر.س';
+                document.getElementById('dash-pending-count').innerText = pendingCount;
+
+                document.getElementById('p-hosp-val').innerText = hospTot.toLocaleString() + ' ر.س';
+                document.getElementById('p-clean-val').innerText = cleanTot.toLocaleString() + ' ر.س';
+                document.getElementById('p-stat-val').innerText = statTot.toLocaleString() + ' ر.س';
+
+                const grandTotal = totalEst || 1;
+                document.getElementById('p-hosp-bar').style.width = Math.min((hospTot / grandTotal) * 100, 100) + '%';
+                document.getElementById('p-clean-bar').style.width = Math.min((cleanTot / grandTotal) * 100, 100) + '%';
+                document.getElementById('p-stat-bar').style.width = Math.min((statTot / grandTotal) * 100, 100) + '%';
+
+                const listEl = document.getElementById('dash-recent-list');
+                if (recentItems.length === 0) {
+                    listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-4">لا توجد عروض أسعار مسجلة</p>`;
+                } else {
+                    listEl.innerHTML = recentItems.slice(0, 5).map(item => `
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-xs">${item.item_name}</h4>
+                                <p class="text-[10px] text-slate-400">الكمية: ${item.quantity} | المسند: ${item.assigned_to}</p>
+                            </div>
+                            <div class="text-left">
+                                <span class="font-black text-xs text-blue-600 block">${item.total} ر.س</span>
+                                <span class="text-[10px] font-bold ${item.status === 'تم الشراء والتسليم' ? 'text-emerald-600' : 'text-amber-600'}">${item.status || 'قيد الانتظار'}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                console.error("Dashboard compute error:", e);
+            }
+        }
+
+        // 2. Categories Render Engine (Hospitality, Cleaning, Stationery)
+        async function renderCategoryPage(c, catKey, title, subtitle) {
+            document.getElementById('page-title').innerText = title;
+            document.getElementById('page-subtitle').innerText = subtitle;
+
+            let agentOptions = globalAgents.map(a => `<option value="${a.email}">${a.name || a.email}</option>`).join('');
+            if (!agentOptions) agentOptions = `<option value="agent@company.com">مندوب افتراضي</option>`;
+
+            let supplierOptions = globalSuppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            if (!supplierOptions) supplierOptions = `<option value="مورد عام">مورد عام</option>`;
+
+            c.innerHTML = `
+                <div class="card-custom p-6 mb-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-circle-plus me-2 text-blue-600"></i>إضافة عرض سعر / طلب جديد</h3>
+                    <form onsubmit="saveCategoryItem(event, '${catKey}')" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم الصنف / البيان</label>
+                            <input type="text" id="cat-item-name" required placeholder="مثال: شاي كبوس 100 كيس" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الكمية</label>
+                            <input type="number" id="cat-item-qty" min="1" required placeholder="10" oninput="calcCatTotal()" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">سعر الوحدة التقديري (ر.س)</label>
+                            <input type="number" step="0.01" id="cat-item-price" required placeholder="15.00" oninput="calcCatTotal()" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">المبلغ الإجمالي التقديري</label>
+                            <input type="text" id="cat-item-total" readonly placeholder="0.00" class="form-input-custom bg-slate-100 font-bold text-blue-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">المورد المقترح</label>
+                            <select id="cat-item-supplier" class="form-input-custom">
+                                ${supplierOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">إسناد لمندوب المشتريات</label>
+                            <select id="cat-item-agent" class="form-input-custom">
+                                ${agentOptions}
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 flex items-end">
+                            <button type="submit" id="cat-save-btn" class="w-full btn-primary-custom flex justify-center items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> حفظ وإسناد الطلب
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-custom p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 text-base">سجل عروض الأسعار والطلبات المسجلة</h3>
+                        <span id="cat-count-badge" class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">0 طلبات</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table-custom text-right">
+                            <thead>
+                                <tr>
+                                    <th>الصنف</th>
+                                    <th>الكمية</th>
+                                    <th>سعر الوحدة</th>
+                                    <th>الإجمالي</th>
+                                    <th>المورد</th>
+                                    <th>المندوب المسند</th>
+                                    <th>الحالة</th>
+                                    <th class="no-print">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cat-table-body">
+                                <tr><td colspan="8" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب البيانات...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            loadCategoryItems(catKey);
+        }
+
+        function calcCatTotal() {
+            const qty = parseFloat(document.getElementById('cat-item-qty').value) || 0;
+            const price = parseFloat(document.getElementById('cat-item-price').value) || 0;
+            document.getElementById('cat-item-total').value = (qty * price).toFixed(2);
+        }
+
+        async function saveCategoryItem(e, catKey) {
+            e.preventDefault();
+            const btn = document.getElementById('cat-save-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحفظ...`;
+
+            try {
+                await db.collection('quotations').add({
+                    category: catKey,
+                    item_name: document.getElementById('cat-item-name').value,
+                    quantity: parseFloat(document.getElementById('cat-item-qty').value),
+                    unit_price: parseFloat(document.getElementById('cat-item-price').value),
+                    total: parseFloat(document.getElementById('cat-item-total').value),
+                    supplier: document.getElementById('cat-item-supplier').value,
+                    assigned_to: document.getElementById('cat-item-agent').value,
+                    status: 'قيد الشراء',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('تم تسجيل عرض السعر وإسناده بنجاح!');
+                showPage(catKey);
+            } catch (err) {
+                alert('حدث خطأ أثناء الحفظ: ' + err.message);
+                btn.disabled = false;
+            }
+        }
+
+        async function loadCategoryItems(catKey) {
+            try {
+                const snap = await db.collection('quotations').where('category', '==', catKey).get();
+                const tbody = document.getElementById('cat-table-body');
+                document.getElementById('cat-count-badge').innerText = snap.size + ' طلبات';
+
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">لا توجد عناصر مسجلة في هذا القسم بعد.</td></tr>`;
+                    return;
+                }
+
+                let rowsHtml = '';
+                snap.forEach(doc => {
+                    const item = doc.data();
+                    rowsHtml += `
+                        <tr>
+                            <td class="font-bold text-slate-800">${item.item_name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.unit_price} ر.س</td>
+                            <td class="font-black text-blue-600">${item.total} ر.س</td>
+                            <td><span class="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-md border">${item.supplier || '-'}</span></td>
+                            <td class="text-xs font-bold text-slate-600">${item.assigned_to}</td>
+                            <td>
+                                <span class="status-badge ${item.status === 'تم الشراء والتسليم' ? 'status-approved' : 'status-pending'}">
+                                    ${item.status || 'قيد الشراء'}
+                                </span>
+                            </td>
+                            <td class="no-print">
+                                <button onclick="deleteQuotationDoc('${doc.id}', '${catKey}')" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition" title="حذف">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = rowsHtml;
+            } catch (e) {
+                console.error("Error loading category data:", e);
+            }
+        }
+
+        async function deleteQuotationDoc(docId, catKey) {
+            if (confirm('هل أنت تأكد من رغبتك في حذف هذا البند من السجلات؟')) {
+                await db.collection('quotations').doc(docId).delete();
+                loadCategoryItems(catKey);
+            }
+        }
+
+        // 3. Custody Management View
+        async function renderCustodyPage(c) {
+            document.getElementById('page-title').innerText = 'إدارة العُهد والمشتريات المالية';
+            document.getElementById('page-subtitle').innerText = 'تسليم العُهد المالية للمندوبين وتتبع الفواتير والمصروفات المتبقية';
+
+            let agentOpts = globalAgents.map(a => `<option value="${a.email}">${a.name || a.email}</option>`).join('');
+
+            c.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card-custom p-6 border-t-4 border-t-amber-500">
+                        <h4 class="font-bold text-slate-700 text-sm mb-2">إجمالي العُهد المسلمة</h4>
+                        <p id="total-custody-given" class="text-2xl font-black text-amber-600">0.00 ر.س</p>
+                    </div>
+                    <div class="card-custom p-6 border-t-4 border-t-emerald-500">
+                        <h4 class="font-bold text-slate-700 text-sm mb-2">إجمالي المبالغ المصروفة (فواتير)</h4>
+                        <p id="total-custody-spent" class="text-2xl font-black text-emerald-600">0.00 ر.س</p>
+                    </div>
+                    <div class="card-custom p-6 border-t-4 border-t-blue-500">
+                        <h4 class="font-bold text-slate-700 text-sm mb-2">المبلغ المتبقي لدى المندوبين</h4>
+                        <p id="total-custody-rem" class="text-2xl font-black text-blue-600">0.00 ر.س</p>
+                    </div>
+                </div>
+
+                <div class="card-custom p-6 mb-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-hand-holding-dollar me-2 text-amber-500"></i>صرف عُهدة مالية جديدة لمندوب</h3>
+                    <form onsubmit="issueCustody(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">اختر مندوب المشتريات</label>
+                            <select id="custody-agent" required class="form-input-custom">
+                                ${agentOpts || '<option value="agent@company.com">مندوب افتراضي</option>'}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">المبلغ المعتمد للعُهدة (ر.س)</label>
+                            <input type="number" step="0.01" id="custody-amount" required placeholder="1000.00" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات / البيان</label>
+                            <input type="text" id="custody-notes" placeholder="عُهدة شراء مستلزمات النظافة والضيافة" class="form-input-custom">
+                        </div>
+                        <div class="md:col-span-3 flex justify-end">
+                            <button type="submit" class="btn-primary-custom flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> اعتماد وتسليم العُهدة
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-custom p-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">سجل حركة العُهد المالية والتسويات</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table-custom text-right">
+                            <thead>
+                                <tr>
+                                    <th>المندوب</th>
+                                    <th>مبلغ العُهدة</th>
+                                    <th>المصروف بفواتير</th>
+                                    <th>المتبقي</th>
+                                    <th>البيان والملاحظات</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="custody-table-body">
+                                <tr><td colspan="6" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تحميل سجل العُهد...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            loadCustodyData();
+        }
+
+        async function issueCustody(e) {
+            e.preventDefault();
+            try {
+                await db.collection('custodies').add({
+                    agent_email: document.getElementById('custody-agent').value,
+                    amount: parseFloat(document.getElementById('custody-amount').value),
+                    spent: 0,
+                    notes: document.getElementById('custody-notes').value,
+                    issuedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('تم إيداع وتسجيل العُهدة بنجاح!');
+                showPage('custody');
+            } catch(err) {
+                alert('خطأ أثناء إضافة العُهدة: ' + err.message);
+            }
+        }
+
+        async function loadCustodyData() {
+            try {
+                const snap = await db.collection('custodies').get();
+                let given = 0, spent = 0;
+                const tbody = document.getElementById('custody-table-body');
+
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">لا توجد عُهد مالية مسجلة.</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                snap.forEach(doc => {
+                    const c = doc.data();
+                    const amt = c.amount || 0;
+                    const sp = c.spent || 0;
+                    const rem = amt - sp;
+
+                    given += amt;
+                    spent += sp;
+
+                    html += `
+                        <tr>
+                            <td class="font-bold text-slate-800">${c.agent_email}</td>
+                            <td class="font-bold text-amber-600">${amt.toLocaleString()} ر.س</td>
+                            <td class="font-bold text-emerald-600">${sp.toLocaleString()} ر.س</td>
+                            <td class="font-bold text-blue-600">${rem.toLocaleString()} ر.س</td>
+                            <td class="text-xs text-slate-500">${c.notes || '-'}</td>
+                            <td class="text-xs text-slate-400">${c.issuedAt ? new Date(c.issuedAt.toDate()).toLocaleDateString('ar-SA') : 'الآن'}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('total-custody-given').innerText = given.toLocaleString() + ' ر.س';
+                document.getElementById('total-custody-spent').innerText = spent.toLocaleString() + ' ر.س';
+                document.getElementById('total-custody-rem').innerText = (given - spent).toLocaleString() + ' ر.س';
+                tbody.innerHTML = html;
+            } catch(e) {
+                console.error("Error loading custody data:", e);
+            }
+        }
+
+        // 4. Approved Suppliers View
+        async function renderSuppliersPage(c) {
+            document.getElementById('page-title').innerText = 'قائمة الموردين المعتمدين';
+            document.getElementById('page-subtitle').innerText = 'إدارة قاعدة بيانات الموردين وأرقام التواصل والتصنيفات';
+
+            c.innerHTML = `
+                <div class="card-custom p-6 mb-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-truck-ram me-2 text-emerald-600"></i>إضافة مورد جديد</h3>
+                    <form onsubmit="saveSupplier(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم المورد / الشركة</label>
+                            <input type="text" id="supp-name" required placeholder="شركة الموردين المتحدة" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">التصنيف الرئيسي</label>
+                            <select id="supp-cat" class="form-input-custom">
+                                <option value="ضيافة وبوفيه">ضيافة وبوفيه</option>
+                                <option value="أدوات نظافة">أدوات نظافة</option>
+                                <option value="قرطاسية وأجهزة">قرطاسية وأجهزة</option>
+                                <option value="مورد عام">مورد عام</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف / الجوال</label>
+                            <input type="text" id="supp-phone" placeholder="0500000000" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الرقم الضريبي (اختياري)</label>
+                            <input type="text" id="supp-tax" placeholder="300000000000003" class="form-input-custom">
+                        </div>
+                        <div class="md:col-span-4 flex justify-end">
+                            <button type="submit" class="btn-primary-custom flex items-center gap-2">
+                                <i class="fa-solid fa-plus-circle"></i> حفظ المورد في القاعدة
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-custom p-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">قائمة الموردين المعتمدين بالنظام</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table-custom text-right">
+                            <thead>
+                                <tr>
+                                    <th>اسم المورد</th>
+                                    <th>التصنيف</th>
+                                    <th>رقم التواصل</th>
+                                    <th>الرقم الضريبي</th>
+                                    <th class="no-print">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="suppliers-table-body">
+                                <tr><td colspan="5" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب الموردين...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            loadSuppliersData();
+        }
+
+        async function saveSupplier(e) {
+            e.preventDefault();
+            try {
+                await db.collection('suppliers').add({
+                    name: document.getElementById('supp-name').value,
+                    category: document.getElementById('supp-cat').value,
+                    phone: document.getElementById('supp-phone').value,
+                    tax_number: document.getElementById('supp-tax').value,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('تمت إضافة المورد بنجاح!');
+                await loadGlobalMetadata();
+                showPage('suppliers');
+            } catch (err) {
+                alert('خطأ أثناء إضافة المورد: ' + err.message);
+            }
+        }
+
+        async function loadSuppliersData() {
+            try {
+                const snap = await db.collection('suppliers').get();
+                const tbody = document.getElementById('suppliers-table-body');
+
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">لا يوجد موردين مسجلين حتى الآن.</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                snap.forEach(doc => {
+                    const s = doc.data();
+                    html += `
+                        <tr>
+                            <td class="font-bold text-slate-800">${s.name}</td>
+                            <td><span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-md border border-blue-200 font-bold">${s.category}</span></td>
+                            <td>${s.phone || '-'}</td>
+                            <td class="font-mono text-xs">${s.tax_number || '-'}</td>
+                            <td class="no-print">
+                                <button onclick="deleteSupplierDoc('${doc.id}')" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch(e) {
+                console.error("Error loading suppliers:", e);
+            }
+        }
+
+        async function deleteSupplierDoc(id) {
+            if (confirm('هل ترغب في حذف هذا المورد؟')) {
+                await db.collection('suppliers').doc(id).delete();
+                await loadGlobalMetadata();
+                loadSuppliersData();
+            }
+        }
+
+        // 5. Users and Permissions Management View
+        async function renderUsersManagement(c) {
+            document.getElementById('page-title').innerText = 'إدارة الحسابات والصلاحيات';
+            document.getElementById('page-subtitle').innerText = 'التحكم في أدوار وصلاحيات مستخدمي النظام ومندوبي المشتريات';
+
+            c.innerHTML = `
+                <div class="card-custom p-6 mb-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-user-plus me-2 text-blue-600"></i>إضافة حساب موظف / مندوب جديد</h3>
+                    <p class="text-xs text-slate-500 mb-4">ملاحظة: يمكنك إضافة وتحديد الصلاحية مباشرة هنا لربطها ببريد Firebase Auth.</p>
+                    <form onsubmit="addNewUserRole(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الكامل</label>
+                            <input type="text" id="new-user-name" required placeholder="أحمد المحمد" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+                            <input type="email" id="new-user-email" required placeholder="agent2@company.com" class="form-input-custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الصلاحية / الدور</label>
+                            <select id="new-user-role" class="form-input-custom">
+                                <option value="agent">مندوب مشتريات (Agent)</option>
+                                <option value="admin">مدير النظام (Admin)</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-3 flex justify-end">
+                            <button type="submit" class="btn-primary-custom flex items-center gap-2">
+                                <i class="fa-solid fa-user-check"></i> اعتماد الحساب والصلاحية
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-custom p-6">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">قائمة المستخدمين المسجلين في النظام</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table-custom text-right">
+                            <thead>
+                                <tr>
+                                    <th>الاسم الكامل</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>الصلاحية الحالية</th>
+                                    <th>تاريخ التسجيل</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <tr><td colspan="4" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تحميل الحسابات...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            loadUsersData();
+        }
+
+        async function addNewUserRole(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-user-name').value;
+            const email = document.getElementById('new-user-email').value;
+            const role = document.getElementById('new-user-role').value;
+
+            try {
+                const userRef = db.collection('users').doc();
+                await userRef.set({
+                    name: name,
+                    email: email,
+                    role: role,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('تم تسجيل الموظف وصلاحياته بنجاح!');
+                await loadGlobalMetadata();
+                showPage('users-manage');
+            } catch(err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        }
+
+        async function loadUsersData() {
+            try {
+                const snap = await db.collection('users').get();
+                const tbody = document.getElementById('users-table-body');
+
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">لا يوجد مستخدمون مسجلون.</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                snap.forEach(doc => {
+                    const u = doc.data();
+                    html += `
+                        <tr>
+                            <td class="font-bold text-slate-800">${u.name || 'بدون اسم'}</td>
+                            <td>${u.email}</td>
+                            <td>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
+                                    ${u.role === 'admin' ? '🛡️ مدير النظام' : '📦 مندوب مشتريات'}
+                                </span>
+                            </td>
+                            <td class="text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString('ar-SA') : 'الآن'}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch(e) {
+                console.error("Error loading users:", e);
+            }
+        }
+
+        // 6. Procurement Agent View (My Tasks)
+        async function renderAgentProcurements(c) {
+            document.getElementById('page-title').innerText = 'قائمة المشتريات والمهام المطلوبة منك';
+            document.getElementById('page-subtitle').innerText = 'استعراض الطلبات المسندة لبريدك وشراء المنتجات وتحديث الحالات';
+
+            c.innerHTML = `
+                <div class="card-custom p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-boxes-packing me-2 text-emerald-600"></i>المهام المسندة لإيميلك (${currentUser.email})</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table-custom text-right">
+                            <thead>
+                                <tr>
+                                    <th>الصنف المطلوب</th>
+                                    <th>القسم</th>
+                                    <th>الكمية</th>
+                                    <th>المبلغ التقديري</th>
+                                    <th>المورد المقترح</th>
+                                    <th>الحالة</th>
+                                    <th class="no-print">الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agent-tasks-tbody">
+                                <tr><td colspan="7" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب مشترياتك...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const snap = await db.collection('quotations').where('assigned_to', '==', currentUser.email).get();
+                const tbody = document.getElementById('agent-tasks-tbody');
+
+                if (snap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">لا توجد مشتريات أو عروض أسعار مسندة لبريدك حالياً.</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                snap.forEach(doc => {
+                    const q = doc.data();
+                    const isDone = q.status === 'تم الشراء والتسليم';
+                    html += `
+                        <tr>
+                            <td class="font-bold text-slate-800">${q.item_name}</td>
+                            <td><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${q.category}</span></td>
+                            <td>${q.quantity}</td>
+                            <td class="font-black text-emerald-600">${q.total} ر.س</td>
+                            <td>${q.supplier || '-'}</td>
+                            <td>
+                                <span class="status-badge ${isDone ? 'status-approved' : 'status-pending'}">
+                                    ${q.status || 'قيد الانتظار'}
+                                </span>
+                            </td>
+                            <td class="no-print">
+                                ${!isDone ? `
+                                    <button onclick="markTaskAsCompleted('${doc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                        <i class="fa-solid fa-check"></i> تأكيد الشراء
+                                    </button>
+                                ` : `<span class="text-xs text-emerald-600 font-bold"><i class="fa-solid fa-circle-check me-1"></i>مكتمل</span>`}
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch(e) {
+                console.error("Agent procurements load error:", e);
+            }
+        }
+
+        async function markTaskAsCompleted(docId) {
+            if (confirm('هل تؤكد إتمامك لشراء هذا البند وتسليمه؟')) {
+                await db.collection('quotations').doc(docId).update({
+                    status: 'تم الشراء والتسليم',
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                renderAgentProcurements(document.getElementById('app-content'));
+            }
+        }
+
+        // 7. Agent Personal Custody View
+        async function renderAgentCustody(c) {
+            document.getElementById('page-title').innerText = 'العُهدة المالية الخاصة بي';
+            document.getElementById('page-subtitle').innerText = 'متابعة الرصيد المستلم والمبالغ المصروفة والمتبقية لديك';
+
+            c.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i> جاري استعلام العُهدة...</div>`;
+
+            try {
+                const snap = await db.collection('custodies').where('agent_email', '==', currentUser.email).get();
+
+                let totalAmt = 0, totalSp = 0;
+                let rows = '';
+
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const amt = data.amount || 0;
+                    const sp = data.spent || 0;
+                    totalAmt += amt;
+                    totalSp += sp;
+
+                    rows += `
+                        <tr>
+                            <td class="font-bold text-amber-600">${amt.toLocaleString()} ر.س</td>
+                            <td class="font-bold text-emerald-600">${sp.toLocaleString()} ر.س</td>
+                            <td class="font-bold text-blue-600">${(amt - sp).toLocaleString()} ر.س</td>
+                            <td class="text-xs text-slate-500">${data.notes || '-'}</td>
+                        </tr>
+                    `;
+                });
+
+                const rem = totalAmt - totalSp;
+
+                c.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="card-custom p-6 border-t-4 border-t-amber-500">
+                            <h4 class="font-bold text-slate-700 text-sm mb-2">إجمالي العُهد المودعة بك</h4>
+                            <p class="text-2xl font-black text-amber-600">${totalAmt.toLocaleString()} ر.س</p>
+                        </div>
+                        <div class="card-custom p-6 border-t-4 border-t-emerald-500">
+                            <h4 class="font-bold text-slate-700 text-sm mb-2">المبالغ المصروفة</h4>
+                            <p class="text-2xl font-black text-emerald-600">${totalSp.toLocaleString()} ر.س</p>
+                        </div>
+                        <div class="card-custom p-6 border-t-4 border-t-blue-500">
+                            <h4 class="font-bold text-slate-700 text-sm mb-2">الرصيد المتبقي بعهدتك</h4>
+                            <p class="text-2xl font-black text-blue-600">${rem.toLocaleString()} ر.س</p>
+                        </div>
+                    </div>
+
+                    <div class="card-custom p-6">
+                        <h3 class="font-bold text-slate-800 text-base mb-4">تفاصيل العُهد المسلمة لك</h3>
+                        <table class="table-custom text-right">
+                            <thead>
+                                <tr>
+                                    <th>المبلغ المودع</th>
+                                    <th>المصروف</th>
+                                    <th>المتبقي</th>
+                                    <th>البيان</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows || '<tr><td colspan="4" class="text-center py-6 text-slate-400">لا توجد عُهد مالية مسجلة باسمك حالياً.</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                `;
+            } catch(e) {
+                console.error("Agent custody error:", e);
+            }
+        }
+
+        // Modal Controls
+        function closeModal() {
+            document.getElementById('generic-modal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
