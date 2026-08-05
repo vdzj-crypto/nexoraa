@@ -130,7 +130,7 @@
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> متصل بالسحابة
             </span>
-            <div class="text-xs text-slate-500 mt-2">الإصدار v3.0</div>
+            <div class="text-xs text-slate-500 mt-2">الإصدار v3.2 - مكتمل</div>
         </div>
     </aside>
 
@@ -161,8 +161,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let db = {
     items: JSON.parse(localStorage.getItem('db_items')) || [
-        { id: 1, category: 'hospitality', name: 'شاي كبوس', default_supplier: 'الصالة الاقتصادية', price_type: 'fixed', price: 18.50 },
-        { id: 2, category: 'hospitality', name: 'قهوة عربية', default_supplier: 'أسواق التميمي', price_type: 'fixed', price: 45.00 },
+        { id: 1, category: 'stationery', name: 'كرتون ورق A4', default_supplier: 'مكتبة جرير', price_type: 'fixed', price: 59.80, raw_price: 52 },
+        { id: 2, category: 'hospitality', name: 'شاي كبوس', default_supplier: 'الصالة الاقتصادية', price_type: 'fixed', price: 18.50, raw_price: 18.50 },
         { id: 3, category: 'cleaning', name: 'منظف أرضيات', default_supplier: 'الصالة الاقتصادية', price_type: 'variable', price: 0 }
     ],
     suppliers: JSON.parse(localStorage.getItem('db_suppliers')) || [
@@ -259,7 +259,7 @@ function renderQuotationPage(c, cat) {
                     <label class="block text-xs font-bold text-slate-600 mb-2">اختر الصنف</label>
                     <select id="q-item" required onchange="onItemSelect()" class="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500">
                         <option value="">اختر الصنف...</option>
-                        ${categoryItems.map(i => `<option value="${i.name}">${i.name} ${i.price_type === 'fixed' ? `(ثابت: ${i.price} ر.س)` : ''}</option>`).join('')}
+                        ${categoryItems.map(i => `<option value="${i.name}">${i.name} ${i.price_type === 'fixed' ? `(شامل: ${i.price} ر.س)` : ''}</option>`).join('')}
                     </select>
                 </div>
 
@@ -275,7 +275,6 @@ function renderQuotationPage(c, cat) {
 
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-2">الخصم / العرض (إن وجد)</label>
-
                     <div class="flex gap-1">
                         <input type="number" step="0.01" id="q-discount" value="0" oninput="calcTotal()" placeholder="0" class="w-2/3 p-2.5 border rounded-xl">
                         <select id="q-discount-type" onchange="calcTotal()" class="w-1/3 p-2.5 border rounded-xl text-xs">
@@ -363,7 +362,6 @@ function renderQuotationPage(c, cat) {
     `;
 }
 
-// دالة اختيار الصنف والتعبئة التلقائية للأسعار والمورد
 function onItemSelect() {
     const selectedName = document.getElementById('q-item').value;
     const itemObj = db.items.find(i => i.name === selectedName);
@@ -395,7 +393,7 @@ function calcTotal() {
     document.getElementById('q-total').value = finalTotal.toFixed(2);
 }
 
-async function addQuotation(e, cat) {
+function addQuotation(e, cat) {
     e.preventDefault();
     const newQ = {
         id: Date.now(),
@@ -417,7 +415,7 @@ async function addQuotation(e, cat) {
     renderQuotationPage(document.getElementById('app-content'), cat);
 }
 
-async function deleteQuote(id, cat) {
+function deleteQuote(id, cat) {
     db.quotations = db.quotations.filter(q => q.id !== id);
     saveLocal();
     renderQuotationPage(document.getElementById('app-content'), cat);
@@ -525,47 +523,87 @@ function deleteCustody(id) {
     renderCustodyPage(document.getElementById('app-content'));
 }
 
-// --- 3.4 إدارة الأصناف والأسعار الثابتة ---
+// --- 3.4 إدارة الأصناف والأسعار الثابتة (مع احتساب الضريبة) ---
 function renderManageItemsPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الأصناف والأسعار الثابتة';
-    document.getElementById('page-subtitle').innerText = 'تحديد أسعار الأجناس الافتراضية وربط الموردين';
+    document.getElementById('page-subtitle').innerText = 'تحديد أسعار الأصناف وحساب الضريبة تلقائياً';
 
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
             <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة صنف جديد</h3>
-            <form onsubmit="addNewItem(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <select id="item-cat" required class="p-2.5 border rounded-xl">
-                    <option value="hospitality">الضيافة والبوفيه</option>
-                    <option value="cleaning">أدوات النظافة</option>
-                    <option value="stationery">القرطاسية والإلكترونيات</option>
-                </select>
-                <input type="text" id="item-name" placeholder="اسم الصنف" required class="p-2.5 border rounded-xl">
-                <select id="item-price-type" onchange="togglePriceInput()" class="p-2.5 border rounded-xl">
-                    <option value="fixed">سعر ثابت</option>
-                    <option value="variable">سعر متغير عند العرض</option>
-                </select>
-                <input type="number" step="0.01" id="item-fixed-price" placeholder="السعر الثابت (ر.س)" class="p-2.5 border rounded-xl">
-                <select id="item-supplier" required class="p-2.5 border rounded-xl">
-                    <option value="">المورد الافتراضي...</option>
-                    ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
-                </select>
-                <div class="md:col-span-5 flex justify-end">
-                    <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">حفظ الصنف</button>
+            <form onsubmit="addNewItem(event)" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">القسم</label>
+                    <select id="item-cat" required class="w-full p-2.5 border rounded-xl text-sm">
+                        <option value="stationery">القرطاسية والإلكترونيات</option>
+                        <option value="hospitality">الضيافة والبوفيه</option>
+                        <option value="cleaning">أدوات النظافة</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم الصنف</label>
+                    <input type="text" id="item-name" placeholder="مثال: كرتون ورق A4" required class="w-full p-2.5 border rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">نوع التسعير</label>
+                    <select id="item-price-type" onchange="togglePriceInput()" class="w-full p-2.5 border rounded-xl text-sm">
+                        <option value="fixed">سعر ثابت</option>
+                        <option value="variable">سعر متغير عند العرض</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">السعر المُدخل (ر.س)</label>
+                    <input type="number" step="0.01" id="item-fixed-price" placeholder="52" class="w-full p-2.5 border rounded-xl text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">احتساب الضريبة (15%)</label>
+                    <select id="item-tax-mode" class="w-full p-2.5 border rounded-xl text-sm bg-blue-50 font-bold text-blue-900">
+                        <option value="add_tax">قبل الضريبة (إضافة 15%+)</option>
+                        <option value="inclusive">شامل الضريبة جاهز</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">المورد الافتراضي</label>
+                    <select id="item-supplier" required class="w-full p-2.5 border rounded-xl text-sm">
+                        <option value="">اختر المورد...</option>
+                        ${db.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="md:col-span-6 flex justify-end mt-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> حفظ الصنف بالسعر النهائي
+                    </button>
                 </div>
             </form>
         </div>
 
         <div class="card-custom p-6">
-            <h3 class="text-lg font-bold mb-4 text-slate-800">دليل الأصناف والأسعار</h3>
+            <h3 class="text-lg font-bold mb-4 text-slate-800">دليل الأصناف والأسعار المسجلة</h3>
             <div class="divide-y">
                 ${db.items.map(item => `
                     <div class="py-3 flex justify-between items-center hover:bg-slate-50 px-3 rounded-lg">
                         <div class="flex items-center gap-3">
-                            <span class="font-bold text-slate-700">${item.name}</span>
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
-                                ${item.price_type === 'fixed' ? `سعر ثابت: <b>${item.price} ر.س</b>` : 'سعر متغير'}
-                            </span>
-                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">المورد: ${item.default_supplier}</span>
+                            <span class="font-bold text-slate-800 text-base">${item.name}</span>
+                            
+                            ${item.price_type === 'fixed' ? `
+                                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md">
+                                    السعر النهائي (شامل الضريبة): ${Number(item.price).toFixed(2)} ر.س
+                                </span>
+                                ${item.raw_price ? `
+                                    <span class="text-xs text-slate-400">
+                                        (السعر قبل الضريبة: ${item.raw_price} ر.س)
+                                    </span>
+                                ` : ''}
+                            ` : '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">سعر متغير</span>'}
+
+                            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">المورد: ${item.default_supplier || 'غير محدد'}</span>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="editItem(${item.id})" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -581,24 +619,39 @@ function renderManageItemsPage(c) {
 function togglePriceInput() {
     const type = document.getElementById('item-price-type').value;
     const priceInput = document.getElementById('item-fixed-price');
+    const taxMode = document.getElementById('item-tax-mode');
+    
     if (type === 'variable') {
         priceInput.value = '';
         priceInput.disabled = true;
+        taxMode.disabled = true;
     } else {
         priceInput.disabled = false;
+        taxMode.disabled = false;
     }
 }
 
 function addNewItem(e) {
     e.preventDefault();
+    const priceType = document.getElementById('item-price-type').value;
+    const rawPrice = parseFloat(document.getElementById('item-fixed-price').value) || 0;
+    const taxMode = document.getElementById('item-tax-mode').value;
+
+    let finalPrice = rawPrice;
+    if (priceType === 'fixed' && taxMode === 'add_tax') {
+        finalPrice = rawPrice * 1.15; // احتساب الـ 15% ضريبة
+    }
+
     const item = {
         id: Date.now(),
         category: document.getElementById('item-cat').value,
         name: document.getElementById('item-name').value,
-        price_type: document.getElementById('item-price-type').value,
-        price: parseFloat(document.getElementById('item-fixed-price').value) || 0,
+        price_type: priceType,
+        raw_price: rawPrice,
+        price: parseFloat(finalPrice.toFixed(2)),
         default_supplier: document.getElementById('item-supplier').value
     };
+
     db.items.push(item);
     saveLocal();
     renderManageItemsPage(document.getElementById('app-content'));
@@ -607,7 +660,7 @@ function addNewItem(e) {
 function editItem(id) {
     const item = db.items.find(i => i.id === id);
     if (!item) return;
-    const newPrice = prompt(`تعديل السعر الثابت للصنف (${item.name}):`, item.price);
+    const newPrice = prompt(`تعديل السعر الثابت النهائي للصنف (${item.name}):`, item.price);
     if (newPrice !== null) {
         item.price = parseFloat(newPrice) || 0;
         item.price_type = 'fixed';
@@ -625,20 +678,26 @@ function deleteItem(id) {
 // --- 3.5 إدارة الموردين والموظفين ---
 function renderManageSuppliersPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الموردين';
+    document.getElementById('page-subtitle').innerText = 'إضافة وتحديث جهات التوريد والمحلات';
+
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
+            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة مورد جديد</h3>
             <form onsubmit="addSupplier(event)" class="flex gap-4">
                 <input type="text" id="sup-name" placeholder="اسم المورد الجديد" required class="flex-1 p-2.5 border rounded-xl">
-                <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">إضافة</button>
+                <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">إضافة مورد</button>
             </form>
         </div>
         <div class="card-custom p-6">
-            ${db.suppliers.map(s => `
-                <div class="py-2 flex justify-between border-b">
-                    <span class="font-bold text-slate-700">${s.name}</span>
-                    <button onclick="deleteSupplier(${s.id})" class="text-red-500"><i class="fa-solid fa-trash-can"></i></button>
-                </div>
-            `).join('')}
+            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموردين المسجلين</h3>
+            <div class="divide-y">
+                ${db.suppliers.map(s => `
+                    <div class="py-3 flex justify-between items-center">
+                        <span class="font-bold text-slate-700">${s.name}</span>
+                        <button onclick="deleteSupplier(${s.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 }
@@ -658,20 +717,26 @@ function deleteSupplier(id) {
 
 function renderManageEmployeesPage(c) {
     document.getElementById('page-title').innerText = 'إدارة الموظفين والجهات';
+    document.getElementById('page-subtitle').innerText = 'إضافة المستفيدين وأصحاب العُهد المالية';
+
     c.innerHTML = `
         <div class="card-custom p-6 mb-8">
+            <h3 class="text-lg font-bold mb-4 text-slate-800">إضافة موظف / قسم جديد</h3>
             <form onsubmit="addEmployee(event)" class="flex gap-4">
-                <input type="text" id="emp-name" placeholder="اسم الموظف أو المستفيد" required class="flex-1 p-2.5 border rounded-xl">
-                <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">إضافة</button>
+                <input type="text" id="emp-name" placeholder="اسم الموظف أو القسم" required class="flex-1 p-2.5 border rounded-xl">
+                <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl">إضافة موظف</button>
             </form>
         </div>
         <div class="card-custom p-6">
-            ${db.employees.map(e => `
-                <div class="py-2 flex justify-between border-b">
-                    <span class="font-bold text-slate-700">${e.name}</span>
-                    <button onclick="deleteEmployee(${e.id})" class="text-red-500"><i class="fa-solid fa-trash-can"></i></button>
-                </div>
-            `).join('')}
+            <h3 class="text-base font-bold mb-4 text-slate-800">قائمة الموظفين والاقسام</h3>
+            <div class="divide-y">
+                ${db.employees.map(e => `
+                    <div class="py-3 flex justify-between items-center">
+                        <span class="font-bold text-slate-700">${e.name}</span>
+                        <button onclick="deleteEmployee(${e.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 }
@@ -689,46 +754,62 @@ function deleteEmployee(id) {
     renderManageEmployeesPage(document.getElementById('app-content'));
 }
 
-// --- 3.6 التقرير والطباعة ---
+// --- 3.6 التقرير والطباعة (الملخص الشامل) ---
 function renderSummaryPage(c) {
     document.getElementById('page-title').innerText = 'الملخص الشامل وتصدير الـ PDF';
+    document.getElementById('page-subtitle').innerText = 'عرض وتصدير كافة العروض والمصروفات والعهد';
+
     const grandTotal = db.quotations.reduce((sum, q) => sum + Number(q.total || 0), 0).toFixed(2);
 
     c.innerHTML = `
         <div class="mb-6 flex justify-end">
-            <button onclick="exportPDF()" class="bg-red-600 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2">
+            <button onclick="exportPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2">
                 <i class="fa-solid fa-file-pdf"></i> تصدير التقرير PDF
             </button>
         </div>
 
         <div id="pdf-content" class="card-custom p-8 bg-white">
-            <h2 class="text-2xl font-black mb-4">ملخص المشتريات والتسعيير العام</h2>
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800">ملخص المشتريات والتسعير العام</h2>
+                    <p class="text-xs text-slate-500 mt-1">تقرير شامل للعمليات والعهد</p>
+                </div>
+                <div class="text-xs text-slate-400">تاريخ التقرير: ${new Date().toLocaleDateString('ar-SA')}</div>
+            </div>
+
             <table class="w-full text-right border-collapse border mb-6">
                 <thead>
                     <tr class="bg-slate-100 text-xs">
                         <th class="border p-2">#</th>
                         <th class="border p-2">الصنف</th>
                         <th class="border p-2">الكمية</th>
+                        <th class="border p-2">السعر</th>
                         <th class="border p-2">المورد</th>
-                        <th class="border p-2">التمويل</th>
+                        <th class="border p-2">مصدر التمويل</th>
                         <th class="border p-2">الإجمالي</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${db.quotations.map((q, idx) => `
-                        <tr class="text-xs">
-                            <td class="border p-2">${idx + 1}</td>
-                            <td class="border p-2 font-bold">${q.item_name}</td>
-                            <td class="border p-2">${q.quantity}</td>
-                            <td class="border p-2">${q.supplier}</td>
-                            <td class="border p-2">${q.custody_id ? 'عُهدة' : 'مباشر'}</td>
-                            <td class="border p-2 font-bold text-emerald-600">${q.total} ر.س</td>
-                        </tr>
-                    `).join('')}
+                    ${db.quotations.map((q, idx) => {
+                        const custodyObj = db.custodies.find(c => c.id == q.custody_id);
+                        return `
+                            <tr class="text-xs">
+                                <td class="border p-2">${idx + 1}</td>
+                                <td class="border p-2 font-bold">${q.item_name}</td>
+                                <td class="border p-2">${q.quantity}</td>
+                                <td class="border p-2">${q.price} ر.س</td>
+                                <td class="border p-2">${q.supplier}</td>
+                                <td class="border p-2">${custodyObj ? `عُهدة: ${custodyObj.title}` : 'حساب مباشر'}</td>
+                                <td class="border p-2 font-bold text-emerald-600">${q.total} ر.س</td>
+                            </tr>
+                        `;
+                    }).join('')}
                 </tbody>
             </table>
-            <div class="text-right border-t pt-4">
-                <span class="text-lg font-black text-emerald-600">الإجمالي الكلي: ${grandTotal} ر.س</span>
+
+            <div class="flex justify-between items-center border-t pt-4">
+                <span class="text-sm font-bold text-slate-500">عدد العروض: ${db.quotations.length}</span>
+                <span class="text-xl font-black text-emerald-600">الإجمالي الكلي: ${grandTotal} ر.س</span>
             </div>
         </div>
     `;
@@ -736,7 +817,12 @@ function renderSummaryPage(c) {
 
 function exportPDF() {
     const el = document.getElementById('pdf-content');
-    html2pdf().set({ margin: 10, filename: 'Procurement_Report.pdf', html2canvas: { scale: 2 }, jsPDF: { format: 'a4', orientation: 'landscape' } }).from(el).save();
+    html2pdf().set({ 
+        margin: 10, 
+        filename: 'Procurement_Report.pdf', 
+        html2canvas: { scale: 2 }, 
+        jsPDF: { format: 'a4', orientation: 'landscape' } 
+    }).from(el).save();
 }
 
 // =============================================================
