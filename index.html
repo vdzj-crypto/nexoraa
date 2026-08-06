@@ -57,7 +57,7 @@
 
   <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
-    <!-- شريط التنقل الرئيسي بين الصفحات المستقلة -->
+    <!-- شريط التنقل الرئيسي -->
     <nav class="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex overflow-x-auto gap-2 no-print">
       <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-btn active bg-indigo-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 whitespace-nowrap transition-all">
         <i class="fa-solid fa-gauge-high"></i> لوحة التحكم
@@ -72,7 +72,6 @@
         <i class="fa-solid fa-pump-soap"></i> إدخال النظافة
       </button>
 
-      <!-- زر عرض السعر الشامل والمجمع -->
       <button onclick="navigateTo('combined-quote')" id="nav-combined-quote" class="nav-btn bg-emerald-50 border border-emerald-300 text-emerald-800 hover:bg-emerald-100 font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 whitespace-nowrap mr-auto transition-all shadow-sm">
         <i class="fa-solid fa-receipt text-emerald-600"></i> عرض السعر الموحد (PDF) 
         <span id="global-badge" class="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[10px]">0</span>
@@ -86,7 +85,7 @@
       </button>
     </nav>
 
-    <!-- ===== 1️⃣ صفحة: Dashboard / لوحة التحكم ===== -->
+    <!-- ===== 1️⃣ Dashboard ===== -->
     <section id="page-dashboard" class="page-sec space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 pb-2">
         <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
@@ -168,7 +167,7 @@
       </div>
     </section>
 
-    <!-- ===== 2️⃣ صفحة: نموذج إدخال المشتريات (مستقل لكل قسم) ===== -->
+    <!-- ===== 2️⃣ نموذج إدخال المشتريات ===== -->
     <section id="page-item-entry" class="page-sec hidden space-y-6">
       <div class="max-w-2xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
         
@@ -179,28 +178,24 @@
           <span id="entry-cat-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">قسم الضيافة</span>
         </div>
 
-        <!-- اختيار الصنف -->
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">اختيار الصنف</label>
           <select id="builder-item" onchange="onItemSelect()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
           </select>
         </div>
 
-        <!-- تخصيص المستفيد -->
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">المستفيد من الصنف</label>
           <select id="builder-employee" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 outline-none">
           </select>
         </div>
 
-        <!-- المورد المعتمد -->
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">المورد المعتمد</label>
           <select id="builder-supplier" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
           </select>
         </div>
 
-        <!-- السعر والكمية -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">السعر الأصلي (ر.س)</label>
@@ -212,7 +207,6 @@
           </div>
         </div>
 
-        <!-- خاصية الخصم -->
         <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100 space-y-2">
           <span class="block text-xs font-bold text-indigo-900 flex items-center gap-1.5">
             <i class="fa-solid fa-tags text-indigo-600"></i> العروض والخصم (إن وجد)
@@ -232,7 +226,6 @@
           </div>
         </div>
 
-        <!-- خيارات الضريبة -->
         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
           <span class="block text-xs font-bold text-slate-700">خيارات الضريبة (VAT 15%):</span>
           <div class="flex flex-col gap-1.5 text-xs">
@@ -255,7 +248,6 @@
           <i class="fa-solid fa-plus"></i> إضافة إلى السلة الموحدة
         </button>
 
-        <!-- معاينة سريعة لأصناف القسم المضافة حالياً -->
         <div class="pt-4 border-t">
           <h4 class="font-bold text-xs text-slate-700 mb-2">الأصناف المضافة بهذا القسم حالياً:</h4>
           <div id="section-items-list" class="space-y-1 text-xs text-slate-600 max-h-40 overflow-y-auto">
@@ -266,7 +258,7 @@
       </div>
     </section>
 
-    <!-- ===== 3️⃣ صفحة: عرض السعر الموحد الشامل (PDF Combined Quote) ===== -->
+    <!-- ===== 3️⃣ عرض السعر الموحد ===== -->
     <section id="page-combined-quote" class="page-sec hidden space-y-6">
       
       <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm no-print">
@@ -287,10 +279,8 @@
         </div>
       </div>
 
-      <!-- المنطقة القابلة للطباعة والتصدير -->
       <div id="combined-printable-area" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
         
-        <!-- ترويسة التقرير الموحد -->
         <div class="flex justify-between items-center border-b border-slate-300 pb-4">
           <div>
             <h1 class="text-2xl font-black text-slate-900">عرض سعر احتياجات المشتريات</h1>
@@ -302,7 +292,7 @@
           </div>
         </div>
 
-        <!-- جدول 1: قسم الضيافة -->
+        <!-- جدول 1: الضيافة -->
         <div class="space-y-2">
           <h3 class="font-bold text-amber-800 text-xs bg-amber-50 border border-amber-200 p-2 rounded-lg flex items-center gap-2">
             <i class="fa-solid fa-mug-hot"></i> أولاً: مستلزمات واحتياجات الضيافة
@@ -328,7 +318,7 @@
           </div>
         </div>
 
-        <!-- جدول 2: قسم القرطاسية -->
+        <!-- جدول 2: القرطاسية -->
         <div class="space-y-2">
           <h3 class="font-bold text-blue-800 text-xs bg-blue-50 border border-blue-200 p-2 rounded-lg flex items-center gap-2">
             <i class="fa-solid fa-pen-ruler"></i> ثانياً: مستلزمات القرطاسية والمكتب
@@ -354,7 +344,7 @@
           </div>
         </div>
 
-        <!-- جدول 3: قسم النظافة -->
+        <!-- جدول 3: النظافة -->
         <div class="space-y-2">
           <h3 class="font-bold text-emerald-800 text-xs bg-emerald-50 border border-emerald-200 p-2 rounded-lg flex items-center gap-2">
             <i class="fa-solid fa-pump-soap"></i> ثالثاً: أدوات ومواد النظافة
@@ -380,7 +370,6 @@
           </div>
         </div>
 
-        <!-- جدول الإجمالي المالي العام الموحد -->
         <div class="bg-slate-900 text-white p-5 rounded-xl space-y-3 font-bold text-xs">
           <h4 class="text-indigo-400 font-black text-sm border-b border-slate-700 pb-2">الملخص المالي الموحد لعرض السعر</h4>
           
@@ -407,7 +396,7 @@
       </div>
     </section>
 
-    <!-- ===== 4️⃣ صفحة: الأرشيف والرسوم البيانية ===== -->
+    <!-- ===== 4️⃣ الأرشيف والرسوم البيانية ===== -->
     <section id="page-archive" class="page-sec hidden space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 md:col-span-1 flex flex-col items-center justify-center">
@@ -465,7 +454,7 @@
       </div>
     </section>
 
-    <!-- ===== 5️⃣ صفحة: إدارة الأصناف والإعدادات ===== -->
+    <!-- ===== 5️⃣ إدارة الأصناف والإعدادات ===== -->
     <section id="page-manage" class="page-sec hidden space-y-6">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
         <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -475,16 +464,21 @@
           <input type="text" id="supabase-url" placeholder="Supabase Project URL" class="bg-slate-50 border p-2.5 rounded-xl font-mono">
           <input type="password" id="supabase-key" placeholder="Supabase Anon Key" class="bg-slate-50 border p-2.5 rounded-xl font-mono">
         </div>
-        <button onclick="saveSupabaseConfig()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800">
-          حفظ إعدادات السحاب
-        </button>
+        <div class="flex gap-2">
+          <button onclick="saveSupabaseConfig()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800">
+            حفظ إعدادات السحاب
+          </button>
+          <button onclick="resetItemsToDefault()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-100">
+            استعادة الأصناف الافتراضية
+          </button>
+        </div>
       </div>
 
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
         <div class="flex justify-between items-center mb-4">
           <div>
             <h2 class="font-bold text-slate-800 text-lg">إدارة الأصناف والأسعار والموردين</h2>
-            <p class="text-xs text-slate-500">تعديل الأصناف المثبتة، تغيير أسعارها، أو ربطها بمورد آخر</p>
+            <p class="text-xs text-slate-500">تعديل الأصناف المثبتة، تغيير أسعارها، أو ربطها بمورد آخر (تنحفظ تلقائياً!)</p>
           </div>
           <button onclick="addNewItemPrompt()" class="bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700">
             <i class="fa-solid fa-plus ml-1"></i> إضافة صنف جديد
@@ -512,7 +506,6 @@
   </main>
 
   <script>
-    // ===== البيانات والمتغيرات العامة =====
     let supabaseClient = null;
     let categoryChart = null;
 
@@ -530,7 +523,7 @@
       "عبدالرحمن قاسم", "محمد العتيبي", "زاهد", "خليل", "محمد جنيد"
     ];
 
-    let itemsDatabase = [
+    const defaultItemsDatabase = [
       // الضيافة
       { id: 1, name: "شاي", category: "hospitality", price: 15, supplier: "باجة" },
       { id: 2, name: "كفندي قهوة تركي 200جم", category: "hospitality", price: 22, supplier: "باجة" },
@@ -584,7 +577,8 @@
       { id: 46, name: "مبيد حشري", category: "cleaning", price: 26, supplier: "النظافة الأنيقة" }
     ];
 
-    // السلة الموحدة العالمية لعرض السعر
+    let itemsDatabase = [];
+
     let globalQuoteBasket = {
       hospitality: [],
       stationery: [],
@@ -593,10 +587,10 @@
 
     let activeCategory = 'hospitality';
     let archivedQuotes = [];
-    let lastPriceUpdateDate = "2026/08/06";
+    let lastPriceUpdateDate = localStorage.getItem('last_price_update') || "2026/08/06";
 
-    // ===== عند تحميل الصفحة =====
     window.onload = function() {
+      loadSavedItems();
       startClock();
       populateSuppliersDropdown();
       populateEmployeesDropdown();
@@ -604,11 +598,55 @@
       renderManageItemsTable();
       updateDashboardData();
       initChart();
-      
+      initSupabaseFromStorage();
+
+      const savedUrl = localStorage.getItem('sp_url');
+      const savedKey = localStorage.getItem('sp_key');
+      if (savedUrl) document.getElementById('supabase-url').value = savedUrl;
+      if (savedKey) document.getElementById('supabase-key').value = savedKey;
+
       const nowCode = "Q-" + Math.floor(1000 + Math.random() * 9000);
       document.getElementById('pdf-quote-code').innerText = nowCode;
       document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('ar-SA');
     };
+
+    // تحميل الأصناف المحفوظة محلياً عند التشغيل
+    function loadSavedItems() {
+      const stored = localStorage.getItem('custom_items_db');
+      if (stored) {
+        try {
+          itemsDatabase = JSON.parse(stored);
+        } catch(e) {
+          itemsDatabase = [...defaultItemsDatabase];
+        }
+      } else {
+        itemsDatabase = [...defaultItemsDatabase];
+      }
+    }
+
+    // حفظ الأصناف المحدثة في ذاكرة المتصفح والسحاب
+    function saveItemsDatabase() {
+      localStorage.setItem('custom_items_db', JSON.stringify(itemsDatabase));
+      lastPriceUpdateDate = new Date().toLocaleDateString('ar-SA');
+      localStorage.setItem('last_price_update', lastPriceUpdateDate);
+
+      // إذا كان Supabase مفعلاً
+      if (supabaseClient) {
+        supabaseClient.from('items').upsert(itemsDatabase).then(res => {
+          console.log('Supabase sync:', res);
+        });
+      }
+    }
+
+    function resetItemsToDefault() {
+      if (confirm("هل أنت تأكد من إعادة الأصناف للقائمة الافتراضية الأولى؟")) {
+        itemsDatabase = [...defaultItemsDatabase];
+        saveItemsDatabase();
+        renderManageItemsTable();
+        updateDashboardData();
+        alert("تمت الاستعادة بنجاح!");
+      }
+    }
 
     function startClock() {
       setInterval(() => {
@@ -618,7 +656,6 @@
       }, 1000);
     }
 
-    // ===== التنقل بين الشاشات المستقلة =====
     function navigateTo(pageId) {
       document.querySelectorAll('.page-sec').forEach(sec => sec.classList.add('hidden'));
 
@@ -656,7 +693,6 @@
       }
     }
 
-    // إعداد نموذج الإدخال حسب القسم المختار
     function setupEntryForm(category) {
       const titleEl = document.getElementById('entry-form-title');
       const badgeEl = document.getElementById('entry-cat-badge');
@@ -692,7 +728,6 @@
       }
     }
 
-    // ===== إضافة الصنف للسلة الموحدة =====
     function addItemToGlobalQuote() {
       const itemId = parseInt(document.getElementById('builder-item').value);
       const itemObj = itemsDatabase.find(i => i.id === itemId);
@@ -777,7 +812,6 @@
       document.getElementById('global-badge').innerText = totalCount;
     }
 
-    // ===== عرض وتقسيم الجداول في التقرير الموحد =====
     function renderCombinedQuote() {
       const hospTbody = document.getElementById('pdf-hospitality-tbody');
       const statTbody = document.getElementById('pdf-stationery-tbody');
@@ -826,7 +860,6 @@
       document.getElementById('comb-grandtotal').innerText = grandTotal.toFixed(2) + " ر.س";
     }
 
-    // ===== تصدير PDF الشامل الموحد =====
     function exportCombinedPDF() {
       const element = document.getElementById('combined-printable-area');
       const quoteCode = document.getElementById('pdf-quote-code').innerText;
@@ -842,7 +875,6 @@
       html2pdf().set(opt).from(element).save();
     }
 
-    // ===== حفظ عرض السعر الموحد بالأرشيف =====
     async function saveCombinedQuote() {
       const allItems = [
         ...globalQuoteBasket.hospitality,
@@ -879,17 +911,14 @@
         }
       }
 
-      // إعادة تهيئة السلة
       globalQuoteBasket = { hospitality: [], stationery: [], cleaning: [] };
       updateGlobalBadge();
       renderCombinedQuote();
       alert(`تم حفظ عرض السعر الموحد (${quoteCode}) بنجاح بالأرشيف!`);
       
-      // تجديد الكود للعرض القادم
       document.getElementById('pdf-quote-code').innerText = "Q-" + Math.floor(1000 + Math.random() * 9000);
     }
 
-    // ===== باقي الإحصائيات والأرشيف =====
     function updateDashboardData() {
       document.getElementById('dash-items-count').innerText = itemsDatabase.length;
       document.getElementById('dash-suppliers-count').innerText = suppliersList.length;
@@ -1015,7 +1044,7 @@
           <td class="p-3 font-bold text-emerald-600">${item.price} ر.س</td>
           <td class="p-3 text-slate-700">${item.supplier}</td>
           <td class="p-3 text-center">
-            <button onclick="editItem(${item.id})" class="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg font-bold text-xs">
+            <button onclick="editItem(${item.id})" class="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg font-bold text-xs hover:bg-indigo-100">
               تعديل
             </button>
           </td>
@@ -1023,6 +1052,7 @@
       `).join('');
     }
 
+    // تعديل الصنف وحفظه دائمياً
     function editItem(id) {
       const item = itemsDatabase.find(i => i.id === id);
       if (!item) return;
@@ -1034,15 +1064,17 @@
       const newSupplier = prompt("تعديل المورد:", item.supplier);
       if (newSupplier === null) return;
 
-      item.name = newName || item.name;
+      item.name = newName.trim() || item.name;
       item.price = parseFloat(newPrice) || item.price;
-      item.supplier = newSupplier || item.supplier;
+      item.supplier = newSupplier.trim() || item.supplier;
 
-      lastPriceUpdateDate = new Date().toLocaleDateString('ar-SA');
+      saveItemsDatabase(); // حفظ دائم
       renderManageItemsTable();
       updateDashboardData();
+      alert("تم حفظ التعديل بنجاح وبشكل دائم!");
     }
 
+    // إضافة صنف وحفظه دائمياً
     function addNewItemPrompt() {
       const name = prompt("اسم الصنف الجديد:");
       if (!name) return;
@@ -1051,16 +1083,17 @@
 
       itemsDatabase.push({
         id: Date.now(),
-        name: name,
+        name: name.trim(),
         category: activeCategory,
         price: price,
-        supplier: supplier || suppliersList[0]
+        supplier: supplier ? supplier.trim() : suppliersList[0]
       });
 
-      lastPriceUpdateDate = new Date().toLocaleDateString('ar-SA');
+      saveItemsDatabase(); // حفظ دائم
       renderManageItemsTable();
       updateDashboardData();
       setupEntryForm(activeCategory);
+      alert("تمت إضافة الصنف وحفظه بنجاح!");
     }
 
     function saveSupabaseConfig() {
@@ -1069,7 +1102,21 @@
       if(url && key) {
         localStorage.setItem('sp_url', url);
         localStorage.setItem('sp_key', key);
-        alert("تم حفظ إعدادات Supabase بنجاح!");
+        initSupabaseFromStorage();
+        saveItemsDatabase();
+        alert("تم حفظ إعدادات Supabase وتزامن البيانات بنجاح!");
+      } else {
+        alert("يرجى إدخال الرابط والمفتاح الخاص بـ Supabase بشكل صحيح.");
+      }
+    }
+
+    function initSupabaseFromStorage() {
+      const url = localStorage.getItem('sp_url');
+      const key = localStorage.getItem('sp_key');
+      if (url && key && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(url, key);
+        } catch(e) { console.log(e); }
       }
     }
   </script>
