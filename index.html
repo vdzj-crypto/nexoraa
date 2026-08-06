@@ -250,8 +250,8 @@
 
         <div class="pt-4 border-t">
           <div class="flex justify-between items-center mb-2">
-            <h4 class="font-bold text-xs text-slate-700">الأصناف المضافة بهذا القسم حالياً:</h4>
-            <button onclick="clearCurrentCategoryBasket()" class="text-[11px] text-red-500 font-semibold hover:underline">تفريغ قسم (${activeCategory})</button>
+            <h4 class="font-bold text-xs text-slate-700" id="section-list-title">الأصناف المضافة بهذا القسم حالياً:</h4>
+            <button onclick="clearCurrentCategoryBasket()" class="text-[11px] text-red-500 font-semibold hover:underline">تفريغ قسم الحاالي</button>
           </div>
           <div id="section-items-list" class="space-y-1 text-xs text-slate-600 max-h-40 overflow-y-auto">
             <p class="text-slate-400 italic">لا توجد أصناف مضافة لهذا القسم في السلة الموحدة حالياً.</p>
@@ -595,7 +595,7 @@
 
     window.onload = function() {
       loadSavedItems();
-      loadSavedBasket(); // استرجاع الأصناف المضافة بالأسفل محلياً
+      loadSavedBasket(); // ⭐ استرجاع الأصناف المضافة محلياً عند فتح/تحديث الصفحة
       loadSavedArchive(); // استرجاع الأرشيف
 
       startClock();
@@ -631,7 +631,7 @@
       }
     }
 
-    // ⭐ 1. حفظ واسترجاع السلة الموحدة (الأصناف المضافة تحت) ⭐
+    // ⭐ 1. حفظ واسترجاع السلة الموحدة تلقائياً في localStorage ⭐
     function saveBasketToStorage() {
       localStorage.setItem('global_quote_basket', JSON.stringify(globalQuoteBasket));
     }
@@ -740,19 +740,25 @@
       const filteredItems = itemsDatabase.filter(i => i.category === category);
       itemSelect.innerHTML = filteredItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
 
+      let catName = "";
       if (category === 'hospitality') {
+        catName = "الضيافة";
         titleEl.innerHTML = '<i class="fa-solid fa-mug-hot text-amber-600"></i> إضافة صنف لقائمة الضيافة';
         badgeEl.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
         badgeEl.innerText = "قسم الضيافة";
       } else if (category === 'stationery') {
+        catName = "القرطاسية";
         titleEl.innerHTML = '<i class="fa-solid fa-pen-ruler text-blue-600"></i> إضافة صنف لقائمة القرطاسية';
         badgeEl.className = "px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800";
         badgeEl.innerText = "قسم القرطاسية";
       } else if (category === 'cleaning') {
+        catName = "النظافة";
         titleEl.innerHTML = '<i class="fa-solid fa-pump-soap text-emerald-600"></i> إضافة صنف لقائمة النظافة';
         badgeEl.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
         badgeEl.innerText = "قسم النظافة";
       }
+
+      document.getElementById('section-list-title').innerText = `الأصناف المضافة بقسم (${catName}) حالياً:`;
 
       onItemSelect();
       renderSectionPreview();
@@ -767,7 +773,7 @@
       }
     }
 
-    // إضافة صنف وحفظه محلياً في السلة
+    // إضافة صنف وحفظه محلياً في السلة بشكل دائم
     function addItemToGlobalQuote() {
       const itemId = parseInt(document.getElementById('builder-item').value);
       const itemObj = itemsDatabase.find(i => i.id === itemId);
@@ -815,7 +821,7 @@
         total: finalUnitPrice * qty
       });
 
-      saveBasketToStorage(); // 💾 حفظ السلة تلقائياً
+      saveBasketToStorage(); // 💾 حفظ السلة تلقائياً بالمتصفح
       document.getElementById('builder-discount-val').value = 0;
       updateGlobalBadge();
       renderSectionPreview();
@@ -841,25 +847,26 @@
 
     function removeGlobalItem(cat, id) {
       globalQuoteBasket[cat] = globalQuoteBasket[cat].filter(i => i.id !== id);
-      saveBasketToStorage(); // 💾 تحديث السلة المحفوظة
+      saveBasketToStorage(); // 💾 تحديث السلة المحفوظة فوراً
       updateGlobalBadge();
       renderSectionPreview();
       renderCombinedQuote();
     }
 
     function clearCurrentCategoryBasket() {
-      if (confirm(`هل أنت تأكد من تفريغ كافة أصناف قسم (${activeCategory})؟`)) {
+      let catName = activeCategory === 'hospitality' ? 'الضيافة' : activeCategory === 'stationery' ? 'القرطاسية' : 'النظافة';
+      if (confirm(`هل أنت تأكد من تفريغ كافة أصناف قسم (${catName})؟`)) {
         globalQuoteBasket[activeCategory] = [];
-        saveBasketToStorage();
+        saveBasketToStorage(); // 💾 تحديث السلة المحفوظة
         updateGlobalBadge();
         renderSectionPreview();
       }
     }
 
     function updateGlobalBadge() {
-      const totalCount = globalQuoteBasket.hospitality.length + 
-                         globalQuoteBasket.stationery.length + 
-                         globalQuoteBasket.cleaning.length;
+      const totalCount = (globalQuoteBasket.hospitality ? globalQuoteBasket.hospitality.length : 0) + 
+                         (globalQuoteBasket.stationery ? globalQuoteBasket.stationery.length : 0) + 
+                         (globalQuoteBasket.cleaning ? globalQuoteBasket.cleaning.length : 0);
       document.getElementById('global-badge').innerText = totalCount;
     }
 
@@ -928,9 +935,9 @@
 
     async function saveCombinedQuote() {
       const allItems = [
-        ...globalQuoteBasket.hospitality,
-        ...globalQuoteBasket.stationery,
-        ...globalQuoteBasket.cleaning
+        ...(globalQuoteBasket.hospitality || []),
+        ...(globalQuoteBasket.stationery || []),
+        ...(globalQuoteBasket.cleaning || [])
       ];
 
       if (allItems.length === 0) {
@@ -964,7 +971,7 @@
       }
 
       globalQuoteBasket = { hospitality: [], stationery: [], cleaning: [] };
-      saveBasketToStorage(); // 💾 مسح السلة بعد الحفظ في الأرشيف
+      saveBasketToStorage(); // 💾 تفريغ وحفظ السلة المحفوظة بعد ترحيلها إلى الأرشيف
       updateGlobalBadge();
       renderCombinedQuote();
       alert(`تم حفظ عرض السعر الموحد (${quoteCode}) بنجاح بالأرشيف!`);
