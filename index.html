@@ -249,7 +249,10 @@
         </button>
 
         <div class="pt-4 border-t">
-          <h4 class="font-bold text-xs text-slate-700 mb-2">الأصناف المضافة بهذا القسم حالياً:</h4>
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="font-bold text-xs text-slate-700">الأصناف المضافة بهذا القسم حالياً:</h4>
+            <button onclick="clearCurrentCategoryBasket()" class="text-[11px] text-red-500 font-semibold hover:underline">تفريغ قسم (${activeCategory})</button>
+          </div>
           <div id="section-items-list" class="space-y-1 text-xs text-slate-600 max-h-40 overflow-y-auto">
             <p class="text-slate-400 italic">لا توجد أصناف مضافة لهذا القسم في السلة الموحدة حالياً.</p>
           </div>
@@ -579,6 +582,7 @@
 
     let itemsDatabase = [];
 
+    // سلة الأصناف المضافة لعرض السعر
     let globalQuoteBasket = {
       hospitality: [],
       stationery: [],
@@ -591,6 +595,9 @@
 
     window.onload = function() {
       loadSavedItems();
+      loadSavedBasket(); // استرجاع الأصناف المضافة بالأسفل محلياً
+      loadSavedArchive(); // استرجاع الأرشيف
+
       startClock();
       populateSuppliersDropdown();
       populateEmployeesDropdown();
@@ -610,7 +617,7 @@
       document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('ar-SA');
     };
 
-    // تحميل الأصناف المحفوظة محلياً عند التشغيل
+    // تحميل الأصناف الأساسية المحفوظة محلياً
     function loadSavedItems() {
       const stored = localStorage.getItem('custom_items_db');
       if (stored) {
@@ -624,13 +631,45 @@
       }
     }
 
-    // حفظ الأصناف المحدثة في ذاكرة المتصفح والسحاب
+    // ⭐ 1. حفظ واسترجاع السلة الموحدة (الأصناف المضافة تحت) ⭐
+    function saveBasketToStorage() {
+      localStorage.setItem('global_quote_basket', JSON.stringify(globalQuoteBasket));
+    }
+
+    function loadSavedBasket() {
+      const storedBasket = localStorage.getItem('global_quote_basket');
+      if (storedBasket) {
+        try {
+          globalQuoteBasket = JSON.parse(storedBasket);
+        } catch(e) {
+          globalQuoteBasket = { hospitality: [], stationery: [], cleaning: [] };
+        }
+      }
+      updateGlobalBadge();
+    }
+
+    // 2. حفظ واسترجاع الأرشيف
+    function saveArchiveToStorage() {
+      localStorage.setItem('archived_quotes_db', JSON.stringify(archivedQuotes));
+    }
+
+    function loadSavedArchive() {
+      const storedArchive = localStorage.getItem('archived_quotes_db');
+      if (storedArchive) {
+        try {
+          archivedQuotes = JSON.parse(storedArchive);
+          renderArchiveTable();
+        } catch(e) {
+          archivedQuotes = [];
+        }
+      }
+    }
+
     function saveItemsDatabase() {
       localStorage.setItem('custom_items_db', JSON.stringify(itemsDatabase));
       lastPriceUpdateDate = new Date().toLocaleDateString('ar-SA');
       localStorage.setItem('last_price_update', lastPriceUpdateDate);
 
-      // إذا كان Supabase مفعلاً
       if (supabaseClient) {
         supabaseClient.from('items').upsert(itemsDatabase).then(res => {
           console.log('Supabase sync:', res);
@@ -728,6 +767,7 @@
       }
     }
 
+    // إضافة صنف وحفظه محلياً في السلة
     function addItemToGlobalQuote() {
       const itemId = parseInt(document.getElementById('builder-item').value);
       const itemObj = itemsDatabase.find(i => i.id === itemId);
@@ -775,15 +815,16 @@
         total: finalUnitPrice * qty
       });
 
+      saveBasketToStorage(); // 💾 حفظ السلة تلقائياً
       document.getElementById('builder-discount-val').value = 0;
       updateGlobalBadge();
       renderSectionPreview();
-      alert(`تم إضافة (${itemObj.name}) بنجاح للسلة الموحدة!`);
+      alert(`تم إضافة (${itemObj.name}) بنجاح وحفظه بالسلة الموحدة!`);
     }
 
     function renderSectionPreview() {
       const listEl = document.getElementById('section-items-list');
-      const items = globalQuoteBasket[activeCategory];
+      const items = globalQuoteBasket[activeCategory] || [];
 
       if (items.length === 0) {
         listEl.innerHTML = `<p class="text-slate-400 italic">لا توجد أصناف مضافة لهذا القسم في السلة الموحدة حالياً.</p>`;
@@ -800,9 +841,19 @@
 
     function removeGlobalItem(cat, id) {
       globalQuoteBasket[cat] = globalQuoteBasket[cat].filter(i => i.id !== id);
+      saveBasketToStorage(); // 💾 تحديث السلة المحفوظة
       updateGlobalBadge();
       renderSectionPreview();
       renderCombinedQuote();
+    }
+
+    function clearCurrentCategoryBasket() {
+      if (confirm(`هل أنت تأكد من تفريغ كافة أصناف قسم (${activeCategory})؟`)) {
+        globalQuoteBasket[activeCategory] = [];
+        saveBasketToStorage();
+        updateGlobalBadge();
+        renderSectionPreview();
+      }
     }
 
     function updateGlobalBadge() {
@@ -820,7 +871,7 @@
       let subtotal = 0, totalTax = 0, grandTotal = 0, totalDiscount = 0;
 
       function generateCategoryRows(items, categoryKey) {
-        if (items.length === 0) {
+        if (!items || items.length === 0) {
           return `<tr><td colspan="9" class="text-center py-3 text-slate-400">لم يتم إضافة أي عناصر لهذا القسم</td></tr>`;
         }
         return items.map((item, idx) => {
@@ -900,6 +951,7 @@
       };
 
       archivedQuotes.unshift(quoteData);
+      saveArchiveToStorage(); // 💾 حفظ الأرشيف في المتصفح
       renderArchiveTable();
       updateDashboardData();
 
@@ -912,6 +964,7 @@
       }
 
       globalQuoteBasket = { hospitality: [], stationery: [], cleaning: [] };
+      saveBasketToStorage(); // 💾 مسح السلة بعد الحفظ في الأرشيف
       updateGlobalBadge();
       renderCombinedQuote();
       alert(`تم حفظ عرض السعر الموحد (${quoteCode}) بنجاح بالأرشيف!`);
@@ -1052,7 +1105,6 @@
       `).join('');
     }
 
-    // تعديل الصنف وحفظه دائمياً
     function editItem(id) {
       const item = itemsDatabase.find(i => i.id === id);
       if (!item) return;
@@ -1068,13 +1120,12 @@
       item.price = parseFloat(newPrice) || item.price;
       item.supplier = newSupplier.trim() || item.supplier;
 
-      saveItemsDatabase(); // حفظ دائم
+      saveItemsDatabase();
       renderManageItemsTable();
       updateDashboardData();
       alert("تم حفظ التعديل بنجاح وبشكل دائم!");
     }
 
-    // إضافة صنف وحفظه دائمياً
     function addNewItemPrompt() {
       const name = prompt("اسم الصنف الجديد:");
       if (!name) return;
@@ -1089,7 +1140,7 @@
         supplier: supplier ? supplier.trim() : suppliersList[0]
       });
 
-      saveItemsDatabase(); // حفظ دائم
+      saveItemsDatabase();
       renderManageItemsTable();
       updateDashboardData();
       setupEntryForm(activeCategory);
