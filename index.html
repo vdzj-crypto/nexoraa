@@ -3,62 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نظام إدارة عروض الأسعار والعُهد - Quotations Hub</title>
+  <title>عروض أسعار</title>
   
   <!-- Tailwind CSS & FontAwesome Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts (Cairo) -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- html2pdf Library for Generating PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     * { font-family: 'Cairo', sans-serif; }
-    
-    /* خلفيات حيوية ومريحة لكل قسم */
-    .bg-hospitality {
-      background: linear-gradient(135deg, #fff8f0 0%, #feebd9 100%);
-    }
-    .bg-stationery {
-      background: linear-gradient(135deg, #f0f7ff 0%, #e0f0fe 100%);
-    }
-    .bg-cleaning {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    }
-    
-    /* أنميشين وتأثيرات الواجهة */
-    .card-glow {
-      transition: all 0.3s ease;
-    }
-    .card-glow:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-    }
-    
+    .bg-hospitality { background: linear-gradient(135deg, #fff8f0 0%, #feebd9 100%); }
+    .bg-stationery { background: linear-gradient(135deg, #f0f7ff 0%, #e0f0fe 100%); }
+    .bg-cleaning { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); }
     @media print {
       .no-print { display: none !important; }
-      .print-only { display: block !important; }
       body { background: white !important; }
     }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- الشريط العلوي التفاعلي (Header) -->
+  <!-- Header -->
   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
       
-      <!-- اللوجو والعنوان -->
       <div class="flex items-center gap-3">
         <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg">
           <i class="fa-solid fa-file-invoice-dollar text-xl text-white"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight">Quotations Hub</h1>
-          <p class="text-xs text-slate-400">إدارة عروض الأسعار والعهد المالية</p>
+          <h1 class="font-extrabold text-xl leading-tight tracking-wide">عروض أسعار</h1>
         </div>
       </div>
 
-      <!-- عرض الوقت والتاريخ الحي -->
       <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/50 text-xs">
         <div class="flex items-center gap-1.5 text-indigo-400">
           <i class="fa-regular fa-calendar-days"></i>
@@ -71,67 +53,59 @@
         </div>
       </div>
 
-      <!-- نظام التبديل بين المستويات (المدير / المندوب) -->
-      <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-xl">
-        <button id="btn-role-admin" onclick="switchRole('admin')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white">
-          <i class="fa-solid fa-user-shield ml-1"></i> المدير (Admin)
-        </button>
-        <button id="btn-role-agent" onclick="switchRole('agent')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white">
-          <i class="fa-solid fa-user-ninja ml-1"></i> المندوب (Agent)
-        </button>
-      </div>
     </div>
   </header>
 
-  <!-- محتوى التطبيق -->
   <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
 
-    <!-- شريط التنقل بين الأقسام (Tabs) -->
+    <!-- شريط التنقل بين القوائم -->
     <div class="flex overflow-x-auto gap-2 mb-6 pb-2 no-print border-b border-slate-200">
-      <button onclick="switchTab('quote-builder')" id="tab-quote-builder" class="tab-btn active border-b-2 border-indigo-600 text-indigo-600 font-bold px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap">
-        <i class="fa-solid fa-plus-circle"></i> إنشاء عرض سعر جديد
+      <button onclick="switchCategory('hospitality')" id="tab-hospitality" class="tab-btn active border-b-2 border-amber-600 text-amber-700 font-bold px-5 py-2.5 text-sm flex items-center gap-2 whitespace-nowrap bg-amber-50 rounded-t-xl">
+        <i class="fa-solid fa-mug-hot"></i> قائمة الضيافة
       </button>
-      <button onclick="switchTab('items-manage')" id="tab-items-manage" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap hover:text-indigo-600">
-        <i class="fa-solid fa-boxes-stacked"></i> إدارة الأصناف والموردين
+      <button onclick="switchCategory('stationery')" id="tab-stationery" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-5 py-2.5 text-sm flex items-center gap-2 whitespace-nowrap hover:text-blue-600 rounded-t-xl">
+        <i class="fa-solid fa-pen-ruler"></i> قائمة القرطاسية
       </button>
-      <button onclick="switchTab('archive')" id="tab-archive" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap hover:text-indigo-600">
-        <i class="fa-solid fa-box-archive"></i> الأرشيف والعهُد
+      <button onclick="switchCategory('cleaning')" id="tab-cleaning" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-5 py-2.5 text-sm flex items-center gap-2 whitespace-nowrap hover:text-emerald-600 rounded-t-xl">
+        <i class="fa-solid fa-pump-soap"></i> قائمة النظافة
+      </button>
+      <button onclick="switchCategory('archive')" id="tab-archive" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-5 py-2.5 text-sm flex items-center gap-2 whitespace-nowrap hover:text-indigo-600 rounded-t-xl mr-auto">
+        <i class="fa-solid fa-folder-open"></i> أرشيف عروض الأسعار
+      </button>
+      <button onclick="switchCategory('manage')" id="tab-manage" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-5 py-2.5 text-sm flex items-center gap-2 whitespace-nowrap hover:text-slate-800 rounded-t-xl">
+        <i class="fa-solid fa-gear"></i> الإعدادات والأصناف
       </button>
     </div>
 
-    <!-- ===== 1. قسم إنشاء عرض سعر جديد ===== -->
-    <section id="sec-quote-builder" class="space-y-6">
+    <!-- ===== الشاشة الرئيسية لعرض الأسعار ===== -->
+    <section id="sec-calculator" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- نموذج الإدخال (يمين) -->
-        <div class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h2 class="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
-            <i class="fa-solid fa-cart-plus text-indigo-600"></i> إضافة صنف إلى عرض السعر
+        <div class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 no-print">
+          <h2 class="font-bold text-slate-800 border-b pb-2 flex items-center gap-2" id="form-title">
+            <i class="fa-solid fa-cart-plus text-amber-600"></i> إضافة صنف لقائمة الضيافة
           </h2>
-
-          <!-- اختيار القسم (الضيافة / القرطاسية / النظافة) -->
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">القسم</label>
-            <select id="builder-category" onchange="loadCategoryItems()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
-              <option value="hospitality">☕ قسم الضيافة</option>
-              <option value="stationery">✏️ قسم القرطاسية</option>
-              <option value="cleaning">🧹 قسم النظافة</option>
-            </select>
-          </div>
 
           <!-- اختيار الصنف -->
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">الصنف</label>
             <select id="builder-item" onchange="onItemSelect()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
-              <!-- يتم التعبئة تلقائياً -->
             </select>
           </div>
 
-          <!-- المورد المربوط تلقائياً (مع إمكانية التعديل) -->
+          <!-- تخصيص الصنف (عام أم لموظف معين) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">المستفيد من الصنف</label>
+            <select id="builder-employee" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+              <!-- يتم تحميل الموظفين + خيار عام تلقائياً -->
+            </select>
+          </div>
+
+          <!-- المورد المربوط تلقائياً -->
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">المورد المعتمد</label>
             <select id="builder-supplier" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
-              <!-- يتم التعبئة تلقائياً -->
             </select>
           </div>
 
@@ -142,12 +116,12 @@
               <input type="number" id="builder-price" step="0.01" value="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-indigo-500 outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">الكمية</label>
+              <label class="block text-xs font-bold text-slate-600 mb-1">الكمية المطلوبة</label>
               <input type="number" id="builder-qty" value="1" min="1" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
             </div>
           </div>
 
-          <!-- إعدادات الضريبة للصنف -->
+          <!-- خيارات الضريبة -->
           <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
             <span class="block text-xs font-bold text-slate-700">خيارات الضريبة (VAT 15%):</span>
             <div class="flex flex-col gap-1.5 text-xs">
@@ -166,50 +140,43 @@
             </div>
           </div>
 
-          <button onclick="addItemToQuote()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md text-xs transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-plus"></i> إضافة للجدول
+          <button onclick="addItemToCurrentQuote()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl shadow-md text-xs transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i> إضافة إلى عرض السعر
           </button>
         </div>
 
-        <!-- جدول العرض والتحكم (يسار) -->
+        <!-- جدول العرض والتحكم (يسار - القابل للتصدير والطباعة) -->
         <div class="lg:col-span-2 space-y-4">
-          <div id="category-bg-container" class="bg-hospitality p-5 rounded-2xl border border-amber-200 shadow-sm transition-all">
-            <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+          <div id="quote-printable-area" class="bg-hospitality p-6 rounded-2xl border border-amber-200 shadow-sm transition-all">
+            
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-2 border-b border-slate-200/60 pb-3">
               <div>
-                <h3 class="font-bold text-slate-800 text-base" id="current-cat-title">جدول عروض الأسعار</h3>
-                <p class="text-xs text-slate-500">راجع البيانات والإجماليات قبل الاعتماد أو الحفظ</p>
+                <h3 class="font-extrabold text-slate-900 text-lg" id="current-cat-title">عرض سعر الضيافة</h3>
+                <p class="text-xs text-slate-500">حساب وتوثيق مبالغ الاحتياجات قبل الرفع للشركة</p>
               </div>
+              
+              <!-- أزرار الإجراءات -->
               <div class="flex items-center gap-2 no-print">
+                <button onclick="exportToPDF()" class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md flex items-center gap-1.5">
+                  <i class="fa-solid fa-file-pdf"></i> تصدير PDF
+                </button>
                 <button onclick="window.print()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm">
                   <i class="fa-solid fa-print"></i> طباعة
                 </button>
-                <button onclick="saveQuoteToArchive()" class="bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-1.5 rounded-lg text-xs font-bold shadow-md">
-                  <i class="fa-solid fa-floppy-disk"></i> حفظ في الأرشيف / العُهدة
+                <button onclick="saveCurrentQuote()" class="bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md flex items-center gap-1.5">
+                  <i class="fa-solid fa-floppy-disk"></i> حفظ في الأرشيف
                 </button>
               </div>
             </div>
 
-            <!-- معلومات اختيار المندوب/الموظف -->
-            <div class="bg-white/80 backdrop-blur p-3 rounded-xl mb-4 border border-slate-200/60 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">الموظف / المندوب المسند إليه:</label>
-                <select id="quote-agent" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-semibold">
-                  <!-- محملة تلقائياً من الموظفين -->
-                </select>
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">ملاحظات / بيان العُهدة:</label>
-                <input type="text" id="quote-notes" placeholder="مثال: شراء احتياجات المكتب لشهري أغسطس" class="w-full bg-white border border-slate-300 rounded-lg p-2">
-              </div>
-            </div>
-
-            <!-- جدول الأصناف المضافة -->
+            <!-- جدول الأصناف -->
             <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
               <table class="w-full text-right text-xs">
                 <thead class="bg-slate-100 text-slate-700 font-bold border-b">
                   <tr>
                     <th class="p-3">#</th>
                     <th class="p-3">الصنف</th>
+                    <th class="p-3">المستفيد</th>
                     <th class="p-3">المورد</th>
                     <th class="p-3">السعر</th>
                     <th class="p-3">الكمية</th>
@@ -219,24 +186,19 @@
                   </tr>
                 </thead>
                 <tbody id="quote-items-tbody">
-                  <tr id="empty-row">
-                    <td colspan="8" class="text-center py-8 text-slate-400 font-medium">
-                      لم يتم إضافة أي أصناف حتى الآن
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
 
-            <!-- ملخص الإجماليات -->
+            <!-- ملخص الإجمالي النهائي -->
             <div class="mt-4 bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap justify-between items-center gap-4 text-xs font-bold">
               <div class="space-y-1">
                 <p class="text-slate-500">المجموع قبل الضريبة: <span id="summary-subtotal" class="text-slate-800">0.00 ر.س</span></p>
                 <p class="text-slate-500">إجمالي الضريبة (15%): <span id="summary-tax" class="text-amber-600">0.00 ر.س</span></p>
               </div>
-              <div class="text-left bg-indigo-50 p-3 rounded-xl border border-indigo-100">
-                <span class="text-indigo-600 block text-xs">الإجمالي النهائي</span>
-                <span id="summary-grandtotal" class="text-indigo-900 text-lg font-extrabold">0.00 ر.س</span>
+              <div class="text-left bg-indigo-50 p-3.5 rounded-xl border border-indigo-200">
+                <span class="text-indigo-700 block text-xs">الإجمالي المطلوب لطلب العُهدة:</span>
+                <span id="summary-grandtotal" class="text-indigo-900 text-xl font-black">0.00 ر.س</span>
               </div>
             </div>
 
@@ -245,13 +207,28 @@
       </div>
     </section>
 
-    <!-- ===== 2. قسم إدارة الأصناف والموردين (تعديل كامل) ===== -->
-    <section id="sec-items-manage" class="hidden space-y-6">
+    <!-- ===== شاشة إدارة القوائم وتعديل الأصناف والإعدادات ===== -->
+    <section id="sec-manage" class="hidden space-y-6">
+      
+      <!-- إعدادات السحاب (Supabase) -->
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-database text-indigo-600"></i> إعدادات الربط السحابي (Supabase Integration)
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <input type="text" id="supabase-url" placeholder="Supabase Project URL" class="bg-slate-50 border p-2.5 rounded-xl font-mono">
+          <input type="password" id="supabase-key" placeholder="Supabase Anon Key" class="bg-slate-50 border p-2.5 rounded-xl font-mono">
+        </div>
+        <button onclick="saveSupabaseConfig()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800">
+          حفظ وإعراب الربط
+        </button>
+      </div>
+
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="font-bold text-slate-800 text-lg">إدارة قائمة الأصناف والموردين</h2>
-            <p class="text-xs text-slate-500">يمكنك تعديل أي اسم، سعر مثبت، أو ربطه بمورد معتمد بسهولة</p>
+            <h2 class="font-bold text-slate-800 text-lg">إدارة الأصناف والأسعار والموردين</h2>
+            <p class="text-xs text-slate-500">تعديل الأصناف المثبتة، تغيير أسعارها، أو ربطها بمورد آخر</p>
           </div>
           <button onclick="addNewItemPrompt()" class="bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700">
             <i class="fa-solid fa-plus ml-1"></i> إضافة صنف جديد
@@ -263,41 +240,39 @@
             <thead class="bg-slate-100 text-slate-700 font-bold border-b">
               <tr>
                 <th class="p-3">اسم الصنف</th>
-                <th class="p-3">القسم</th>
+                <th class="p-3">القائمة التابعة له</th>
                 <th class="p-3">السعر المثبت (ر.س)</th>
-                <th class="p-3">المورد المربوط تلقائياً</th>
-                <th class="p-3 text-center">عمليات والتعديل</th>
+                <th class="p-3">المورد المربوط</th>
+                <th class="p-3 text-center">تعديل</th>
               </tr>
             </thead>
             <tbody id="manage-items-tbody" class="divide-y divide-slate-100">
-              <!-- تعبئة ديناميكية -->
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ===== 3. قسم الأرشيف والعهُد ===== -->
+    <!-- ===== شاشة الأرشيف ===== -->
     <section id="sec-archive" class="hidden space-y-6">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-        <h2 class="font-bold text-slate-800 text-lg mb-1">أرشيف عروض الأسعار والعهُد المالية</h2>
-        <p class="text-xs text-slate-500 mb-4">تتبع كامل الفواتير المسجلة بالتواريخ والموظفين المسؤولين</p>
+        <h2 class="font-bold text-slate-800 text-lg mb-1">أرشيف عروض الأسعار المحفوظة</h2>
+        <p class="text-xs text-slate-500 mb-4">تتبع واسترجاع جميع عروض الأسعار المسجلة سابقاً</p>
 
         <div class="overflow-x-auto">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b">
               <tr>
-                <th class="p-3">رقم العرض/العهد</th>
+                <th class="p-3">رقم العرض</th>
+                <th class="p-3">القائمة / القسم</th>
                 <th class="p-3">التاريخ والوقت</th>
-                <th class="p-3">الموظف / المندوب</th>
                 <th class="p-3">عدد الأصناف</th>
                 <th class="p-3">المبلغ الإجمالي</th>
-                <th class="p-3">البيان / الملاحظات</th>
               </tr>
             </thead>
             <tbody id="archive-tbody" class="divide-y divide-slate-100">
               <tr>
-                <td colspan="6" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td>
+                <td colspan="5" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td>
               </tr>
             </tbody>
           </table>
@@ -307,21 +282,16 @@
 
   </main>
 
-  <!-- JavaScript الكود التفاعلي والبيانات المدمجة -->
   <script>
-    // ===== البيانات الأساسية المدمجة بالكامل (Fallback Data) =====
-    
-    // 1. الموردين (من الصور)
+    // ===== المتغيرات الأساسية والقوائم =====
+    let supabaseClient = null;
+
     let suppliersList = [
-      "النظافة الأنيقة",
-      "الصالة الاقتصادية",
-      "باجة",
-      "النسيم للمنظفات والبلاستيك",
-      "قرطاسية السبعين",
-      "بيست اكتو"
+      "النظافة الأنيقة", "الصالة الاقتصادية", "باجة",
+      "النسيم للمنظفات والبلاستيك", "قرطاسية السبعين", "بيست اكتو"
     ];
 
-    // 2. الموظفين / المندوبين (من الصور)
+    // قائمة الـ 28 موظف كاملاً من صورتك
     let employeesList = [
       "محمد الغامدي", "عبدالعزيز السديس", "محمد ابوالعاصي", "فيصل السلمي",
       "علي الشهراني", "إبراهيم العي", "عبدالله الشهراني", "فاطمه",
@@ -331,7 +301,6 @@
       "عبدالرحمن قاسم", "محمد العتيبي", "زاهد", "خليل", "محمد جنيد"
     ];
 
-    // 3. الأصناف (من صور الضيافة، القرطاسية، النظافة) مع الأسعار والموردين المربوطين
     let itemsDatabase = [
       // الضيافة
       { id: 1, name: "شاي", category: "hospitality", price: 15, supplier: "باجة" },
@@ -386,92 +355,109 @@
       { id: 46, name: "مبيد حشري", category: "cleaning", price: 26, supplier: "النظافة الأنيقة" }
     ];
 
-    // متغيرات التطبيق
-    let currentQuoteItems = [];
+    let currentCategory = 'hospitality';
+    let quoteItemsByCat = { hospitality: [], stationery: [], cleaning: [] };
     let archivedQuotes = [];
-    let currentRole = 'admin';
 
-    // ===== عند تحميل الصفحة =====
+    // ===== التشغيل التلقائي =====
     window.onload = function() {
       startClock();
       populateSuppliersDropdown();
       populateEmployeesDropdown();
-      loadCategoryItems();
+      switchCategory('hospitality');
       renderManageItemsTable();
+      initSupabase();
     };
 
-    // 1. تحديث الساعة والتاريخ الحي
     function startClock() {
-      function update() {
+      setInterval(() => {
         const now = new Date();
         document.getElementById('current-date').innerText = now.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
         document.getElementById('current-time').innerText = now.toLocaleTimeString('ar-SA');
-      }
-      update();
-      setInterval(update, 1000);
+      }, 1000);
     }
 
-    // 2. تعبئة القوائم المنسدلة
     function populateSuppliersDropdown() {
       const select = document.getElementById('builder-supplier');
       select.innerHTML = suppliersList.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
     function populateEmployeesDropdown() {
-      const select = document.getElementById('quote-agent');
-      select.innerHTML = employeesList.map(e => `<option value="${e}">${e}</option>`).join('');
+      const select = document.getElementById('builder-employee');
+      let options = `<option value="عام (لكل الموظفين)" selected>🌐 عام (لكل الموظفين / للمكتب)</option>`;
+      options += employeesList.map(e => `<option value="${e}">👤 ${e}</option>`).join('');
+      select.innerHTML = options;
     }
 
-    // 3. التحويل بين الأقسام والتصميم الحيوي (خلفيات حيوية لكل قسم)
-    function loadCategoryItems() {
-      const cat = document.getElementById('builder-category').value;
-      const itemSelect = document.getElementById('builder-item');
-      const bgContainer = document.getElementById('category-bg-container');
-      const catTitle = document.getElementById('current-cat-title');
+    function switchCategory(cat) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-amber-600', 'text-amber-700', 'border-blue-600', 'text-blue-700', 'border-emerald-600', 'text-emerald-700', 'border-indigo-600', 'text-indigo-700', 'border-slate-800', 'text-slate-800', 'bg-amber-50', 'bg-blue-50', 'bg-emerald-50');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      });
 
-      // تصفية الأصناف بحسب القسم
+      if (cat === 'manage' || cat === 'archive') {
+        document.getElementById('sec-calculator').classList.add('hidden');
+        document.getElementById('sec-manage').classList.toggle('hidden', cat !== 'manage');
+        document.getElementById('sec-archive').classList.toggle('hidden', cat !== 'archive');
+        document.getElementById('tab-' + cat).classList.add('border-indigo-600', 'text-indigo-700');
+        return;
+      }
+
+      document.getElementById('sec-calculator').classList.remove('hidden');
+      document.getElementById('sec-manage').classList.add('hidden');
+      document.getElementById('sec-archive').classList.add('hidden');
+
+      currentCategory = cat;
+      const itemSelect = document.getElementById('builder-item');
+      const bgContainer = document.getElementById('quote-printable-area');
+      const catTitle = document.getElementById('current-cat-title');
+      const formTitle = document.getElementById('form-title');
+      const activeBtn = document.getElementById('tab-' + cat);
+
       const filtered = itemsDatabase.filter(i => i.category === cat);
       itemSelect.innerHTML = filtered.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
 
-      // تغيير خلفية الجدول والعنوان بحسب القسم لتكون حيوية
       if (cat === 'hospitality') {
-        bgContainer.className = "bg-hospitality p-5 rounded-2xl border border-amber-200 shadow-sm transition-all";
-        catTitle.innerHTML = "☕ جدول عرض سعر - قسم الضيافة";
+        activeBtn.classList.add('border-amber-600', 'text-amber-700', 'bg-amber-50');
+        bgContainer.className = "bg-hospitality p-6 rounded-2xl border border-amber-200 shadow-sm transition-all";
+        catTitle.innerHTML = "☕ عرض سعر الضيافة";
+        formTitle.innerHTML = '<i class="fa-solid fa-cart-plus text-amber-600"></i> إضافة صنف لقائمة الضيافة';
       } else if (cat === 'stationery') {
-        bgContainer.className = "bg-stationery p-5 rounded-2xl border border-blue-200 shadow-sm transition-all";
-        catTitle.innerHTML = "✏️ جدول عرض سعر - قسم القرطاسية";
+        activeBtn.classList.add('border-blue-600', 'text-blue-700', 'bg-blue-50');
+        bgContainer.className = "bg-stationery p-6 rounded-2xl border border-blue-200 shadow-sm transition-all";
+        catTitle.innerHTML = "✏️ عرض سعر القرطاسية";
+        formTitle.innerHTML = '<i class="fa-solid fa-cart-plus text-blue-600"></i> إضافة صنف لقائمة القرطاسية';
       } else if (cat === 'cleaning') {
-        bgContainer.className = "bg-cleaning p-5 rounded-2xl border border-emerald-200 shadow-sm transition-all";
-        catTitle.innerHTML = "🧹 جدول عرض سعر - قسم النظافة";
+        activeBtn.classList.add('border-emerald-600', 'text-emerald-700', 'bg-emerald-50');
+        bgContainer.className = "bg-cleaning p-6 rounded-2xl border border-emerald-200 shadow-sm transition-all";
+        catTitle.innerHTML = "🧹 عرض سعر النظافة";
+        formTitle.innerHTML = '<i class="fa-solid fa-cart-plus text-emerald-600"></i> إضافة صنف لقائمة النظافة';
       }
 
       onItemSelect();
+      renderQuoteTable();
     }
 
-    // 4. ربط الصنف بالمورد وتعبئة السعر المعتمد تلقائياً عند الاختيار
     function onItemSelect() {
       const itemId = parseInt(document.getElementById('builder-item').value);
       const item = itemsDatabase.find(i => i.id === itemId);
-      
       if (item) {
         document.getElementById('builder-price').value = item.price;
         document.getElementById('builder-supplier').value = item.supplier;
       }
     }
 
-    // 5. إضافة صنف للجدول وحساب الضريبة والإجمالي
-    function addItemToQuote() {
+    function addItemToCurrentQuote() {
       const itemId = parseInt(document.getElementById('builder-item').value);
       const itemObj = itemsDatabase.find(i => i.id === itemId);
+      const targetEmp = document.getElementById('builder-employee').value;
       const priceInput = parseFloat(document.getElementById('builder-price').value) || 0;
       const qty = parseInt(document.getElementById('builder-qty').value) || 1;
       const supplier = document.getElementById('builder-supplier').value;
-      
+
       const taxRadios = document.getElementsByName('tax-mode');
       let taxMode = 'add';
-      for (const r of taxRadios) {
-        if (r.checked) taxMode = r.value;
-      }
+      for (const r of taxRadios) { if (r.checked) taxMode = r.value; }
 
       let unitPrice = priceInput;
       let taxAmount = 0;
@@ -484,52 +470,54 @@
         const basePrice = unitPrice / 1.15;
         taxAmount = (unitPrice - basePrice) * qty;
         itemTotal = unitPrice * qty;
-        unitPrice = basePrice; // لتسجيل الأساسي
-      } else if (taxMode === 'zero') {
+        unitPrice = basePrice;
+      } else {
         taxAmount = 0;
         itemTotal = unitPrice * qty;
       }
 
-      currentQuoteItems.push({
+      quoteItemsByCat[currentCategory].push({
         id: Date.now(),
         name: itemObj ? itemObj.name : "صنف معدل",
+        targetEmployee: targetEmp,
         supplier: supplier,
         unitPrice: unitPrice,
         qty: qty,
         taxAmount: taxAmount,
-        total: itemTotal,
-        taxMode: taxMode
+        total: itemTotal
       });
 
       renderQuoteTable();
     }
 
-    // 6. عرض جدول عرض السعر المتناول
     function renderQuoteTable() {
       const tbody = document.getElementById('quote-items-tbody');
-      
-      if (currentQuoteItems.length === 0) {
-        tbody.innerHTML = `
-          <tr id="empty-row">
-            <td colspan="8" class="text-center py-8 text-slate-400 font-medium">لم يتم إضافة أي أصناف حتى الآن</td>
-          </tr>`;
+      const items = quoteItemsByCat[currentCategory];
+
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400 font-medium">لم يتم إضافة أي أصناف حتى الآن لهذه القائمة</td></tr>`;
         updateSummary(0, 0, 0);
         return;
       }
 
-      let subtotal = 0;
-      let totalTax = 0;
-      let grandTotal = 0;
+      let subtotal = 0, totalTax = 0, grandTotal = 0;
 
-      tbody.innerHTML = currentQuoteItems.map((item, index) => {
+      tbody.innerHTML = items.map((item, index) => {
         subtotal += (item.unitPrice * item.qty);
         totalTax += item.taxAmount;
         grandTotal += item.total;
+
+        const isGeneral = item.targetEmployee.includes('عام');
 
         return `
           <tr class="border-b border-slate-100 hover:bg-white/60">
             <td class="p-3 font-bold text-slate-400">${index + 1}</td>
             <td class="p-3 font-bold text-slate-800">${item.name}</td>
+            <td class="p-3 font-semibold">
+              <span class="px-2 py-1 rounded-lg text-xs ${isGeneral ? 'bg-slate-100 text-slate-700' : 'bg-indigo-50 text-indigo-700 font-bold'}">
+                ${item.targetEmployee}
+              </span>
+            </td>
             <td class="p-3 text-slate-600">${item.supplier}</td>
             <td class="p-3 text-emerald-600 font-bold">${item.unitPrice.toFixed(2)} ر.س</td>
             <td class="p-3 font-bold">${item.qty}</td>
@@ -548,7 +536,7 @@
     }
 
     function removeItem(id) {
-      currentQuoteItems = currentQuoteItems.filter(i => i.id !== id);
+      quoteItemsByCat[currentCategory] = quoteItemsByCat[currentCategory].filter(i => i.id !== id);
       renderQuoteTable();
     }
 
@@ -558,56 +546,78 @@
       document.getElementById('summary-grandtotal').innerText = grand.toFixed(2) + " ر.س";
     }
 
-    // 7. حفظ عرض السعر في الأرشيف والعهدة
-    function saveQuoteToArchive() {
-      if (currentQuoteItems.length === 0) {
-        alert("يرجى إضافة أصناف أولاً قبل الحفظ!");
+    // ===== ميزة تصدير الملف بصيغة PDF الرسمية =====
+    function exportToPDF() {
+      const element = document.getElementById('quote-printable-area');
+      const catName = currentCategory === 'hospitality' ? 'الضيافة' : currentCategory === 'stationery' ? 'القرطاسية' : 'النظافة';
+      
+      const opt = {
+        margin:       0.5,
+        filename:     `عرض_سعر_${catName}_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    }
+
+    // ===== ميزة حفظ عرض السعر (موقعي + Supabase) =====
+    async function saveCurrentQuote() {
+      const items = quoteItemsByCat[currentCategory];
+      if (items.length === 0) {
+        alert("القائمة فارغة! أضف أصنافاً أولاً.");
         return;
       }
 
-      const agent = document.getElementById('quote-agent').value;
-      const notes = document.getElementById('quote-notes').value || "بدون ملاحظات";
-      const totalAmount = currentQuoteItems.reduce((acc, i) => acc + i.total, 0);
+      const totalAmount = items.reduce((acc, i) => acc + i.total, 0);
+      const catName = currentCategory === 'hospitality' ? 'الضيافة' : currentCategory === 'stationery' ? 'القرطاسية' : 'النظافة';
 
-      const newRecord = {
+      const quoteData = {
         code: "Q-" + Math.floor(1000 + Math.random() * 9000),
+        categoryName: catName,
         dateTime: new Date().toLocaleString('ar-SA'),
-        agent: agent,
-        itemsCount: currentQuoteItems.length,
+        itemsCount: items.length,
         total: totalAmount,
-        notes: notes
+        itemsDetails: items
       };
 
-      archivedQuotes.unshift(newRecord);
+      archivedQuotes.unshift(quoteData);
       renderArchiveTable();
 
-      // تصفية الجدول الحالي
-      currentQuoteItems = [];
+      // محاولة الحفظ السحابي في Supabase إن وجد
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient.from('quotes').insert([quoteData]);
+          if (error) console.error("Supabase Save Error:", error);
+        } catch (err) {
+          console.log("Supabase Connection Failover", err);
+        }
+      }
+
+      quoteItemsByCat[currentCategory] = [];
       renderQuoteTable();
-      document.getElementById('quote-notes').value = "";
-      alert("تم حفظ عرض السعر بنجاح في الأرشيف وقيد العُهدة!");
+      alert(`تم حفظ عرض سعر (${catName}) بنجاح بمبلغ إجمالي: ${totalAmount.toFixed(2)} ر.س`);
     }
 
     function renderArchiveTable() {
       const tbody = document.getElementById('archive-tbody');
       if (archivedQuotes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td></tr>`;
         return;
       }
 
       tbody.innerHTML = archivedQuotes.map(q => `
         <tr class="hover:bg-slate-50 border-b border-slate-100">
           <td class="p-3 font-bold text-indigo-600">${q.code}</td>
+          <td class="p-3 font-bold text-slate-800">${q.categoryName}</td>
           <td class="p-3 text-slate-500">${q.dateTime}</td>
-          <td class="p-3 font-semibold text-slate-800">${q.agent}</td>
           <td class="p-3 font-bold">${q.itemsCount}</td>
           <td class="p-3 font-extrabold text-emerald-600">${q.total.toFixed(2)} ر.س</td>
-          <td class="p-3 text-slate-600">${q.notes}</td>
         </tr>
       `).join('');
     }
 
-    // 8. إدارة وتعديل كافة الأصناف والموردين والأسعار
     function renderManageItemsTable() {
       const tbody = document.getElementById('manage-items-tbody');
       tbody.innerHTML = itemsDatabase.map(item => `
@@ -618,12 +628,12 @@
               item.category === 'hospitality' ? 'bg-amber-100 text-amber-800' :
               item.category === 'stationery' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
             }">
-              ${item.category === 'hospitality' ? 'ضيافة' : item.category === 'stationery' ? 'قرطاسية' : 'نظافة'}
+              ${item.category === 'hospitality' ? 'الضيافة' : item.category === 'stationery' ? 'القرطاسية' : 'النظافة'}
             </span>
           </td>
           <td class="p-3 font-bold text-emerald-600">${item.price} ر.س</td>
           <td class="p-3 font-semibold text-slate-700">${item.supplier}</td>
-          <td class="p-3 text-center space-x-2 space-x-reverse">
+          <td class="p-3 text-center">
             <button onclick="editItem(${item.id})" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-2.5 py-1 rounded-lg font-bold text-xs">
               <i class="fa-solid fa-pen"></i> تعديل
             </button>
@@ -650,8 +660,8 @@
       item.supplier = newSupplier || item.supplier;
 
       renderManageItemsTable();
-      loadCategoryItems(); // لتحديث البيانات في القائمة المنسدلة
-      alert("تم تحديث بيانات الصنف والمورد بنجاح!");
+      switchCategory(currentCategory);
+      alert("تم التعديل بنجاح!");
     }
 
     function addNewItemPrompt() {
@@ -663,41 +673,35 @@
       itemsDatabase.push({
         id: Date.now(),
         name: name,
-        category: document.getElementById('builder-category').value,
+        category: currentCategory,
         price: price,
         supplier: supplier || suppliersList[0]
       });
 
       renderManageItemsTable();
-      loadCategoryItems();
+      switchCategory(currentCategory);
     }
 
-    // 9. التنقل بين الأبواب والشاشات
-    function switchTab(tabId) {
-      document.querySelectorAll('section[id^="sec-"]').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-600', 'text-indigo-600');
-        btn.classList.add('border-transparent', 'text-slate-500');
-      });
-
-      document.getElementById('sec-' + tabId).classList.remove('hidden');
-      document.getElementById('tab-' + tabId).classList.add('border-indigo-600', 'text-indigo-600');
+    // ===== إدارة الربط مع Supabase =====
+    function saveSupabaseConfig() {
+      const url = document.getElementById('supabase-url').value.trim();
+      const key = document.getElementById('supabase-key').value.trim();
+      
+      if(url && key) {
+        localStorage.setItem('sp_url', url);
+        localStorage.setItem('sp_key', key);
+        initSupabase();
+        alert("تم حفظ إعدادات Supabase بنجاح!");
+      }
     }
 
-    function switchRole(role) {
-      currentRole = role;
-      const btnAdmin = document.getElementById('btn-role-admin');
-      const btnAgent = document.getElementById('btn-role-agent');
-
-      if (role === 'admin') {
-        btnAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white";
-        btnAgent.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white";
-        document.getElementById('tab-items-manage').style.display = 'block';
-      } else {
-        btnAgent.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white";
-        btnAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white";
-        document.getElementById('tab-items-manage').style.display = 'none';
-        switchTab('quote-builder');
+    function initSupabase() {
+      const url = localStorage.getItem('sp_url') || document.getElementById('supabase-url').value;
+      const key = localStorage.getItem('sp_key') || document.getElementById('supabase-key').value;
+      if (url && key && window.supabase) {
+        supabaseClient = window.supabase.createClient(url, key);
+        document.getElementById('supabase-url').value = url;
+        document.getElementById('supabase-key').value = key;
       }
     }
   </script>
