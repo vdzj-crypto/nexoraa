@@ -1,1208 +1,705 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotations Hub - منصة عروض الأسعار والمشتريات والعُهد</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام إدارة عروض الأسعار والعُهد - Quotations Hub</title>
+  
+  <!-- Tailwind CSS & FontAwesome Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts (Cairo) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { font-family: 'Cairo', sans-serif; }
     
-    <!-- Frameworks & CSS Libraries -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <!-- Firebase SDK Compat Core -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
-        
-        :root {
-            --primary-dark: #0f172a;
-            --sidebar-bg: #1e293b;
-            --accent-color: #2563eb;
-        }
-
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .sidebar {
-            background-color: var(--sidebar-bg);
-            color: #ffffff;
-            min-height: 100vh;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar .nav-link {
-            color: #94a3b8;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .sidebar .nav-link:hover {
-            color: #ffffff;
-            background-color: rgba(255, 255, 255, 0.08);
-            transform: translateX(-3px);
-        }
-
-        .sidebar .nav-link.active {
-            color: #ffffff;
-            background-color: var(--accent-color);
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-            font-weight: 700;
-        }
-
-        .card-custom {
-            background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-            transition: all 0.2s ease;
-        }
-
-        .card-custom:hover {
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08);
-        }
-
-        .table-custom {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .table-custom th {
-            background-color: #f1f5f9;
-            color: #475569;
-            font-weight: 700;
-            padding: 14px 16px;
-            font-size: 0.825rem;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .table-custom td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.85rem;
-            vertical-align: middle;
-        }
-
-        .table-custom tr:last-child td {
-            border-bottom: none;
-        }
-
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-pending { background-color: #fef3c7; color: #d97706; }
-        .status-approved { background-color: #d1fae5; color: #059669; }
-        .status-rejected { background-color: #fee2e2; color: #dc2626; }
-        .status-completed { background-color: #e0e7ff; color: #4338ca; }
-
-        .form-input-custom {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1px solid #cbd5e1;
-            font-size: 0.85rem;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-input-custom:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
-        .btn-primary-custom {
-            background-color: #2563eb;
-            color: #ffffff;
-            font-weight: 700;
-            padding: 10px 20px;
-            border-radius: 10px;
-            transition: all 0.2s;
-        }
-
-        .btn-primary-custom:hover {
-            background-color: #1d4ed8;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            .sidebar { display: none !important; }
-            main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
-            body { background: white !important; }
-            .card-custom { border: none !important; box-shadow: none !important; }
-        }
-    </style>
+    /* خلفيات حيوية ومريحة لكل قسم */
+    .bg-hospitality {
+      background: linear-gradient(135deg, #fff8f0 0%, #feebd9 100%);
+    }
+    .bg-stationery {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e0f0fe 100%);
+    }
+    .bg-cleaning {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+    
+    /* أنميشين وتأثيرات الواجهة */
+    .card-glow {
+      transition: all 0.3s ease;
+    }
+    .card-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    }
+    
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white !important; }
+    }
+  </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- 1. شاشة تسجيل الدخول -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
-        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 border border-slate-100">
-            <div class="text-center mb-8">
-                <div class="inline-flex p-3 bg-blue-600 text-white rounded-2xl mb-3 shadow-lg shadow-blue-500/30">
-                    <i class="fa-solid fa-file-invoice-dollar text-3xl"></i>
-                </div>
-                <h2 class="text-2xl font-black text-slate-800">Quotations Hub</h2>
-                <p class="text-xs text-slate-500 mt-1">منصة إدارة عروض الأسعار والمشتريات والعُهد المالية</p>
-            </div>
-
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
-                    <input type="email" id="login-email" required placeholder="user@company.com" class="form-input-custom">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="form-input-custom">
-                </div>
-                <div id="login-error" class="text-red-500 text-xs font-bold hidden bg-red-50 p-3 rounded-lg border border-red-200"></div>
-                <button type="submit" id="login-btn" class="w-full btn-primary-custom flex justify-center items-center gap-2">
-                    <span>تسجيل الدخول</span>
-                </button>
-            </form>
-            <div class="mt-6 text-center">
-                <p class="text-xs text-slate-400">جميع الحقوق محفوظة &copy; Quotations Hub 2026</p>
-            </div>
+  <!-- الشريط العلوي التفاعلي (Header) -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+      
+      <!-- اللوجو والعنوان -->
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg">
+          <i class="fa-solid fa-file-invoice-dollar text-xl text-white"></i>
         </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Quotations Hub</h1>
+          <p class="text-xs text-slate-400">إدارة عروض الأسعار والعهد المالية</p>
+        </div>
+      </div>
+
+      <!-- عرض الوقت والتاريخ الحي -->
+      <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/50 text-xs">
+        <div class="flex items-center gap-1.5 text-indigo-400">
+          <i class="fa-regular fa-calendar-days"></i>
+          <span id="current-date">--/--/----</span>
+        </div>
+        <div class="w-px h-4 bg-slate-700"></div>
+        <div class="flex items-center gap-1.5 text-emerald-400">
+          <i class="fa-regular fa-clock"></i>
+          <span id="current-time">--:--:--</span>
+        </div>
+      </div>
+
+      <!-- نظام التبديل بين المستويات (المدير / المندوب) -->
+      <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-xl">
+        <button id="btn-role-admin" onclick="switchRole('admin')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white">
+          <i class="fa-solid fa-user-shield ml-1"></i> المدير (Admin)
+        </button>
+        <button id="btn-role-agent" onclick="switchRole('agent')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white">
+          <i class="fa-solid fa-user-ninja ml-1"></i> المندوب (Agent)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- محتوى التطبيق -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+    <!-- شريط التنقل بين الأقسام (Tabs) -->
+    <div class="flex overflow-x-auto gap-2 mb-6 pb-2 no-print border-b border-slate-200">
+      <button onclick="switchTab('quote-builder')" id="tab-quote-builder" class="tab-btn active border-b-2 border-indigo-600 text-indigo-600 font-bold px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-plus-circle"></i> إنشاء عرض سعر جديد
+      </button>
+      <button onclick="switchTab('items-manage')" id="tab-items-manage" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap hover:text-indigo-600">
+        <i class="fa-solid fa-boxes-stacked"></i> إدارة الأصناف والموردين
+      </button>
+      <button onclick="switchTab('archive')" id="tab-archive" class="tab-btn border-b-2 border-transparent text-slate-500 font-bold px-4 py-2 text-sm flex items-center gap-2 whitespace-nowrap hover:text-indigo-600">
+        <i class="fa-solid fa-box-archive"></i> الأرشيف والعهُد
+      </button>
     </div>
 
-    <!-- 2. الواجهة الرئيسية للتطبيق -->
-    <div id="app-screen" class="hidden flex flex-col md:flex-row min-h-screen">
+    <!-- ===== 1. قسم إنشاء عرض سعر جديد ===== -->
+    <section id="sec-quote-builder" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- القائمة الجانبية Navigation Sidebar -->
-        <aside class="w-full md:w-72 sidebar p-5 flex flex-col justify-between shadow-xl no-print">
+        <!-- نموذج الإدخال (يمين) -->
+        <div class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h2 class="font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-cart-plus text-indigo-600"></i> إضافة صنف إلى عرض السعر
+          </h2>
+
+          <!-- اختيار القسم (الضيافة / القرطاسية / النظافة) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">القسم</label>
+            <select id="builder-category" onchange="loadCategoryItems()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="hospitality">☕ قسم الضيافة</option>
+              <option value="stationery">✏️ قسم القرطاسية</option>
+              <option value="cleaning">🧹 قسم النظافة</option>
+            </select>
+          </div>
+
+          <!-- اختيار الصنف -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">الصنف</label>
+            <select id="builder-item" onchange="onItemSelect()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+              <!-- يتم التعبئة تلقائياً -->
+            </select>
+          </div>
+
+          <!-- المورد المربوط تلقائياً (مع إمكانية التعديل) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">المورد المعتمد</label>
+            <select id="builder-supplier" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+              <!-- يتم التعبئة تلقائياً -->
+            </select>
+          </div>
+
+          <!-- السعر والكمية -->
+          <div class="grid grid-cols-2 gap-3">
             <div>
-                <div class="flex items-center gap-3 mb-8 px-2 pt-2">
-                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-md">
-                        <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg font-black text-white">Quotations Hub</h1>
-                        <p id="user-role-badge" class="text-xs text-amber-400 font-bold">جاري المزامنة...</p>
-                    </div>
-                </div>
-                
-                <nav class="nav flex-column" id="main-nav">
-                    <!-- يتم بناء عناصر Navigation بناءً على الصلاحيات عبر JS -->
-                </nav>
+              <label class="block text-xs font-bold text-slate-600 mb-1">السعر (ر.س)</label>
+              <input type="number" id="builder-price" step="0.01" value="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-indigo-500 outline-none">
             </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">الكمية</label>
+              <input type="number" id="builder-qty" value="1" min="1" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+          </div>
 
-            <div class="pt-4 border-t border-slate-700/60">
-                <div class="flex items-center justify-between px-2 mb-3">
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <i class="fa-solid fa-circle-user text-slate-400 text-lg"></i>
-                        <span id="user-email-display" class="text-xs text-slate-300 font-medium truncate max-w-[140px]"></span>
-                    </div>
-                    <button onclick="handleLogout()" title="تسجيل الخروج" class="text-xs bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-2.5 py-1.5 rounded-lg transition">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
+          <!-- إعدادات الضريبة للصنف -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+            <span class="block text-xs font-bold text-slate-700">خيارات الضريبة (VAT 15%):</span>
+            <div class="flex flex-col gap-1.5 text-xs">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="tax-mode" value="add" checked class="text-indigo-600">
+                <span>إضافة ضريبة 15% على السعر</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="tax-mode" value="included" class="text-indigo-600">
+                <span>السعر شامل للضريبة</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="tax-mode" value="zero" class="text-indigo-600">
+                <span>معفى / تصفير الضريبة (0%)</span>
+              </label>
             </div>
-        </aside>
+          </div>
 
-        <!-- المحتوى الرئيسي Main Content Area -->
-        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
-            <header class="flex justify-between items-center mb-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm no-print">
-                <div>
-                    <h2 id="page-title" class="text-2xl font-black text-slate-800">---</h2>
-                    <p id="page-subtitle" class="text-xs text-slate-500 mt-1">---</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-xs font-bold text-slate-600 bg-slate-100 px-4 py-2.5 rounded-xl border flex items-center gap-2">
-                        <i class="fa-solid fa-user-shield text-blue-600"></i>
-                        <span id="current-user-name">...</span>
-                    </div>
-                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> طباعة
-                    </button>
-                </div>
-            </header>
-
-            <div id="app-content">
-                <!-- المحتوى يتغير ديناميكياً هنا -->
-            </div>
-        </main>
-    </div>
-
-    <!-- Modals (نافذة إضافة وتحرير الموردين والأصناف) -->
-    <div id="generic-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="modal-title" class="font-bold text-slate-800 text-base">---</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="modal-body">
-                <!-- أسطر المودال تضاف بالسوفتوير -->
-            </div>
+          <button onclick="addItemToQuote()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md text-xs transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i> إضافة للجدول
+          </button>
         </div>
-    </div>
-
-    <!-- JavaScript Logic -->
-    <script>
-        // 1. Firebase Initialization
-        const firebaseConfig = {
-            apiKey: "AIzaSyCVbmyDOHZR7nyQTSEUKWacDyFHdrdMUDY",
-            authDomain: "quotations-hub.firebaseapp.com",
-            projectId: "quotations-hub",
-            storageBucket: "quotations-hub.firebasestorage.app",
-            messagingSenderId: "573711718348",
-            appId: "1:573711718348:web:a573ba9e151e3124d1ef69",
-            measurementId: "G-E5MTZT0N34"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // Application State
-        let currentUser = null;
-        let currentUserProfile = null;
-        let globalSuppliers = [];
-        let globalAgents = [];
-
-        // App Preloader / Auth Change Engine
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    const userDoc = await db.collection('users').doc(user.uid).get();
-                    if (userDoc.exists) {
-                        currentUserProfile = userDoc.data();
-                    } else {
-                        currentUserProfile = {
-                            name: user.email.split('@')[0],
-                            role: 'agent',
-                            email: user.email,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        };
-                        await db.collection('users').doc(user.uid).set(currentUserProfile);
-                    }
-                } catch(e) {
-                    console.error("User profile load error:", e);
-                    currentUserProfile = { name: user.email.split('@')[0], role: 'agent', email: user.email };
-                }
-                await loadGlobalMetadata();
-                showApp();
-            } else {
-                showLogin();
-            }
-        });
-
-        async function loadGlobalMetadata() {
-            try {
-                const agentsSnap = await db.collection('users').where('role', '==', 'agent').get();
-                globalAgents = [];
-                agentsSnap.forEach(doc => globalAgents.push({ id: doc.id, ...doc.data() }));
-
-                const suppliersSnap = await db.collection('suppliers').get();
-                globalSuppliers = [];
-                suppliersSnap.forEach(doc => globalSuppliers.push({ id: doc.id, ...doc.data() }));
-            } catch (e) {
-                console.log("Metadata loading error:", e);
-            }
-        }
-
-        function showLogin() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('app-screen').classList.add('hidden');
-        }
-
-        function showApp() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-email-display').innerText = currentUser.email;
-            document.getElementById('current-user-name').innerText = currentUserProfile.name || currentUser.email;
-            document.getElementById('user-role-badge').innerText = currentUserProfile.role === 'admin' ? '🛡️ المدير (Admin)' : '📦 مندوب المشتريات';
-
-            buildNavigation();
-            showPage(currentUserProfile.role === 'admin' ? 'dashboard' : 'my-procurements');
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-password').value;
-            const errEl = document.getElementById('login-error');
-            const btn = document.getElementById('login-btn');
-            
-            try {
-                errEl.classList.add('hidden');
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i> جاري التحقق...`;
-                btn.disabled = true;
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (err) {
-                errEl.innerText = "فشل تسجيل الدخول: تأكد من بيانات الحساب.";
-                errEl.classList.remove('hidden');
-            } finally {
-                btn.innerHTML = `<span>تسجيل الدخول</span>`;
-                btn.disabled = false;
-            }
-        }
-
-        function handleLogout() {
-            auth.signOut();
-        }
-
-        // Navigation Builder Engine
-        function buildNavigation() {
-            const nav = document.getElementById('main-nav');
-            const isAdmin = currentUserProfile.role === 'admin';
-
-            if (isAdmin) {
-                nav.innerHTML = `
-                    <a href="#" onclick="showPage('dashboard')" class="nav-link active" id="link-dashboard"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم الشاملة</a>
-                    <a href="#" onclick="showPage('hospitality')" class="nav-link" id="link-hospitality"><i class="fa-solid fa-mug-hot"></i> الضيافة والبوفيه</a>
-                    <a href="#" onclick="showPage('cleaning')" class="nav-link" id="link-cleaning"><i class="fa-solid fa-pump-soap"></i> أدوات النظافة</a>
-                    <a href="#" onclick="showPage('stationery')" class="nav-link" id="link-stationery"><i class="fa-solid fa-print"></i> القرطاسية والإلكترونيات</a>
-                    <a href="#" onclick="showPage('custody')" class="nav-link" id="link-custody"><i class="fa-solid fa-wallet text-amber-400"></i> إدارة العُهد والمشتريات</a>
-                    <a href="#" onclick="showPage('suppliers')" class="nav-link" id="link-suppliers"><i class="fa-solid fa-truck-field text-emerald-400"></i> قائمة الموردين المعتمدين</a>
-                    <a href="#" onclick="showPage('users-manage')" class="nav-link" id="link-users-manage"><i class="fa-solid fa-users-gear text-blue-400"></i> إدارة الحسابات والصلاحيات</a>
-                `;
-            } else {
-                nav.innerHTML = `
-                    <a href="#" onclick="showPage('my-procurements')" class="nav-link active" id="link-my-procurements"><i class="fa-solid fa-boxes-packing text-emerald-400"></i> قائمتي الخاصة بالمشتريات</a>
-                    <a href="#" onclick="showPage('my-custody')" class="nav-link" id="link-my-custody"><i class="fa-solid fa-wallet text-amber-400"></i> العُهدة المالية الخاصة بي</a>
-                `;
-            }
-        }
-
-        // Router Engine
-        function showPage(pageId) {
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            const activeLink = document.getElementById(`link-${pageId}`);
-            if (activeLink) activeLink.classList.add('active');
-
-            const container = document.getElementById('app-content');
-
-            if (pageId === 'dashboard') renderAdminDashboard(container);
-            else if (pageId === 'hospitality') renderCategoryPage(container, 'hospitality', 'الضيافة والبوفيه', 'إدارة عروض أسعار الشاي، القهوة، والمستلزمات');
-            else if (pageId === 'cleaning') renderCategoryPage(container, 'cleaning', 'أدوات النظافة', 'إدارة ومتابعة طلبات مواد التنظيف والمطهرات');
-            else if (pageId === 'stationery') renderCategoryPage(container, 'stationery', 'القرطاسية والإلكترونيات', 'متابعة أجهزة المكتب والورقيات والمستلزمات');
-            else if (pageId === 'custody') renderCustodyPage(container);
-            else if (pageId === 'suppliers') renderSuppliersPage(container);
-            else if (pageId === 'users-manage') renderUsersManagement(container);
-            else if (pageId === 'my-procurements') renderAgentProcurements(container);
-            else if (pageId === 'my-custody') renderAgentCustody(container);
-        }
-
-        // 1. Dashboard View
-        async function renderAdminDashboard(c) {
-            document.getElementById('page-title').innerText = 'لوحة تحكم المدير الشاملة';
-            document.getElementById('page-subtitle').innerText = 'نظرة عامة على المشتريات، الموردين، وإجمالي العُهد والمصروفات';
-
-            c.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="card-custom p-5 border-r-4 border-r-blue-600">
-                        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي الميزانية التقديرية</p>
-                        <h3 id="dash-total-est" class="text-2xl font-black text-slate-800">0.00 ر.س</h3>
-                    </div>
-                    <div class="card-custom p-5 border-r-4 border-r-emerald-500">
-                        <p class="text-xs text-slate-500 font-bold mb-1">إجمالي المشتريات المكتملة</p>
-                        <h3 id="dash-total-done" class="text-2xl font-black text-slate-800">0.00 ر.س</h3>
-                    </div>
-                    <div class="card-custom p-5 border-r-4 border-r-amber-500">
-                        <p class="text-xs text-slate-500 font-bold mb-1">طلبات قيد الشراء والتنسيق</p>
-                        <h3 id="dash-pending-count" class="text-2xl font-black text-slate-800">0</h3>
-                    </div>
-                    <div class="card-custom p-5 border-r-4 border-r-purple-600">
-                        <p class="text-xs text-slate-500 font-bold mb-1">مندوبي المشتريات</p>
-                        <h3 class="text-2xl font-black text-slate-800">${globalAgents.length} مندوب</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="card-custom p-6">
-                        <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-clock-rotate-left me-2 text-blue-600"></i>آخر التحديثات والمشتريات المضافة</h3>
-                        <div id="dash-recent-list" class="space-y-3">
-                            <div class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تحميل السجلات...</div>
-                        </div>
-                    </div>
-
-                    <div class="card-custom p-6">
-                        <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-chart-simple me-2 text-emerald-600"></i>توزيع المصروفات حسب الأقسام</h3>
-                        <div class="space-y-4 text-xs">
-                            <div>
-                                <div class="flex justify-between font-bold mb-1"><span>قسم الضيافة والبوفيه</span><span id="p-hosp-val">0 ر.س</span></div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5"><div id="p-hosp-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between font-bold mb-1"><span>قسم أدوات النظافة</span><span id="p-clean-val">0 ر.س</span></div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5"><div id="p-clean-bar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 0%"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between font-bold mb-1"><span>قسم القرطاسية والإلكترونيات</span><span id="p-stat-val">0 ر.س</span></div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5"><div id="p-stat-bar" class="bg-amber-500 h-2.5 rounded-full" style="width: 0%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Dynamic Dashboard Calculations
-            try {
-                const snap = await db.collection('quotations').get();
-                let totalEst = 0;
-                let totalDone = 0;
-                let pendingCount = 0;
-                let hospTot = 0, cleanTot = 0, statTot = 0;
-                let recentItems = [];
-
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const tot = parseFloat(data.total) || 0;
-                    totalEst += tot;
-
-                    if (data.status === 'تم الشراء والتسليم') {
-                        totalDone += tot;
-                    } else {
-                        pendingCount++;
-                    }
-
-                    if (data.category === 'hospitality') hospTot += tot;
-                    if (data.category === 'cleaning') cleanTot += tot;
-                    if (data.category === 'stationery') statTot += tot;
-
-                    recentItems.push({ id: doc.id, ...data });
-                });
-
-                document.getElementById('dash-total-est').innerText = totalEst.toLocaleString() + ' ر.س';
-                document.getElementById('dash-total-done').innerText = totalDone.toLocaleString() + ' ر.س';
-                document.getElementById('dash-pending-count').innerText = pendingCount;
-
-                document.getElementById('p-hosp-val').innerText = hospTot.toLocaleString() + ' ر.س';
-                document.getElementById('p-clean-val').innerText = cleanTot.toLocaleString() + ' ر.س';
-                document.getElementById('p-stat-val').innerText = statTot.toLocaleString() + ' ر.س';
-
-                const grandTotal = totalEst || 1;
-                document.getElementById('p-hosp-bar').style.width = Math.min((hospTot / grandTotal) * 100, 100) + '%';
-                document.getElementById('p-clean-bar').style.width = Math.min((cleanTot / grandTotal) * 100, 100) + '%';
-                document.getElementById('p-stat-bar').style.width = Math.min((statTot / grandTotal) * 100, 100) + '%';
-
-                const listEl = document.getElementById('dash-recent-list');
-                if (recentItems.length === 0) {
-                    listEl.innerHTML = `<p class="text-center text-slate-400 text-xs py-4">لا توجد عروض أسعار مسجلة</p>`;
-                } else {
-                    listEl.innerHTML = recentItems.slice(0, 5).map(item => `
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-xs">${item.item_name}</h4>
-                                <p class="text-[10px] text-slate-400">الكمية: ${item.quantity} | المسند: ${item.assigned_to}</p>
-                            </div>
-                            <div class="text-left">
-                                <span class="font-black text-xs text-blue-600 block">${item.total} ر.س</span>
-                                <span class="text-[10px] font-bold ${item.status === 'تم الشراء والتسليم' ? 'text-emerald-600' : 'text-amber-600'}">${item.status || 'قيد الانتظار'}</span>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch(e) {
-                console.error("Dashboard compute error:", e);
-            }
-        }
-
-        // 2. Categories Render Engine (Hospitality, Cleaning, Stationery)
-        async function renderCategoryPage(c, catKey, title, subtitle) {
-            document.getElementById('page-title').innerText = title;
-            document.getElementById('page-subtitle').innerText = subtitle;
-
-            let agentOptions = globalAgents.map(a => `<option value="${a.email}">${a.name || a.email}</option>`).join('');
-            if (!agentOptions) agentOptions = `<option value="agent@company.com">مندوب افتراضي</option>`;
-
-            let supplierOptions = globalSuppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-            if (!supplierOptions) supplierOptions = `<option value="مورد عام">مورد عام</option>`;
-
-            c.innerHTML = `
-                <div class="card-custom p-6 mb-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-circle-plus me-2 text-blue-600"></i>إضافة عرض سعر / طلب جديد</h3>
-                    <form onsubmit="saveCategoryItem(event, '${catKey}')" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم الصنف / البيان</label>
-                            <input type="text" id="cat-item-name" required placeholder="مثال: شاي كبوس 100 كيس" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">الكمية</label>
-                            <input type="number" id="cat-item-qty" min="1" required placeholder="10" oninput="calcCatTotal()" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">سعر الوحدة التقديري (ر.س)</label>
-                            <input type="number" step="0.01" id="cat-item-price" required placeholder="15.00" oninput="calcCatTotal()" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">المبلغ الإجمالي التقديري</label>
-                            <input type="text" id="cat-item-total" readonly placeholder="0.00" class="form-input-custom bg-slate-100 font-bold text-blue-600">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">المورد المقترح</label>
-                            <select id="cat-item-supplier" class="form-input-custom">
-                                ${supplierOptions}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">إسناد لمندوب المشتريات</label>
-                            <select id="cat-item-agent" class="form-input-custom">
-                                ${agentOptions}
-                            </select>
-                        </div>
-                        <div class="md:col-span-2 flex items-end">
-                            <button type="submit" id="cat-save-btn" class="w-full btn-primary-custom flex justify-center items-center gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i> حفظ وإسناد الطلب
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card-custom p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-800 text-base">سجل عروض الأسعار والطلبات المسجلة</h3>
-                        <span id="cat-count-badge" class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">0 طلبات</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="table-custom text-right">
-                            <thead>
-                                <tr>
-                                    <th>الصنف</th>
-                                    <th>الكمية</th>
-                                    <th>سعر الوحدة</th>
-                                    <th>الإجمالي</th>
-                                    <th>المورد</th>
-                                    <th>المندوب المسند</th>
-                                    <th>الحالة</th>
-                                    <th class="no-print">الإجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cat-table-body">
-                                <tr><td colspan="8" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب البيانات...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            loadCategoryItems(catKey);
-        }
-
-        function calcCatTotal() {
-            const qty = parseFloat(document.getElementById('cat-item-qty').value) || 0;
-            const price = parseFloat(document.getElementById('cat-item-price').value) || 0;
-            document.getElementById('cat-item-total').value = (qty * price).toFixed(2);
-        }
-
-        async function saveCategoryItem(e, catKey) {
-            e.preventDefault();
-            const btn = document.getElementById('cat-save-btn');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحفظ...`;
-
-            try {
-                await db.collection('quotations').add({
-                    category: catKey,
-                    item_name: document.getElementById('cat-item-name').value,
-                    quantity: parseFloat(document.getElementById('cat-item-qty').value),
-                    unit_price: parseFloat(document.getElementById('cat-item-price').value),
-                    total: parseFloat(document.getElementById('cat-item-total').value),
-                    supplier: document.getElementById('cat-item-supplier').value,
-                    assigned_to: document.getElementById('cat-item-agent').value,
-                    status: 'قيد الشراء',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                alert('تم تسجيل عرض السعر وإسناده بنجاح!');
-                showPage(catKey);
-            } catch (err) {
-                alert('حدث خطأ أثناء الحفظ: ' + err.message);
-                btn.disabled = false;
-            }
-        }
-
-        async function loadCategoryItems(catKey) {
-            try {
-                const snap = await db.collection('quotations').where('category', '==', catKey).get();
-                const tbody = document.getElementById('cat-table-body');
-                document.getElementById('cat-count-badge').innerText = snap.size + ' طلبات';
-
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">لا توجد عناصر مسجلة في هذا القسم بعد.</td></tr>`;
-                    return;
-                }
-
-                let rowsHtml = '';
-                snap.forEach(doc => {
-                    const item = doc.data();
-                    rowsHtml += `
-                        <tr>
-                            <td class="font-bold text-slate-800">${item.item_name}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.unit_price} ر.س</td>
-                            <td class="font-black text-blue-600">${item.total} ر.س</td>
-                            <td><span class="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-md border">${item.supplier || '-'}</span></td>
-                            <td class="text-xs font-bold text-slate-600">${item.assigned_to}</td>
-                            <td>
-                                <span class="status-badge ${item.status === 'تم الشراء والتسليم' ? 'status-approved' : 'status-pending'}">
-                                    ${item.status || 'قيد الشراء'}
-                                </span>
-                            </td>
-                            <td class="no-print">
-                                <button onclick="deleteQuotationDoc('${doc.id}', '${catKey}')" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition" title="حذف">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = rowsHtml;
-            } catch (e) {
-                console.error("Error loading category data:", e);
-            }
-        }
-
-        async function deleteQuotationDoc(docId, catKey) {
-            if (confirm('هل أنت تأكد من رغبتك في حذف هذا البند من السجلات؟')) {
-                await db.collection('quotations').doc(docId).delete();
-                loadCategoryItems(catKey);
-            }
-        }
-
-        // 3. Custody Management View
-        async function renderCustodyPage(c) {
-            document.getElementById('page-title').innerText = 'إدارة العُهد والمشتريات المالية';
-            document.getElementById('page-subtitle').innerText = 'تسليم العُهد المالية للمندوبين وتتبع الفواتير والمصروفات المتبقية';
-
-            let agentOpts = globalAgents.map(a => `<option value="${a.email}">${a.name || a.email}</option>`).join('');
-
-            c.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="card-custom p-6 border-t-4 border-t-amber-500">
-                        <h4 class="font-bold text-slate-700 text-sm mb-2">إجمالي العُهد المسلمة</h4>
-                        <p id="total-custody-given" class="text-2xl font-black text-amber-600">0.00 ر.س</p>
-                    </div>
-                    <div class="card-custom p-6 border-t-4 border-t-emerald-500">
-                        <h4 class="font-bold text-slate-700 text-sm mb-2">إجمالي المبالغ المصروفة (فواتير)</h4>
-                        <p id="total-custody-spent" class="text-2xl font-black text-emerald-600">0.00 ر.س</p>
-                    </div>
-                    <div class="card-custom p-6 border-t-4 border-t-blue-500">
-                        <h4 class="font-bold text-slate-700 text-sm mb-2">المبلغ المتبقي لدى المندوبين</h4>
-                        <p id="total-custody-rem" class="text-2xl font-black text-blue-600">0.00 ر.س</p>
-                    </div>
-                </div>
-
-                <div class="card-custom p-6 mb-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-hand-holding-dollar me-2 text-amber-500"></i>صرف عُهدة مالية جديدة لمندوب</h3>
-                    <form onsubmit="issueCustody(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">اختر مندوب المشتريات</label>
-                            <select id="custody-agent" required class="form-input-custom">
-                                ${agentOpts || '<option value="agent@company.com">مندوب افتراضي</option>'}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">المبلغ المعتمد للعُهدة (ر.س)</label>
-                            <input type="number" step="0.01" id="custody-amount" required placeholder="1000.00" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات / البيان</label>
-                            <input type="text" id="custody-notes" placeholder="عُهدة شراء مستلزمات النظافة والضيافة" class="form-input-custom">
-                        </div>
-                        <div class="md:col-span-3 flex justify-end">
-                            <button type="submit" class="btn-primary-custom flex items-center gap-2">
-                                <i class="fa-solid fa-paper-plane"></i> اعتماد وتسليم العُهدة
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card-custom p-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4">سجل حركة العُهد المالية والتسويات</h3>
-                    <div class="overflow-x-auto">
-                        <table class="table-custom text-right">
-                            <thead>
-                                <tr>
-                                    <th>المندوب</th>
-                                    <th>مبلغ العُهدة</th>
-                                    <th>المصروف بفواتير</th>
-                                    <th>المتبقي</th>
-                                    <th>البيان والملاحظات</th>
-                                    <th>التاريخ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="custody-table-body">
-                                <tr><td colspan="6" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تحميل سجل العُهد...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            loadCustodyData();
-        }
-
-        async function issueCustody(e) {
-            e.preventDefault();
-            try {
-                await db.collection('custodies').add({
-                    agent_email: document.getElementById('custody-agent').value,
-                    amount: parseFloat(document.getElementById('custody-amount').value),
-                    spent: 0,
-                    notes: document.getElementById('custody-notes').value,
-                    issuedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert('تم إيداع وتسجيل العُهدة بنجاح!');
-                showPage('custody');
-            } catch(err) {
-                alert('خطأ أثناء إضافة العُهدة: ' + err.message);
-            }
-        }
-
-        async function loadCustodyData() {
-            try {
-                const snap = await db.collection('custodies').get();
-                let given = 0, spent = 0;
-                const tbody = document.getElementById('custody-table-body');
-
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">لا توجد عُهد مالية مسجلة.</td></tr>`;
-                    return;
-                }
-
-                let html = '';
-                snap.forEach(doc => {
-                    const c = doc.data();
-                    const amt = c.amount || 0;
-                    const sp = c.spent || 0;
-                    const rem = amt - sp;
-
-                    given += amt;
-                    spent += sp;
-
-                    html += `
-                        <tr>
-                            <td class="font-bold text-slate-800">${c.agent_email}</td>
-                            <td class="font-bold text-amber-600">${amt.toLocaleString()} ر.س</td>
-                            <td class="font-bold text-emerald-600">${sp.toLocaleString()} ر.س</td>
-                            <td class="font-bold text-blue-600">${rem.toLocaleString()} ر.س</td>
-                            <td class="text-xs text-slate-500">${c.notes || '-'}</td>
-                            <td class="text-xs text-slate-400">${c.issuedAt ? new Date(c.issuedAt.toDate()).toLocaleDateString('ar-SA') : 'الآن'}</td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById('total-custody-given').innerText = given.toLocaleString() + ' ر.س';
-                document.getElementById('total-custody-spent').innerText = spent.toLocaleString() + ' ر.س';
-                document.getElementById('total-custody-rem').innerText = (given - spent).toLocaleString() + ' ر.س';
-                tbody.innerHTML = html;
-            } catch(e) {
-                console.error("Error loading custody data:", e);
-            }
-        }
-
-        // 4. Approved Suppliers View
-        async function renderSuppliersPage(c) {
-            document.getElementById('page-title').innerText = 'قائمة الموردين المعتمدين';
-            document.getElementById('page-subtitle').innerText = 'إدارة قاعدة بيانات الموردين وأرقام التواصل والتصنيفات';
-
-            c.innerHTML = `
-                <div class="card-custom p-6 mb-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-truck-ram me-2 text-emerald-600"></i>إضافة مورد جديد</h3>
-                    <form onsubmit="saveSupplier(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم المورد / الشركة</label>
-                            <input type="text" id="supp-name" required placeholder="شركة الموردين المتحدة" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">التصنيف الرئيسي</label>
-                            <select id="supp-cat" class="form-input-custom">
-                                <option value="ضيافة وبوفيه">ضيافة وبوفيه</option>
-                                <option value="أدوات نظافة">أدوات نظافة</option>
-                                <option value="قرطاسية وأجهزة">قرطاسية وأجهزة</option>
-                                <option value="مورد عام">مورد عام</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف / الجوال</label>
-                            <input type="text" id="supp-phone" placeholder="0500000000" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">الرقم الضريبي (اختياري)</label>
-                            <input type="text" id="supp-tax" placeholder="300000000000003" class="form-input-custom">
-                        </div>
-                        <div class="md:col-span-4 flex justify-end">
-                            <button type="submit" class="btn-primary-custom flex items-center gap-2">
-                                <i class="fa-solid fa-plus-circle"></i> حفظ المورد في القاعدة
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card-custom p-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4">قائمة الموردين المعتمدين بالنظام</h3>
-                    <div class="overflow-x-auto">
-                        <table class="table-custom text-right">
-                            <thead>
-                                <tr>
-                                    <th>اسم المورد</th>
-                                    <th>التصنيف</th>
-                                    <th>رقم التواصل</th>
-                                    <th>الرقم الضريبي</th>
-                                    <th class="no-print">إجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody id="suppliers-table-body">
-                                <tr><td colspan="5" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب الموردين...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            loadSuppliersData();
-        }
-
-        async function saveSupplier(e) {
-            e.preventDefault();
-            try {
-                await db.collection('suppliers').add({
-                    name: document.getElementById('supp-name').value,
-                    category: document.getElementById('supp-cat').value,
-                    phone: document.getElementById('supp-phone').value,
-                    tax_number: document.getElementById('supp-tax').value,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert('تمت إضافة المورد بنجاح!');
-                await loadGlobalMetadata();
-                showPage('suppliers');
-            } catch (err) {
-                alert('خطأ أثناء إضافة المورد: ' + err.message);
-            }
-        }
-
-        async function loadSuppliersData() {
-            try {
-                const snap = await db.collection('suppliers').get();
-                const tbody = document.getElementById('suppliers-table-body');
-
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">لا يوجد موردين مسجلين حتى الآن.</td></tr>`;
-                    return;
-                }
-
-                let html = '';
-                snap.forEach(doc => {
-                    const s = doc.data();
-                    html += `
-                        <tr>
-                            <td class="font-bold text-slate-800">${s.name}</td>
-                            <td><span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-md border border-blue-200 font-bold">${s.category}</span></td>
-                            <td>${s.phone || '-'}</td>
-                            <td class="font-mono text-xs">${s.tax_number || '-'}</td>
-                            <td class="no-print">
-                                <button onclick="deleteSupplierDoc('${doc.id}')" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-            } catch(e) {
-                console.error("Error loading suppliers:", e);
-            }
-        }
-
-        async function deleteSupplierDoc(id) {
-            if (confirm('هل ترغب في حذف هذا المورد؟')) {
-                await db.collection('suppliers').doc(id).delete();
-                await loadGlobalMetadata();
-                loadSuppliersData();
-            }
-        }
-
-        // 5. Users and Permissions Management View
-        async function renderUsersManagement(c) {
-            document.getElementById('page-title').innerText = 'إدارة الحسابات والصلاحيات';
-            document.getElementById('page-subtitle').innerText = 'التحكم في أدوار وصلاحيات مستخدمي النظام ومندوبي المشتريات';
-
-            c.innerHTML = `
-                <div class="card-custom p-6 mb-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4"><i class="fa-solid fa-user-plus me-2 text-blue-600"></i>إضافة حساب موظف / مندوب جديد</h3>
-                    <p class="text-xs text-slate-500 mb-4">ملاحظة: يمكنك إضافة وتحديد الصلاحية مباشرة هنا لربطها ببريد Firebase Auth.</p>
-                    <form onsubmit="addNewUserRole(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الكامل</label>
-                            <input type="text" id="new-user-name" required placeholder="أحمد المحمد" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
-                            <input type="email" id="new-user-email" required placeholder="agent2@company.com" class="form-input-custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">الصلاحية / الدور</label>
-                            <select id="new-user-role" class="form-input-custom">
-                                <option value="agent">مندوب مشتريات (Agent)</option>
-                                <option value="admin">مدير النظام (Admin)</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-3 flex justify-end">
-                            <button type="submit" class="btn-primary-custom flex items-center gap-2">
-                                <i class="fa-solid fa-user-check"></i> اعتماد الحساب والصلاحية
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card-custom p-6">
-                    <h3 class="font-bold text-slate-800 text-base mb-4">قائمة المستخدمين المسجلين في النظام</h3>
-                    <div class="overflow-x-auto">
-                        <table class="table-custom text-right">
-                            <thead>
-                                <tr>
-                                    <th>الاسم الكامل</th>
-                                    <th>البريد الإلكتروني</th>
-                                    <th>الصلاحية الحالية</th>
-                                    <th>تاريخ التسجيل</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-table-body">
-                                <tr><td colspan="4" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تحميل الحسابات...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            loadUsersData();
-        }
-
-        async function addNewUserRole(e) {
-            e.preventDefault();
-            const name = document.getElementById('new-user-name').value;
-            const email = document.getElementById('new-user-email').value;
-            const role = document.getElementById('new-user-role').value;
-
-            try {
-                const userRef = db.collection('users').doc();
-                await userRef.set({
-                    name: name,
-                    email: email,
-                    role: role,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert('تم تسجيل الموظف وصلاحياته بنجاح!');
-                await loadGlobalMetadata();
-                showPage('users-manage');
-            } catch(err) {
-                alert('حدث خطأ: ' + err.message);
-            }
-        }
-
-        async function loadUsersData() {
-            try {
-                const snap = await db.collection('users').get();
-                const tbody = document.getElementById('users-table-body');
-
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">لا يوجد مستخدمون مسجلون.</td></tr>`;
-                    return;
-                }
-
-                let html = '';
-                snap.forEach(doc => {
-                    const u = doc.data();
-                    html += `
-                        <tr>
-                            <td class="font-bold text-slate-800">${u.name || 'بدون اسم'}</td>
-                            <td>${u.email}</td>
-                            <td>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
-                                    ${u.role === 'admin' ? '🛡️ مدير النظام' : '📦 مندوب مشتريات'}
-                                </span>
-                            </td>
-                            <td class="text-xs text-slate-400">${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString('ar-SA') : 'الآن'}</td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-            } catch(e) {
-                console.error("Error loading users:", e);
-            }
-        }
-
-        // 6. Procurement Agent View (My Tasks)
-        async function renderAgentProcurements(c) {
-            document.getElementById('page-title').innerText = 'قائمة المشتريات والمهام المطلوبة منك';
-            document.getElementById('page-subtitle').innerText = 'استعراض الطلبات المسندة لبريدك وشراء المنتجات وتحديث الحالات';
-
-            c.innerHTML = `
-                <div class="card-custom p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-boxes-packing me-2 text-emerald-600"></i>المهام المسندة لإيميلك (${currentUser.email})</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="table-custom text-right">
-                            <thead>
-                                <tr>
-                                    <th>الصنف المطلوب</th>
-                                    <th>القسم</th>
-                                    <th>الكمية</th>
-                                    <th>المبلغ التقديري</th>
-                                    <th>المورد المقترح</th>
-                                    <th>الحالة</th>
-                                    <th class="no-print">الإجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agent-tasks-tbody">
-                                <tr><td colspan="7" class="text-center py-6 text-slate-400"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب مشترياتك...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            try {
-                const snap = await db.collection('quotations').where('assigned_to', '==', currentUser.email).get();
-                const tbody = document.getElementById('agent-tasks-tbody');
-
-                if (snap.empty) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">لا توجد مشتريات أو عروض أسعار مسندة لبريدك حالياً.</td></tr>`;
-                    return;
-                }
-
-                let html = '';
-                snap.forEach(doc => {
-                    const q = doc.data();
-                    const isDone = q.status === 'تم الشراء والتسليم';
-                    html += `
-                        <tr>
-                            <td class="font-bold text-slate-800">${q.item_name}</td>
-                            <td><span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">${q.category}</span></td>
-                            <td>${q.quantity}</td>
-                            <td class="font-black text-emerald-600">${q.total} ر.س</td>
-                            <td>${q.supplier || '-'}</td>
-                            <td>
-                                <span class="status-badge ${isDone ? 'status-approved' : 'status-pending'}">
-                                    ${q.status || 'قيد الانتظار'}
-                                </span>
-                            </td>
-                            <td class="no-print">
-                                ${!isDone ? `
-                                    <button onclick="markTaskAsCompleted('${doc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1">
-                                        <i class="fa-solid fa-check"></i> تأكيد الشراء
-                                    </button>
-                                ` : `<span class="text-xs text-emerald-600 font-bold"><i class="fa-solid fa-circle-check me-1"></i>مكتمل</span>`}
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-            } catch(e) {
-                console.error("Agent procurements load error:", e);
-            }
-        }
-
-        async function markTaskAsCompleted(docId) {
-            if (confirm('هل تؤكد إتمامك لشراء هذا البند وتسليمه؟')) {
-                await db.collection('quotations').doc(docId).update({
-                    status: 'تم الشراء والتسليم',
-                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                renderAgentProcurements(document.getElementById('app-content'));
-            }
-        }
-
-        // 7. Agent Personal Custody View
-        async function renderAgentCustody(c) {
-            document.getElementById('page-title').innerText = 'العُهدة المالية الخاصة بي';
-            document.getElementById('page-subtitle').innerText = 'متابعة الرصيد المستلم والمبالغ المصروفة والمتبقية لديك';
-
-            c.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i> جاري استعلام العُهدة...</div>`;
-
-            try {
-                const snap = await db.collection('custodies').where('agent_email', '==', currentUser.email).get();
-
-                let totalAmt = 0, totalSp = 0;
-                let rows = '';
-
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const amt = data.amount || 0;
-                    const sp = data.spent || 0;
-                    totalAmt += amt;
-                    totalSp += sp;
-
-                    rows += `
-                        <tr>
-                            <td class="font-bold text-amber-600">${amt.toLocaleString()} ر.س</td>
-                            <td class="font-bold text-emerald-600">${sp.toLocaleString()} ر.س</td>
-                            <td class="font-bold text-blue-600">${(amt - sp).toLocaleString()} ر.س</td>
-                            <td class="text-xs text-slate-500">${data.notes || '-'}</td>
-                        </tr>
-                    `;
-                });
-
-                const rem = totalAmt - totalSp;
-
-                c.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <div class="card-custom p-6 border-t-4 border-t-amber-500">
-                            <h4 class="font-bold text-slate-700 text-sm mb-2">إجمالي العُهد المودعة بك</h4>
-                            <p class="text-2xl font-black text-amber-600">${totalAmt.toLocaleString()} ر.س</p>
-                        </div>
-                        <div class="card-custom p-6 border-t-4 border-t-emerald-500">
-                            <h4 class="font-bold text-slate-700 text-sm mb-2">المبالغ المصروفة</h4>
-                            <p class="text-2xl font-black text-emerald-600">${totalSp.toLocaleString()} ر.س</p>
-                        </div>
-                        <div class="card-custom p-6 border-t-4 border-t-blue-500">
-                            <h4 class="font-bold text-slate-700 text-sm mb-2">الرصيد المتبقي بعهدتك</h4>
-                            <p class="text-2xl font-black text-blue-600">${rem.toLocaleString()} ر.س</p>
-                        </div>
-                    </div>
-
-                    <div class="card-custom p-6">
-                        <h3 class="font-bold text-slate-800 text-base mb-4">تفاصيل العُهد المسلمة لك</h3>
-                        <table class="table-custom text-right">
-                            <thead>
-                                <tr>
-                                    <th>المبلغ المودع</th>
-                                    <th>المصروف</th>
-                                    <th>المتبقي</th>
-                                    <th>البيان</th>
-                                </tr>
-                            </thead>
-                            <tbody>${rows || '<tr><td colspan="4" class="text-center py-6 text-slate-400">لا توجد عُهد مالية مسجلة باسمك حالياً.</td></tr>'}</tbody>
-                        </table>
-                    </div>
-                `;
-            } catch(e) {
-                console.error("Agent custody error:", e);
-            }
-        }
-
-        // Modal Controls
-        function closeModal() {
-            document.getElementById('generic-modal').classList.add('hidden');
-        }
-    </script>
+
+        <!-- جدول العرض والتحكم (يسار) -->
+        <div class="lg:col-span-2 space-y-4">
+          <div id="category-bg-container" class="bg-hospitality p-5 rounded-2xl border border-amber-200 shadow-sm transition-all">
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+              <div>
+                <h3 class="font-bold text-slate-800 text-base" id="current-cat-title">جدول عروض الأسعار</h3>
+                <p class="text-xs text-slate-500">راجع البيانات والإجماليات قبل الاعتماد أو الحفظ</p>
+              </div>
+              <div class="flex items-center gap-2 no-print">
+                <button onclick="window.print()" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm">
+                  <i class="fa-solid fa-print"></i> طباعة
+                </button>
+                <button onclick="saveQuoteToArchive()" class="bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-1.5 rounded-lg text-xs font-bold shadow-md">
+                  <i class="fa-solid fa-floppy-disk"></i> حفظ في الأرشيف / العُهدة
+                </button>
+              </div>
+            </div>
+
+            <!-- معلومات اختيار المندوب/الموظف -->
+            <div class="bg-white/80 backdrop-blur p-3 rounded-xl mb-4 border border-slate-200/60 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">الموظف / المندوب المسند إليه:</label>
+                <select id="quote-agent" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-semibold">
+                  <!-- محملة تلقائياً من الموظفين -->
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">ملاحظات / بيان العُهدة:</label>
+                <input type="text" id="quote-notes" placeholder="مثال: شراء احتياجات المكتب لشهري أغسطس" class="w-full bg-white border border-slate-300 rounded-lg p-2">
+              </div>
+            </div>
+
+            <!-- جدول الأصناف المضافة -->
+            <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+              <table class="w-full text-right text-xs">
+                <thead class="bg-slate-100 text-slate-700 font-bold border-b">
+                  <tr>
+                    <th class="p-3">#</th>
+                    <th class="p-3">الصنف</th>
+                    <th class="p-3">المورد</th>
+                    <th class="p-3">السعر</th>
+                    <th class="p-3">الكمية</th>
+                    <th class="p-3">الضريبة</th>
+                    <th class="p-3">الإجمالي</th>
+                    <th class="p-3 no-print">إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="quote-items-tbody">
+                  <tr id="empty-row">
+                    <td colspan="8" class="text-center py-8 text-slate-400 font-medium">
+                      لم يتم إضافة أي أصناف حتى الآن
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- ملخص الإجماليات -->
+            <div class="mt-4 bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap justify-between items-center gap-4 text-xs font-bold">
+              <div class="space-y-1">
+                <p class="text-slate-500">المجموع قبل الضريبة: <span id="summary-subtotal" class="text-slate-800">0.00 ر.س</span></p>
+                <p class="text-slate-500">إجمالي الضريبة (15%): <span id="summary-tax" class="text-amber-600">0.00 ر.س</span></p>
+              </div>
+              <div class="text-left bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                <span class="text-indigo-600 block text-xs">الإجمالي النهائي</span>
+                <span id="summary-grandtotal" class="text-indigo-900 text-lg font-extrabold">0.00 ر.س</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2. قسم إدارة الأصناف والموردين (تعديل كامل) ===== -->
+    <section id="sec-items-manage" class="hidden space-y-6">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="font-bold text-slate-800 text-lg">إدارة قائمة الأصناف والموردين</h2>
+            <p class="text-xs text-slate-500">يمكنك تعديل أي اسم، سعر مثبت، أو ربطه بمورد معتمد بسهولة</p>
+          </div>
+          <button onclick="addNewItemPrompt()" class="bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700">
+            <i class="fa-solid fa-plus ml-1"></i> إضافة صنف جديد
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b">
+              <tr>
+                <th class="p-3">اسم الصنف</th>
+                <th class="p-3">القسم</th>
+                <th class="p-3">السعر المثبت (ر.س)</th>
+                <th class="p-3">المورد المربوط تلقائياً</th>
+                <th class="p-3 text-center">عمليات والتعديل</th>
+              </tr>
+            </thead>
+            <tbody id="manage-items-tbody" class="divide-y divide-slate-100">
+              <!-- تعبئة ديناميكية -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. قسم الأرشيف والعهُد ===== -->
+    <section id="sec-archive" class="hidden space-y-6">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+        <h2 class="font-bold text-slate-800 text-lg mb-1">أرشيف عروض الأسعار والعهُد المالية</h2>
+        <p class="text-xs text-slate-500 mb-4">تتبع كامل الفواتير المسجلة بالتواريخ والموظفين المسؤولين</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b">
+              <tr>
+                <th class="p-3">رقم العرض/العهد</th>
+                <th class="p-3">التاريخ والوقت</th>
+                <th class="p-3">الموظف / المندوب</th>
+                <th class="p-3">عدد الأصناف</th>
+                <th class="p-3">المبلغ الإجمالي</th>
+                <th class="p-3">البيان / الملاحظات</th>
+              </tr>
+            </thead>
+            <tbody id="archive-tbody" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="6" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JavaScript الكود التفاعلي والبيانات المدمجة -->
+  <script>
+    // ===== البيانات الأساسية المدمجة بالكامل (Fallback Data) =====
+    
+    // 1. الموردين (من الصور)
+    let suppliersList = [
+      "النظافة الأنيقة",
+      "الصالة الاقتصادية",
+      "باجة",
+      "النسيم للمنظفات والبلاستيك",
+      "قرطاسية السبعين",
+      "بيست اكتو"
+    ];
+
+    // 2. الموظفين / المندوبين (من الصور)
+    let employeesList = [
+      "محمد الغامدي", "عبدالعزيز السديس", "محمد ابوالعاصي", "فيصل السلمي",
+      "علي الشهراني", "إبراهيم العي", "عبدالله الشهراني", "فاطمه",
+      "سعاد", "شروق", "ثريا", "سلوى", "مظهر اقبال", "حسين يوسف",
+      "فوز", "ولاء", "مصعب جمال", "محمد شمراني", "مازن الغامدي",
+      "علي السميري", "محمد علي", "محمد عبدالله الشهراني", "حسن السيد",
+      "عبدالرحمن قاسم", "محمد العتيبي", "زاهد", "خليل", "محمد جنيد"
+    ];
+
+    // 3. الأصناف (من صور الضيافة، القرطاسية، النظافة) مع الأسعار والموردين المربوطين
+    let itemsDatabase = [
+      // الضيافة
+      { id: 1, name: "شاي", category: "hospitality", price: 15, supplier: "باجة" },
+      { id: 2, name: "كفندي قهوة تركي 200جم", category: "hospitality", price: 22, supplier: "باجة" },
+      { id: 3, name: "قهوة بيشه 1كجم", category: "hospitality", price: 65, supplier: "باجة" },
+      { id: 4, name: "سكر 5 كيلو", category: "hospitality", price: 28, supplier: "الصالة الاقتصادية" },
+      { id: 5, name: "نسكافية", category: "hospitality", price: 35, supplier: "الصالة الاقتصادية" },
+      { id: 6, name: "مبيض قهوة", category: "hospitality", price: 18, supplier: "الصالة الاقتصادية" },
+      { id: 7, name: "بن قهوه", category: "hospitality", price: 45, supplier: "باجة" },
+      { id: 8, name: "مطحنة هيل", category: "hospitality", price: 85, supplier: "الصالة الاقتصادية" },
+      { id: 9, name: "بن هيل", category: "hospitality", price: 50, supplier: "باجة" },
+      { id: 10, name: "شاهي أبو جبل", category: "hospitality", price: 20, supplier: "باجة" },
+      { id: 11, name: "سكر دايت", category: "hospitality", price: 25, supplier: "الصالة الاقتصادية" },
+      { id: 12, name: "خلطه القصيم 250 جم", category: "hospitality", price: 30, supplier: "باجة" },
+      { id: 13, name: "اعواد تحريك", category: "hospitality", price: 8, supplier: "النسيم للمنظفات والبلاستيك" },
+
+      // القرطاسية
+      { id: 14, name: "أقلام", category: "stationery", price: 12, supplier: "قرطاسية السبعين" },
+      { id: 15, name: "تصليح لابتوب", category: "stationery", price: 150, supplier: "بيست اكتو" },
+      { id: 16, name: "حامل ملف طولي", category: "stationery", price: 25, supplier: "قرطاسية السبعين" },
+      { id: 17, name: "كرتون أوراق A4", category: "stationery", price: 140, supplier: "قرطاسية السبعين" },
+      { id: 18, name: "ملفات بلاستيكية", category: "stationery", price: 15, supplier: "قرطاسية السبعين" },
+      { id: 19, name: "كرتون غراء", category: "stationery", price: 40, supplier: "قرطاسية السبعين" },
+      { id: 20, name: "مغلفات", category: "stationery", price: 18, supplier: "قرطاسية السبعين" },
+      { id: 21, name: "تجليد", category: "stationery", price: 20, supplier: "قرطاسية السبعين" },
+      { id: 22, name: "حبر 17 A", category: "stationery", price: 210, supplier: "بيست اكتو" },
+      { id: 23, name: "دباسة", category: "stationery", price: 22, supplier: "قرطاسية السبعين" },
+      { id: 24, name: "ربطه دفاتر", category: "stationery", price: 35, supplier: "قرطاسية السبعين" },
+      { id: 25, name: "تقويم", category: "stationery", price: 15, supplier: "قرطاسية السبعين" },
+      { id: 26, name: "أقلام تحديد", category: "stationery", price: 10, supplier: "قرطاسية السبعين" },
+      { id: 27, name: "بطاريه AAA", category: "stationery", price: 16, supplier: "بيست اكتو" },
+
+      // النظافة
+      { id: 28, name: "صابون سائل لليدين", category: "cleaning", price: 25, supplier: "النظافة الأنيقة" },
+      { id: 29, name: "منظف ديتول ارضيات كبير", category: "cleaning", price: 48, supplier: "النظافة الأنيقة" },
+      { id: 30, name: "مطهر عام للأسطح", category: "cleaning", price: 30, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 31, name: "صابون رغوه", category: "cleaning", price: 22, supplier: "النظافة الأنيقة" },
+      { id: 32, name: "مكنسه", category: "cleaning", price: 18, supplier: "النظافة الأنيقة" },
+      { id: 33, name: "جاروف", category: "cleaning", price: 12, supplier: "النظافة الأنيقة" },
+      { id: 34, name: "معطر جو", category: "cleaning", price: 16, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 35, name: "منظف كرسي الحمام", category: "cleaning", price: 20, supplier: "النظافة الأنيقة" },
+      { id: 36, name: "مناديل مكتبية", category: "cleaning", price: 35, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 37, name: "مناديل رول مكينه", category: "cleaning", price: 45, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 38, name: "ممسح قطن", category: "cleaning", price: 15, supplier: "النظافة الأنيقة" },
+      { id: 39, name: "ممسحة قطن 400سم", category: "cleaning", price: 32, supplier: "النظافة الأنيقة" },
+      { id: 40, name: "مناديل رول ( حمام الحريم و المطبخ )", category: "cleaning", price: 40, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 41, name: "مناديل رول وسط", category: "cleaning", price: 28, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 42, name: "إسفنجات تنظيف", category: "cleaning", price: 10, supplier: "النظافة الأنيقة" },
+      { id: 43, name: "أكياس نفايات 10 كيلو", category: "cleaning", price: 30, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 44, name: "بديل فيري", category: "cleaning", price: 14, supplier: "النظافة الأنيقة" },
+      { id: 45, name: "أكياس نفايات 8 جالون", category: "cleaning", price: 22, supplier: "النسيم للمنظفات والبلاستيك" },
+      { id: 46, name: "مبيد حشري", category: "cleaning", price: 26, supplier: "النظافة الأنيقة" }
+    ];
+
+    // متغيرات التطبيق
+    let currentQuoteItems = [];
+    let archivedQuotes = [];
+    let currentRole = 'admin';
+
+    // ===== عند تحميل الصفحة =====
+    window.onload = function() {
+      startClock();
+      populateSuppliersDropdown();
+      populateEmployeesDropdown();
+      loadCategoryItems();
+      renderManageItemsTable();
+    };
+
+    // 1. تحديث الساعة والتاريخ الحي
+    function startClock() {
+      function update() {
+        const now = new Date();
+        document.getElementById('current-date').innerText = now.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        document.getElementById('current-time').innerText = now.toLocaleTimeString('ar-SA');
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // 2. تعبئة القوائم المنسدلة
+    function populateSuppliersDropdown() {
+      const select = document.getElementById('builder-supplier');
+      select.innerHTML = suppliersList.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    function populateEmployeesDropdown() {
+      const select = document.getElementById('quote-agent');
+      select.innerHTML = employeesList.map(e => `<option value="${e}">${e}</option>`).join('');
+    }
+
+    // 3. التحويل بين الأقسام والتصميم الحيوي (خلفيات حيوية لكل قسم)
+    function loadCategoryItems() {
+      const cat = document.getElementById('builder-category').value;
+      const itemSelect = document.getElementById('builder-item');
+      const bgContainer = document.getElementById('category-bg-container');
+      const catTitle = document.getElementById('current-cat-title');
+
+      // تصفية الأصناف بحسب القسم
+      const filtered = itemsDatabase.filter(i => i.category === cat);
+      itemSelect.innerHTML = filtered.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+
+      // تغيير خلفية الجدول والعنوان بحسب القسم لتكون حيوية
+      if (cat === 'hospitality') {
+        bgContainer.className = "bg-hospitality p-5 rounded-2xl border border-amber-200 shadow-sm transition-all";
+        catTitle.innerHTML = "☕ جدول عرض سعر - قسم الضيافة";
+      } else if (cat === 'stationery') {
+        bgContainer.className = "bg-stationery p-5 rounded-2xl border border-blue-200 shadow-sm transition-all";
+        catTitle.innerHTML = "✏️ جدول عرض سعر - قسم القرطاسية";
+      } else if (cat === 'cleaning') {
+        bgContainer.className = "bg-cleaning p-5 rounded-2xl border border-emerald-200 shadow-sm transition-all";
+        catTitle.innerHTML = "🧹 جدول عرض سعر - قسم النظافة";
+      }
+
+      onItemSelect();
+    }
+
+    // 4. ربط الصنف بالمورد وتعبئة السعر المعتمد تلقائياً عند الاختيار
+    function onItemSelect() {
+      const itemId = parseInt(document.getElementById('builder-item').value);
+      const item = itemsDatabase.find(i => i.id === itemId);
+      
+      if (item) {
+        document.getElementById('builder-price').value = item.price;
+        document.getElementById('builder-supplier').value = item.supplier;
+      }
+    }
+
+    // 5. إضافة صنف للجدول وحساب الضريبة والإجمالي
+    function addItemToQuote() {
+      const itemId = parseInt(document.getElementById('builder-item').value);
+      const itemObj = itemsDatabase.find(i => i.id === itemId);
+      const priceInput = parseFloat(document.getElementById('builder-price').value) || 0;
+      const qty = parseInt(document.getElementById('builder-qty').value) || 1;
+      const supplier = document.getElementById('builder-supplier').value;
+      
+      const taxRadios = document.getElementsByName('tax-mode');
+      let taxMode = 'add';
+      for (const r of taxRadios) {
+        if (r.checked) taxMode = r.value;
+      }
+
+      let unitPrice = priceInput;
+      let taxAmount = 0;
+      let itemTotal = 0;
+
+      if (taxMode === 'add') {
+        taxAmount = (unitPrice * 0.15) * qty;
+        itemTotal = (unitPrice * qty) + taxAmount;
+      } else if (taxMode === 'included') {
+        const basePrice = unitPrice / 1.15;
+        taxAmount = (unitPrice - basePrice) * qty;
+        itemTotal = unitPrice * qty;
+        unitPrice = basePrice; // لتسجيل الأساسي
+      } else if (taxMode === 'zero') {
+        taxAmount = 0;
+        itemTotal = unitPrice * qty;
+      }
+
+      currentQuoteItems.push({
+        id: Date.now(),
+        name: itemObj ? itemObj.name : "صنف معدل",
+        supplier: supplier,
+        unitPrice: unitPrice,
+        qty: qty,
+        taxAmount: taxAmount,
+        total: itemTotal,
+        taxMode: taxMode
+      });
+
+      renderQuoteTable();
+    }
+
+    // 6. عرض جدول عرض السعر المتناول
+    function renderQuoteTable() {
+      const tbody = document.getElementById('quote-items-tbody');
+      
+      if (currentQuoteItems.length === 0) {
+        tbody.innerHTML = `
+          <tr id="empty-row">
+            <td colspan="8" class="text-center py-8 text-slate-400 font-medium">لم يتم إضافة أي أصناف حتى الآن</td>
+          </tr>`;
+        updateSummary(0, 0, 0);
+        return;
+      }
+
+      let subtotal = 0;
+      let totalTax = 0;
+      let grandTotal = 0;
+
+      tbody.innerHTML = currentQuoteItems.map((item, index) => {
+        subtotal += (item.unitPrice * item.qty);
+        totalTax += item.taxAmount;
+        grandTotal += item.total;
+
+        return `
+          <tr class="border-b border-slate-100 hover:bg-white/60">
+            <td class="p-3 font-bold text-slate-400">${index + 1}</td>
+            <td class="p-3 font-bold text-slate-800">${item.name}</td>
+            <td class="p-3 text-slate-600">${item.supplier}</td>
+            <td class="p-3 text-emerald-600 font-bold">${item.unitPrice.toFixed(2)} ر.س</td>
+            <td class="p-3 font-bold">${item.qty}</td>
+            <td class="p-3 text-amber-600">${item.taxAmount.toFixed(2)} ر.س</td>
+            <td class="p-3 font-extrabold text-indigo-900">${item.total.toFixed(2)} ر.س</td>
+            <td class="p-3 no-print">
+              <button onclick="removeItem(${item.id})" class="text-red-500 hover:text-red-700 p-1">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      updateSummary(subtotal, totalTax, grandTotal);
+    }
+
+    function removeItem(id) {
+      currentQuoteItems = currentQuoteItems.filter(i => i.id !== id);
+      renderQuoteTable();
+    }
+
+    function updateSummary(sub, tax, grand) {
+      document.getElementById('summary-subtotal').innerText = sub.toFixed(2) + " ر.س";
+      document.getElementById('summary-tax').innerText = tax.toFixed(2) + " ر.س";
+      document.getElementById('summary-grandtotal').innerText = grand.toFixed(2) + " ر.س";
+    }
+
+    // 7. حفظ عرض السعر في الأرشيف والعهدة
+    function saveQuoteToArchive() {
+      if (currentQuoteItems.length === 0) {
+        alert("يرجى إضافة أصناف أولاً قبل الحفظ!");
+        return;
+      }
+
+      const agent = document.getElementById('quote-agent').value;
+      const notes = document.getElementById('quote-notes').value || "بدون ملاحظات";
+      const totalAmount = currentQuoteItems.reduce((acc, i) => acc + i.total, 0);
+
+      const newRecord = {
+        code: "Q-" + Math.floor(1000 + Math.random() * 9000),
+        dateTime: new Date().toLocaleString('ar-SA'),
+        agent: agent,
+        itemsCount: currentQuoteItems.length,
+        total: totalAmount,
+        notes: notes
+      };
+
+      archivedQuotes.unshift(newRecord);
+      renderArchiveTable();
+
+      // تصفية الجدول الحالي
+      currentQuoteItems = [];
+      renderQuoteTable();
+      document.getElementById('quote-notes').value = "";
+      alert("تم حفظ عرض السعر بنجاح في الأرشيف وقيد العُهدة!");
+    }
+
+    function renderArchiveTable() {
+      const tbody = document.getElementById('archive-tbody');
+      if (archivedQuotes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = archivedQuotes.map(q => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="p-3 font-bold text-indigo-600">${q.code}</td>
+          <td class="p-3 text-slate-500">${q.dateTime}</td>
+          <td class="p-3 font-semibold text-slate-800">${q.agent}</td>
+          <td class="p-3 font-bold">${q.itemsCount}</td>
+          <td class="p-3 font-extrabold text-emerald-600">${q.total.toFixed(2)} ر.س</td>
+          <td class="p-3 text-slate-600">${q.notes}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 8. إدارة وتعديل كافة الأصناف والموردين والأسعار
+    function renderManageItemsTable() {
+      const tbody = document.getElementById('manage-items-tbody');
+      tbody.innerHTML = itemsDatabase.map(item => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 font-bold text-slate-800">${item.name}</td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded-full text-xs font-semibold ${
+              item.category === 'hospitality' ? 'bg-amber-100 text-amber-800' :
+              item.category === 'stationery' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+            }">
+              ${item.category === 'hospitality' ? 'ضيافة' : item.category === 'stationery' ? 'قرطاسية' : 'نظافة'}
+            </span>
+          </td>
+          <td class="p-3 font-bold text-emerald-600">${item.price} ر.س</td>
+          <td class="p-3 font-semibold text-slate-700">${item.supplier}</td>
+          <td class="p-3 text-center space-x-2 space-x-reverse">
+            <button onclick="editItem(${item.id})" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-2.5 py-1 rounded-lg font-bold text-xs">
+              <i class="fa-solid fa-pen"></i> تعديل
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function editItem(id) {
+      const item = itemsDatabase.find(i => i.id === id);
+      if (!item) return;
+
+      const newName = prompt("تعديل اسم الصنف:", item.name);
+      if (newName === null) return;
+
+      const newPrice = prompt("تعديل السعر المثبت (ر.س):", item.price);
+      if (newPrice === null) return;
+
+      const newSupplier = prompt("تعديل المورد المربوط:", item.supplier);
+      if (newSupplier === null) return;
+
+      item.name = newName || item.name;
+      item.price = parseFloat(newPrice) || item.price;
+      item.supplier = newSupplier || item.supplier;
+
+      renderManageItemsTable();
+      loadCategoryItems(); // لتحديث البيانات في القائمة المنسدلة
+      alert("تم تحديث بيانات الصنف والمورد بنجاح!");
+    }
+
+    function addNewItemPrompt() {
+      const name = prompt("أدخل اسم الصنف الجديد:");
+      if (!name) return;
+      const price = parseFloat(prompt("أدخل السعر الافتراضي:", "0")) || 0;
+      const supplier = prompt("أدخل اسم المورد المعتمد:", suppliersList[0]);
+
+      itemsDatabase.push({
+        id: Date.now(),
+        name: name,
+        category: document.getElementById('builder-category').value,
+        price: price,
+        supplier: supplier || suppliersList[0]
+      });
+
+      renderManageItemsTable();
+      loadCategoryItems();
+    }
+
+    // 9. التنقل بين الأبواب والشاشات
+    function switchTab(tabId) {
+      document.querySelectorAll('section[id^="sec-"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'text-indigo-600');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      });
+
+      document.getElementById('sec-' + tabId).classList.remove('hidden');
+      document.getElementById('tab-' + tabId).classList.add('border-indigo-600', 'text-indigo-600');
+    }
+
+    function switchRole(role) {
+      currentRole = role;
+      const btnAdmin = document.getElementById('btn-role-admin');
+      const btnAgent = document.getElementById('btn-role-agent');
+
+      if (role === 'admin') {
+        btnAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white";
+        btnAgent.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white";
+        document.getElementById('tab-items-manage').style.display = 'block';
+      } else {
+        btnAgent.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white";
+        btnAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white";
+        document.getElementById('tab-items-manage').style.display = 'none';
+        switchTab('quote-builder');
+      }
+    }
+  </script>
 </body>
 </html>
