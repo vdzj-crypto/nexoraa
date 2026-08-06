@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>عروض أسعار</title>
+  <title>نظام عروض الأسعار واللوحة التنفيذية</title>
   
   <!-- Tailwind CSS & FontAwesome Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,14 +34,14 @@
       
       <div class="flex items-center gap-3">
         <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg">
-          <i class="fa-solid fa-file-invoice-dollar text-xl text-white"></i>
+          <i class="fa-solid fa-chart-line text-xl text-white"></i>
         </div>
         <div>
-          <h1 class="font-extrabold text-xl leading-tight tracking-wide">عروض أسعار</h1>
+          <h1 class="font-extrabold text-xl leading-tight tracking-wide">إدارة عروض الأسعار والمشتريات</h1>
         </div>
       </div>
 
-      <!-- الساعة والتاريخ بالتنسيق المحسن -->
+      <!-- الساعة والتاريخ -->
       <div class="flex items-center gap-4 bg-slate-800/90 px-4 py-2 rounded-xl border border-slate-700/60 shadow-inner">
         <div class="flex items-center gap-2 text-indigo-300 font-semibold text-xs">
           <i class="fa-regular fa-calendar-days text-indigo-400"></i>
@@ -57,10 +57,104 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+    <!-- ===== 📊 Dashboard / لوحة التحكم الرئيسية ===== -->
+    <section id="sec-dashboard" class="no-print space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+        <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+          <i class="fa-solid fa-gauge-high text-indigo-600"></i> لوحة التحكم الرئيسية (Dashboard)
+        </h2>
+        <span class="text-xs text-slate-500 font-semibold">مؤشرات الأداء المالي والمشتريات</span>
+      </div>
+
+      <!-- كروت البطاقات الإحصائية (KPIs) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        
+        <!-- إجمالي مشتريات الشهر -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-500">مشتريات الشهر</span>
+            <div class="p-1.5 bg-emerald-50 rounded-lg text-emerald-600"><i class="fa-solid fa-coins text-xs"></i></div>
+          </div>
+          <span id="dash-monthly-total" class="text-base font-black text-slate-900">0.00 ر.س</span>
+        </div>
+
+        <!-- عدد الأصناف -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-500">إجمالي الأصناف</span>
+            <div class="p-1.5 bg-indigo-50 rounded-lg text-indigo-600"><i class="fa-solid fa-boxes-stacked text-xs"></i></div>
+          </div>
+          <span id="dash-items-count" class="text-base font-black text-slate-900">0</span>
+        </div>
+
+        <!-- عدد الموردين -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-500">عدد الموردين</span>
+            <div class="p-1.5 bg-blue-50 rounded-lg text-blue-600"><i class="fa-solid fa-truck-field text-xs"></i></div>
+          </div>
+          <span id="dash-suppliers-count" class="text-base font-black text-slate-900">0</span>
+        </div>
+
+        <!-- آخر فاتورة / عملية حفظ -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-500">آخر عملية حفظ</span>
+            <div class="p-1.5 bg-purple-50 rounded-lg text-purple-600"><i class="fa-solid fa-receipt text-xs"></i></div>
+          </div>
+          <span id="dash-last-quote" class="text-[11px] font-bold text-slate-700 truncate">لا يوجد</span>
+        </div>
+
+        <!-- آخر تعديل أسعار -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-500">آخر تعديل أسعار</span>
+            <div class="p-1.5 bg-amber-50 rounded-lg text-amber-600"><i class="fa-solid fa-pen-to-square text-xs"></i></div>
+          </div>
+          <span id="dash-last-price-update" class="text-[11px] font-bold text-slate-700 truncate">اليوم</span>
+        </div>
+
+        <!-- إجمالي العروض المحفوظة -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-500">عدد الفواتير</span>
+            <div class="p-1.5 bg-slate-100 rounded-lg text-slate-600"><i class="fa-solid fa-file-invoice text-xs"></i></div>
+          </div>
+          <span id="dash-quotes-count" class="text-base font-black text-slate-900">0</span>
+        </div>
+
+      </div>
+
+      <!-- أكثر 10 أصناف شراءً -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-800 text-xs mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-fire text-amber-500"></i> أكثر 10 أصناف طلباً وشراءً
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-bold border-b">
+              <tr>
+                <th class="p-2">#</th>
+                <th class="p-2">اسم الصنف</th>
+                <th class="p-2">مرات الطلب</th>
+                <th class="p-2">إجمالي الكمية المطلوبة</th>
+                <th class="p-2">إجمالي الإنفاق (ر.س)</th>
+              </tr>
+            </thead>
+            <tbody id="dash-top-items-tbody" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="5" class="text-center py-4 text-slate-400">سيتم بناء الإحصائية فور حفظ أول عرض سعر</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
     <!-- شريط التنقل بين القوائم -->
-    <div class="flex overflow-x-auto gap-2 mb-6 pb-2 no-print border-b border-slate-200">
+    <div class="flex overflow-x-auto gap-2 border-b border-slate-200 pb-2 no-print">
       <button onclick="switchCategory('hospitality')" id="tab-hospitality" class="tab-btn active border-b-2 border-amber-600 text-amber-700 font-bold px-5 py-2.5 text-sm flex items-center gap-2 whitespace-nowrap bg-amber-50 rounded-t-xl">
         <i class="fa-solid fa-mug-hot"></i> قائمة الضيافة
       </button>
@@ -78,11 +172,11 @@
       </button>
     </div>
 
-    <!-- ===== الشاشة الرئيسية لعرض الأسعار ===== -->
+    <!-- ===== الشاشة الرئيسية لعروض الأسعار ===== -->
     <section id="sec-calculator" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- نموذج الإدخال (يمين) -->
+        <!-- نموذج الإدخال -->
         <div class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 no-print">
           <h2 class="font-bold text-slate-800 border-b pb-2 flex items-center gap-2" id="form-title">
             <i class="fa-solid fa-cart-plus text-amber-600"></i> إضافة صنف لقائمة الضيافة
@@ -121,7 +215,7 @@
             </div>
           </div>
 
-          <!-- خاصية الخصم / التخفيضات -->
+          <!-- خاصية الخصم -->
           <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100 space-y-2">
             <span class="block text-xs font-bold text-indigo-900 flex items-center gap-1.5">
               <i class="fa-solid fa-tags text-indigo-600"></i> العروض والخصم (إن وجد)
@@ -165,7 +259,7 @@
           </button>
         </div>
 
-        <!-- جدول العرض والتحكم (يسار - القابل للتصدير والطباعة) -->
+        <!-- جدول العرض والطباعة -->
         <div class="lg:col-span-2 space-y-4">
           <div id="quote-printable-area" class="bg-hospitality p-6 rounded-2xl border border-amber-200 shadow-sm transition-all">
             
@@ -189,7 +283,7 @@
               </div>
             </div>
 
-            <!-- جدول الأصناف بالتفاصيل المالية كاملة -->
+            <!-- جدول الأصناف -->
             <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
               <table class="w-full text-right text-[11px]">
                 <thead class="bg-slate-100 text-slate-700 font-bold border-b">
@@ -198,12 +292,12 @@
                     <th class="p-2.5">الصنف</th>
                     <th class="p-2.5">المستفيد</th>
                     <th class="p-2.5">المورد</th>
-                    <th class="p-2.5">السعر قبل الخصم</th>
+                    <th class="p-2.5">السعر الأصلي</th>
                     <th class="p-2.5">الخصم</th>
                     <th class="p-2.5">قبل الضريبة</th>
                     <th class="p-2.5">الكمية</th>
                     <th class="p-2.5">الضريبة</th>
-                    <th class="p-2.5">الإجمالي النهائية</th>
+                    <th class="p-2.5">الإجمالي</th>
                     <th class="p-2.5 no-print">إجراء</th>
                   </tr>
                 </thead>
@@ -212,7 +306,7 @@
               </table>
             </div>
 
-            <!-- ملخص الإجمالي المالي المحسن -->
+            <!-- ملخص الإجمالي -->
             <div class="mt-4 bg-white p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-bold">
               <div class="space-y-1.5">
                 <p class="text-slate-500">المجموع قبل الضريبة: <span id="summary-subtotal" class="text-slate-800 font-extrabold">0.00 ر.س</span></p>
@@ -235,12 +329,10 @@
 
     <!-- ===== شاشة الأرشيف والرسوم البيانية ===== -->
     <section id="sec-archive" class="hidden space-y-6">
-      
-      <!-- قسم الرسوم البيانية للإحصائيات المالية -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 md:col-span-1 flex flex-col items-center justify-center">
           <h3 class="font-bold text-slate-800 text-xs mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie text-indigo-600"></i> نسبة الصرف حسب القوائم
+            <i class="fa-solid fa-chart-pie text-indigo-600"></i> توزيع المصروفات حسب القوائم
           </h3>
           <div class="w-48 h-48">
             <canvas id="categoryExpensesChart"></canvas>
@@ -249,7 +341,7 @@
 
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 md:col-span-2 flex flex-col justify-between">
           <h3 class="font-bold text-slate-800 text-xs mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-wallet text-emerald-600"></i> الملخص المالي العام لجميع المصروفات والعروض
+            <i class="fa-solid fa-wallet text-emerald-600"></i> ملخص مبالغ القوائم المحفوظة
           </h3>
           <div class="grid grid-cols-3 gap-3 text-center my-auto">
             <div class="bg-amber-50 p-3 rounded-xl border border-amber-100">
@@ -266,17 +358,14 @@
             </div>
           </div>
           <div class="mt-3 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between font-bold">
-            <span class="text-slate-600">إجمالي المبالغ المصروفة في كافة العروض:</span>
+            <span class="text-slate-600">الإجمالي العام لمصروفات الأرشيف:</span>
             <span id="chart-grand-all" class="text-indigo-700 text-sm">0.00 ر.س</span>
           </div>
         </div>
       </div>
 
-      <!-- جدول الأرشيف -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
         <h2 class="font-bold text-slate-800 text-lg mb-1">أرشيف عروض الأسعار المحفوظة</h2>
-        <p class="text-xs text-slate-500 mb-4">تتبع عروض الأسعار المسجلة سابقاً للرجوع إليها وقت الحاجة</p>
-
         <div class="overflow-x-auto">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b">
@@ -289,19 +378,15 @@
               </tr>
             </thead>
             <tbody id="archive-tbody" class="divide-y divide-slate-100">
-              <tr>
-                <td colspan="5" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td>
-              </tr>
+              <tr><td colspan="5" class="text-center py-6 text-slate-400">لا يوجد عروض أسعار محفوظة حالياً</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ===== شاشة إدارة القوائم وتعديل الأصناف والإعدادات ===== -->
+    <!-- ===== شاشة إدارة الأصناف والإعدادات ===== -->
     <section id="sec-manage" class="hidden space-y-6">
-      
-      <!-- إعدادات السحاب (Supabase) -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
         <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
           <i class="fa-solid fa-database text-indigo-600"></i> إعدادات الربط السحابي (Supabase Integration)
@@ -311,7 +396,7 @@
           <input type="password" id="supabase-key" placeholder="Supabase Anon Key" class="bg-slate-50 border p-2.5 rounded-xl font-mono">
         </div>
         <button onclick="saveSupabaseConfig()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800">
-          حفظ وإعراب الربط
+          حفظ إعدادات السحاب
         </button>
       </div>
 
@@ -347,7 +432,7 @@
   </main>
 
   <script>
-    // ===== المتغيرات الأساسية =====
+    // ===== المتغيرات والتخزين =====
     let supabaseClient = null;
     let categoryChart = null;
 
@@ -422,6 +507,7 @@
     let currentCategory = 'hospitality';
     let quoteItemsByCat = { hospitality: [], stationery: [], cleaning: [] };
     let archivedQuotes = [];
+    let lastPriceUpdateDate = "2026/08/06";
 
     // ===== التشغيل التلقائي =====
     window.onload = function() {
@@ -430,7 +516,7 @@
       populateEmployeesDropdown();
       switchCategory('hospitality');
       renderManageItemsTable();
-      initSupabase();
+      updateDashboardData();
       initChart();
     };
 
@@ -440,6 +526,57 @@
         document.getElementById('current-date').innerText = now.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
         document.getElementById('current-time').innerText = now.toLocaleTimeString('ar-SA');
       }, 1000);
+    }
+
+    // ===== تحديث لوحة التحكم الداشبورد =====
+    function updateDashboardData() {
+      document.getElementById('dash-items-count').innerText = itemsDatabase.length;
+      document.getElementById('dash-suppliers-count').innerText = suppliersList.length;
+      document.getElementById('dash-last-price-update').innerText = lastPriceUpdateDate;
+      document.getElementById('dash-quotes-count').innerText = archivedQuotes.length;
+
+      let monthTotal = archivedQuotes.reduce((acc, q) => acc + q.total, 0);
+      document.getElementById('dash-monthly-total').innerText = monthTotal.toFixed(2) + " ر.س";
+
+      if (archivedQuotes.length > 0) {
+        const last = archivedQuotes[0];
+        document.getElementById('dash-last-quote').innerText = `${last.code} (${last.total.toFixed(0)} ر.س)`;
+      } else {
+        document.getElementById('dash-last-quote').innerText = "لا يوجد عروض";
+      }
+
+      // تتبع أكثر 10 أصناف طلباً
+      let itemUsage = {};
+      archivedQuotes.forEach(q => {
+        q.itemsDetails.forEach(item => {
+          if (!itemUsage[item.name]) {
+            itemUsage[item.name] = { count: 0, qty: 0, total: 0 };
+          }
+          itemUsage[item.name].count += 1;
+          itemUsage[item.name].qty += item.qty;
+          itemUsage[item.name].total += item.total;
+        });
+      });
+
+      let sortedTop = Object.keys(itemUsage)
+        .map(name => ({ name, ...itemUsage[name] }))
+        .sort((a, b) => b.qty - a.qty)
+        .slice(0, 10);
+
+      const topTbody = document.getElementById('dash-top-items-tbody');
+      if (sortedTop.length === 0) {
+        topTbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">سيتم بناء الإحصائية فور حفظ أول عرض سعر</td></tr>`;
+      } else {
+        topTbody.innerHTML = sortedTop.map((item, idx) => `
+          <tr class="hover:bg-slate-50">
+            <td class="p-2 font-bold text-slate-400">${idx + 1}</td>
+            <td class="p-2 font-bold text-slate-800">${item.name}</td>
+            <td class="p-2 text-indigo-600 font-bold">${item.count} مرات</td>
+            <td class="p-2 font-semibold">${item.qty} قطعة</td>
+            <td class="p-2 font-extrabold text-emerald-600">${item.total.toFixed(2)} ر.س</td>
+          </tr>
+        `).join('');
+      }
     }
 
     function populateSuppliersDropdown() {
@@ -465,7 +602,6 @@
         document.getElementById('sec-manage').classList.toggle('hidden', cat !== 'manage');
         document.getElementById('sec-archive').classList.toggle('hidden', cat !== 'archive');
         document.getElementById('tab-' + cat).classList.add('border-indigo-600', 'text-indigo-700');
-        
         if(cat === 'archive') updateChartsAndStats();
         return;
       }
@@ -514,7 +650,6 @@
       }
     }
 
-    // ===== إضافة الصنف مع حساب الخصم والضريبة المتقدمة =====
     function addItemToCurrentQuote() {
       const itemId = parseInt(document.getElementById('builder-item').value);
       const itemObj = itemsDatabase.find(i => i.id === itemId);
@@ -523,20 +658,12 @@
       const qty = parseInt(document.getElementById('builder-qty').value) || 1;
       const supplier = document.getElementById('builder-supplier').value;
 
-      // حساب الخصم
       const discountVal = parseFloat(document.getElementById('builder-discount-val').value) || 0;
       const discountType = document.getElementById('builder-discount-type').value;
 
-      let discountAmountPerUnit = 0;
-      if (discountType === 'percent') {
-        discountAmountPerUnit = (originalPrice * (discountVal / 100));
-      } else {
-        discountAmountPerUnit = discountVal;
-      }
-
+      let discountAmountPerUnit = (discountType === 'percent') ? (originalPrice * (discountVal / 100)) : discountVal;
       let priceAfterDiscount = Math.max(0, originalPrice - discountAmountPerUnit);
 
-      // حساب الضريبة
       const taxRadios = document.getElementsByName('tax-mode');
       let taxMode = 'add';
       for (const r of taxRadios) { if (r.checked) taxMode = r.value; }
@@ -559,7 +686,7 @@
 
       quoteItemsByCat[currentCategory].push({
         id: Date.now(),
-        name: itemObj ? itemObj.name : "صنف معدل",
+        name: itemObj ? itemObj.name : "صنف",
         targetEmployee: targetEmp,
         supplier: supplier,
         originalPrice: originalPrice,
@@ -570,9 +697,7 @@
         total: finalUnitPrice * qty
       });
 
-      // إعادة ضبط الخصم بعد الإضافة
       document.getElementById('builder-discount-val').value = 0;
-
       renderQuoteTable();
     }
 
@@ -640,7 +765,6 @@
       document.getElementById('summary-avg').innerText = avg.toFixed(2) + " ر.س";
     }
 
-    // ===== تصدير PDF =====
     function exportToPDF() {
       const element = document.getElementById('quote-printable-area');
       const catName = currentCategory === 'hospitality' ? 'الضيافة' : currentCategory === 'stationery' ? 'القرطاسية' : 'النظافة';
@@ -656,7 +780,6 @@
       html2pdf().set(opt).from(element).save();
     }
 
-    // ===== حفظ عرض السعر =====
     async function saveCurrentQuote() {
       const items = quoteItemsByCat[currentCategory];
       if (items.length === 0) {
@@ -674,24 +797,24 @@
         dateTime: new Date().toLocaleString('ar-SA'),
         itemsCount: items.length,
         total: totalAmount,
-        itemsDetails: items
+        itemsDetails: JSON.parse(JSON.stringify(items))
       };
 
       archivedQuotes.unshift(quoteData);
       renderArchiveTable();
+      updateDashboardData();
 
       if (supabaseClient) {
         try {
-          const { error } = await supabaseClient.from('quotes').insert([quoteData]);
-          if (error) console.error("Supabase Save Error:", error);
+          await supabaseClient.from('quotes').insert([quoteData]);
         } catch (err) {
-          console.log("Supabase Failover", err);
+          console.log("Supabase save failover", err);
         }
       }
 
       quoteItemsByCat[currentCategory] = [];
       renderQuoteTable();
-      alert(`تم حفظ عرض سعر (${catName}) بنجاح بمبلغ إجمالي: ${totalAmount.toFixed(2)} ر.س`);
+      alert(`تم حفظ عرض سعر (${catName}) بنجاح!`);
     }
 
     function renderArchiveTable() {
@@ -712,7 +835,6 @@
       `).join('');
     }
 
-    // ===== الرسوم البيانية وإحصائيات الإنفاق =====
     function initChart() {
       const ctx = document.getElementById('categoryExpensesChart').getContext('2d');
       categoryChart = new Chart(ctx, {
@@ -722,22 +844,15 @@
           datasets: [{
             data: [0, 0, 0],
             backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
-            borderWidth: 2,
-            borderColor: '#ffffff'
+            borderWidth: 2
           }]
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 11 } } }
-          }
-        }
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
       });
     }
 
     function updateChartsAndStats() {
       let hospTotal = 0, statTotal = 0, cleanTotal = 0;
-
       archivedQuotes.forEach(q => {
         if (q.categoryKey === 'hospitality') hospTotal += q.total;
         else if (q.categoryKey === 'stationery') statTotal += q.total;
@@ -760,19 +875,12 @@
       tbody.innerHTML = itemsDatabase.map(item => `
         <tr class="hover:bg-slate-50">
           <td class="p-3 font-bold text-slate-800">${item.name}</td>
-          <td class="p-3">
-            <span class="px-2 py-1 rounded-full text-xs font-semibold ${
-              item.category === 'hospitality' ? 'bg-amber-100 text-amber-800' :
-              item.category === 'stationery' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
-            }">
-              ${item.category === 'hospitality' ? 'الضيافة' : item.category === 'stationery' ? 'القرطاسية' : 'النظافة'}
-            </span>
-          </td>
+          <td class="p-3 font-semibold">${item.category === 'hospitality' ? 'الضيافة' : item.category === 'stationery' ? 'القرطاسية' : 'النظافة'}</td>
           <td class="p-3 font-bold text-emerald-600">${item.price} ر.س</td>
-          <td class="p-3 font-semibold text-slate-700">${item.supplier}</td>
+          <td class="p-3 text-slate-700">${item.supplier}</td>
           <td class="p-3 text-center">
-            <button onclick="editItem(${item.id})" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-2.5 py-1 rounded-lg font-bold text-xs">
-              <i class="fa-solid fa-pen"></i> تعديل
+            <button onclick="editItem(${item.id})" class="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg font-bold text-xs">
+              تعديل
             </button>
           </td>
         </tr>
@@ -785,27 +893,26 @@
 
       const newName = prompt("تعديل اسم الصنف:", item.name);
       if (newName === null) return;
-
-      const newPrice = prompt("تعديل السعر المثبت (ر.س):", item.price);
+      const newPrice = prompt("تعديل السعر المثبت:", item.price);
       if (newPrice === null) return;
-
-      const newSupplier = prompt("تعديل المورد المربوط:", item.supplier);
+      const newSupplier = prompt("تعديل المورد:", item.supplier);
       if (newSupplier === null) return;
 
       item.name = newName || item.name;
       item.price = parseFloat(newPrice) || item.price;
       item.supplier = newSupplier || item.supplier;
 
+      lastPriceUpdateDate = new Date().toLocaleDateString('ar-SA');
       renderManageItemsTable();
+      updateDashboardData();
       switchCategory(currentCategory);
-      alert("تم التعديل بنجاح!");
     }
 
     function addNewItemPrompt() {
-      const name = prompt("أدخل اسم الصنف الجديد:");
+      const name = prompt("اسم الصنف الجديد:");
       if (!name) return;
-      const price = parseFloat(prompt("أدخل السعر الافتراضي:", "0")) || 0;
-      const supplier = prompt("أدخل اسم المورد المعتمد:", suppliersList[0]);
+      const price = parseFloat(prompt("السعر الافتراضي:", "0")) || 0;
+      const supplier = prompt("المورد المعتمد:", suppliersList[0]);
 
       itemsDatabase.push({
         id: Date.now(),
@@ -815,29 +922,19 @@
         supplier: supplier || suppliersList[0]
       });
 
+      lastPriceUpdateDate = new Date().toLocaleDateString('ar-SA');
       renderManageItemsTable();
+      updateDashboardData();
       switchCategory(currentCategory);
     }
 
     function saveSupabaseConfig() {
       const url = document.getElementById('supabase-url').value.trim();
       const key = document.getElementById('supabase-key').value.trim();
-      
       if(url && key) {
         localStorage.setItem('sp_url', url);
         localStorage.setItem('sp_key', key);
-        initSupabase();
         alert("تم حفظ إعدادات Supabase بنجاح!");
-      }
-    }
-
-    function initSupabase() {
-      const url = localStorage.getItem('sp_url') || document.getElementById('supabase-url').value;
-      const key = localStorage.getItem('sp_key') || document.getElementById('supabase-key').value;
-      if (url && key && window.supabase) {
-        supabaseClient = window.supabase.createClient(url, key);
-        document.getElementById('supabase-url').value = url;
-        document.getElementById('supabase-key').value = key;
       }
     }
   </script>
